@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright 2012 Manuel Schulze <manuel_schulze@i-entwicklung.de>
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~     http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
+<web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xmlns="http://java.sun.com/xml/ns/javaee"
+         xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
+         version="2.5">
+    <display-name>Tomcat Demos Web Application</display-name>
+
+    <!--
+    Das folgende ist wichtig, da wir damit Springs ROOT-Context initialisieren.
+    Wenn wir das nicht tun würden alle uns Services und DAOs für jedes DispatcherServlet
+    erstellt werden (Die selbe Bean wird für jedes DispatcherServlet erstellt).
+
+    In der application.xml, die wir für die Initialisierung des ROOT-Context angelegt
+    haben, führen wie die Package-Scans durch. Dadurch landen die ganzen Beans im
+    ROOT-Context. Die speziellen Dispatcher-Kontexte leiten quasi vom ROOT-Kontext ab
+    und bietet somit zusätzlich eine DispatcherServlet spezifische Konfiguration.
+
+    see http://stackoverflow.com/questions/7833767/why-dispatcherservlet-creates-another-application-context
+    see http://stackoverflow.com/questions/7451325/spring-mvc-what-are-a-context-and-namespace/7451389#7451389
+    see http://forum.springsource.org/showthread.php?50079-DispatcherServlet-and-ContextLoaderListener
+    -->
+    <context-param>
+        <param-name>contextConfigLocation</param-name>
+        <param-value>classpath:application.xml</param-value>
+    </context-param>
+
+    <listener>
+        <listener-class>
+            org.springframework.web.context.ContextLoaderListener
+        </listener-class>
+    </listener>
+
+    <servlet>
+        <servlet-name>spring-html</servlet-name>
+        <servlet-class>
+            org.springframework.web.servlet.DispatcherServlet
+        </servlet-class>
+        <init-param>
+            <param-name>contextConfigLocation</param-name>
+            <param-value>/WEB-INF/spring-html-servlet.xml</param-value>
+        </init-param>
+        <load-on-startup>1</load-on-startup>
+    </servlet>
+    <servlet>
+        <servlet-name>spring-json</servlet-name>
+        <servlet-class>
+            org.springframework.web.servlet.DispatcherServlet
+        </servlet-class>
+        <init-param>
+            <param-name>contextConfigLocation</param-name>
+            <param-value>/WEB-INF/spring-json-servlet.xml</param-value>
+        </init-param>
+        <load-on-startup>1</load-on-startup>
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>spring-html</servlet-name>
+        <url-pattern>*.html</url-pattern>
+        <url-pattern>/</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>spring-json</servlet-name>
+        <url-pattern>*.json</url-pattern>
+    </servlet-mapping>
+</web-app>
