@@ -1,0 +1,14 @@
+  i-entwicklung.de Tomcat Demos
+  Copyright 2012 Manuel Schulze <manuel_schulze@i-entwicklung.de>
+
+  This product includes or uses software developed at
+  The Apache Software Foundation (http://www.apache.org/).
+
+* The Spring Framework (http://www.springsource.org/) is licensed
+  in the terms of the Apache 2.0 license.
+
+* The Simple Logging Facade for Java - SLF4J (http://www.slf4j.org/) is
+  licensed in the terms of the MIT license.
+
+* The Jackson JSON Processor (http://jackson.codehaus.org/) is
+  licensed in the terms of the Apache 2.0 license.

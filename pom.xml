@@ -116,29 +116,6 @@
             <version>2.0</version>
             <scope>provided</scope>
         </dependency>
-        <!--
-        Hibernate und Datenbank
-        -->
-        <dependency>
-            <groupId>org.hibernate</groupId>
-            <artifactId>hibernate-c3p0</artifactId>
-            <version>4.1.7.Final</version>
-        </dependency>
-        <dependency>
-            <groupId>org.hibernate</groupId>
-            <artifactId>hibernate-core</artifactId>
-            <version>4.1.7.Final</version>
-        </dependency>
-        <dependency>
-            <groupId>org.hibernate</groupId>
-            <artifactId>hibernate-ehcache</artifactId>
-            <version>4.1.7.Final</version>
-        </dependency>
-        <dependency>
-            <groupId>mysql</groupId>
-            <artifactId>mysql-connector-java</artifactId>
-            <version>5.1.21</version>
-        </dependency>
     </dependencies>
     <build>
         <finalName>tcdemos</finalName>
