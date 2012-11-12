@@ -18,7 +18,7 @@
  * Implementiert ein paar einfache Javascript Funktionen zum Zeichnen auf
  * Canvas-Objekten.
  *
- * @author Manuel Schulze <mschulze@geneon.de>
+ * @author Manuel Schulze <manuel_schulze@i-entwicklung.de>
  * @since 10.11.12 - 16:59
  */
 

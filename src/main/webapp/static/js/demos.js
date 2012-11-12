@@ -18,7 +18,7 @@
  * Einige Testfunktionen für die Javascript <-> Server Kommunikation mit
  * Ajax.
  *
- * @author Manuel Schulze <mschulze@geneon.de>
+ * @author Manuel Schulze <manuel_schulze@i-entwicklung.de>
  * @since 10.11.12 - 15:51
  */
 

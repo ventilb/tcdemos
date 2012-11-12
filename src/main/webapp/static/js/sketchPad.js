@@ -17,7 +17,7 @@
 /**
  * Implementiert die Javascript-seitigen Funktionen für das Sketchpad.
  *
- * @author Manuel Schulze <mschulze@geneon.de>
+ * @author Manuel Schulze <manuel_schulze@i-entwicklung.de>
  * @since 11.11.12 - 00:34
  */
 

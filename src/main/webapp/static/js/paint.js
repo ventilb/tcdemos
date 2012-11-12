@@ -17,7 +17,7 @@
 /**
  * Stellt Hilfsklassen und Primitive für das Sketchpad bereit.
  *
- * @author Manuel Schulze <mschulze@geneon.de>
+ * @author Manuel Schulze <manuel_schulze@i-entwicklung.de>
  * @since 11.11.12 - 00:42
  */
 
