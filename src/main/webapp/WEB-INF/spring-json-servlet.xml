@@ -46,6 +46,13 @@
                     see http://forum.springsource.org/showthread.php?117690-Wierd-JSON-results-from-REST-calls-quot-amp-amp-quot
                     -->
                     <property name="prefixJson" value="false"/>
+                    <!--
+                    Wird benötigt damit Jackson nur unsere Smartclient Responses rendert. Sonst würde es auch das
+                    Request Objekt zusätzlich rendern...Komisches Verhalten.
+
+                    see http://stackoverflow.com/questions/4679084/spring-mvc-controller-adds-request-object-to-response
+                    -->
+                    <property name="modelKey" value="response"/>
                 </bean>
             </list>
         </property>

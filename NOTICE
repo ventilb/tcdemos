@@ -5,13 +5,21 @@
   The Apache Software Foundation (http://www.apache.org/).
 
 * The Spring Framework (http://www.springsource.org/) is licensed
-  in the terms of the Apache 2.0 license.
+  under the terms of the Apache 2.0 license.
 
 * The Simple Logging Facade for Java - SLF4J (http://www.slf4j.org/) is
-  licensed in the terms of the MIT license.
+  licensed under the terms of the MIT license.
 
 * The Jackson JSON Processor (http://jackson.codehaus.org/) is
-  licensed in the terms of the Apache 2.0 license.
+  licensed under the terms of the Apache 2.0 license.
 
 * The jQuery JavaScript Library v1.8.2 (http://jquery.org/) is
-  licensed in the terms of the MIT license.
+  licensed under the terms of the MIT license.
+
+* RequireJS (http://requirejs.org/) is licensed under the terms of the
+  MIT license or New BSD license.
+
+* The JavaScript SmartClient UI components library (http://smartclient.com/)
+  used by this application is licensed under the terms of the
+  GNU Lesser General Public License, version 3.
+  Please refer to: http://www.gnu.org/licenses/lgpl-3.0.html

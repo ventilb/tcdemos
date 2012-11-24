@@ -1,5 +1,6 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib prefix="iew" uri="/WEB-INF/taglibs/iew.tld" %>
 <%--
   ~ Copyright 2012 Manuel Schulze <manuel_schulze@i-entwicklung.de>
   ~
@@ -19,6 +20,7 @@
 <head>
     <title>i-entwicklung Tomcat Demos</title>
     <link href="${pageContext.request.contextPath}/static/css/page.css" rel="stylesheet" type="text/css"/>
+    <script data-main="${pageContext.request.contextPath}/static/js/main.js" src="${pageContext.request.contextPath}/static/js/require.js"></script>
     <script type="text/javascript">
         function baseUrl(/* String|NULL */ url) {
             var baseUrl = '${pageContext.request.contextPath}';
@@ -26,4 +28,5 @@
         }
     </script>
     <script src="${pageContext.request.contextPath}/static/js/jquery-1.8.2.js" type="text/javascript"></script>
+    <iew:loadIsc/>
 </head>

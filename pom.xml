@@ -28,7 +28,7 @@
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
-            <version>3.8.1</version>
+            <version>4.10</version>
             <scope>test</scope>
         </dependency>
         <!--
@@ -56,6 +56,8 @@
         </dependency>
         <!--
         Abhängigkeiten für Spring
+
+        Lizenz: Apache 2.0 laut Maven Repository
         -->
         <dependency>
             <groupId>org.springframework</groupId>
@@ -67,6 +69,26 @@
             <artifactId>spring-orm</artifactId>
             <version>3.1.2.RELEASE</version>
         </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-aop</artifactId>
+            <version>3.1.2.RELEASE</version>
+        </dependency>
+
+        <!--
+        Benötigen wir für AOP Funktionen
+
+        Lizenz: Eclipse Public License - v 1.0 (http://www.eclipse.org/legal/epl-v10.html)
+        -->
+        <dependency>
+        	<groupId>org.aspectj</groupId>
+        	<artifactId>aspectjweaver</artifactId>
+        	<version>1.7.0</version>
+        </dependency>
+
+        <!--
+        Abhängigkeiten für das Schreiben von JSPs
+        -->
         <dependency>
             <groupId>jstl</groupId>
             <artifactId>jstl</artifactId>
@@ -81,7 +103,7 @@
         Jackson wird benötigt um mit Spring 3 JSON in Spring-Controller
         verarbeiten und produzieren zu können.
 
-        * net.sf.json wurde in SPring 2 verwendet
+        * net.sf.json wurde in Spring 2 verwendet
         -->
         <dependency>
             <groupId>org.codehaus.jackson</groupId>
