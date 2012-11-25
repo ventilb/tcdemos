@@ -13,6 +13,10 @@
 * The Jackson JSON Processor (http://jackson.codehaus.org/) is
   licensed under the terms of the Apache 2.0 license.
 
+* The aspectj (http://www.eclipse.org/aspectj/) framework is licensed under
+  the terms of the Eclipse Public License - v 1.0.
+  Please refer to: http://www.eclipse.org/legal/epl-v10.html
+
 * The jQuery JavaScript Library v1.8.2 (http://jquery.org/) is
   licensed under the terms of the MIT license.
 
@@ -23,3 +27,20 @@
   used by this application is licensed under the terms of the
   GNU Lesser General Public License, version 3.
   Please refer to: http://www.gnu.org/licenses/lgpl-3.0.html
+
+* Hibernate (http://www.hibernate.org/) is licensed under the terms of the
+  GNU Lesser General Public License, Version 2.1.
+  Please refer to: http://www.hibernate.org/license
+
+* The MySQL Java Connector (http://dev.mysql.com/downloads/connector/j/) is
+  licensed under the terms of the GNU General Public License, Version 2.
+  Oracle allows the creation and distribution of FOSS compatible software with
+  the MySQL client libraries under a FOSS exception.
+  Please refer to:
+    http://dev.mysql.com/downloads/connector/j/
+    http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
+    http://www.mysql.com/about/legal/licensing/foss-exception/
+    http://www.mysql.com/about/legal/licensing/oem/#5
+
+* The Liquibase library (http://www.liquibase.org/) is licensed under the terms
+  of the Apache 2.0 license.

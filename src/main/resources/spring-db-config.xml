@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright 2012 Manuel Schulze <manuel_schulze@i-entwicklung.de>
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~     http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xmlns:cache="http://www.springframework.org/schema/cache"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+  http://www.springframework.org/schema/beans/spring-beans-3.1.xsd
+  http://www.springframework.org/schema/tx
+  http://www.springframework.org/schema/tx/spring-tx-3.1.xsd
+  http://www.springframework.org/schema/cache
+  http://www.springframework.org/schema/cache/spring-cache.xsd
+  http://www.springframework.org/schema/context
+  http://www.springframework.org/schema/context/spring-context-3.1.xsd
+  http://www.springframework.org/schema/aop
+  http://www.springframework.org/schema/aop/spring-aop-2.0.xsd">
+
+    <context:component-scan base-package="de.iew.persistence, de.iew.domain"></context:component-scan>
+
+    <!-- MySQL DataSource -->
+    <bean id="dataSource" class="com.mchange.v2.c3p0.ComboPooledDataSource">
+        <property name="driverClass" value="com.mysql.jdbc.Driver"/>
+        <property name="jdbcUrl" value="jdbc:mysql://squeeze:3306/tcdemos?characterEncoding=UTF-8"/>
+        <property name="user" value="tcdemos"/>
+        <property name="password" value="tcdemos"/>
+    </bean>
+
+    <!-- Hibernate SessionFactory -->
+    <!--
+    Für die Liquibase Integration:
+
+    @see http://www.insaneprogramming.be/?p=56
+    -->
+    <bean id="sessionFactory"
+          class="org.springframework.orm.hibernate4.LocalSessionFactoryBean" depends-on="liquibase">
+        <property name="dataSource" ref="dataSource"/>
+        <property name="packagesToScan" value="de.iew.domain"></property>
+    </bean>
+
+    <!-- Transaction Management -->
+    <tx:annotation-driven transaction-manager="txManager"/>
+
+    <bean id="txManager"
+          class="org.springframework.orm.hibernate4.HibernateTransactionManager">
+        <property name="sessionFactory" ref="sessionFactory"/>
+    </bean>
+
+    <tx:advice id="serviceAdvice" transaction-manager="txManager">
+        <tx:attributes>
+            <tx:method name="get*" propagation="REQUIRED" read-only="true"/>
+            <tx:method name="*"/>
+        </tx:attributes>
+    </tx:advice>
+
+    <tx:advice id="hbmDaoAdvice" transaction-manager="txManager">
+        <tx:attributes>
+            <tx:method name="find*" propagation="REQUIRED" read-only="true"/>
+            <tx:method name="save*" propagation="REQUIRED" read-only="false"/>
+            <tx:method name="remove*" propagation="REQUIRED" read-only="false"/>
+            <tx:method name="*"/>
+        </tx:attributes>
+    </tx:advice>
+
+    <aop:config>
+        <aop:advisor advice-ref="serviceAdvice" pointcut="execution(* de.iew.services..*.*(..))"/>
+        <aop:advisor advice-ref="hbmDaoAdvice" pointcut="execution(* de.iew.persistence.hibernate.*.*(..))"/>
+    </aop:config>
+
+    <!-- Cache Configuration -->
+    <cache:annotation-driven/>
+
+    <bean id="ehcache" class="org.springframework.cache.ehcache.EhCacheManagerFactoryBean">
+        <property name="configLocation" value="classpath:ehcache.xml"/>
+        <property name="shared" value="true"/>
+    </bean>
+
+    <bean id="cacheManager" class="org.springframework.cache.ehcache.EhCacheCacheManager">
+        <property name="cacheManager" ref="ehcache"/>
+    </bean>
+
+    <!-- Liquibase Integration -->
+    <bean id="liquibase" class="liquibase.integration.spring.SpringLiquibase">
+        <property name="dataSource" ref="dataSource"/>
+        <property name="changeLog" value="classpath:db-changelog.xml"/>
+
+        <!--
+        contexts specifies the runtime contexts to use.
+        -->
+        <!--
+        Könnte für Unit Tests nützlich sein. Mal sehen wie das mit Maven spielt.
+        <property name="contexts" value="test, production"/>
+        -->
+    </bean>
+</beans>

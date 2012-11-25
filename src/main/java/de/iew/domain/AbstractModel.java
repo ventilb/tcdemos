@@ -16,6 +16,11 @@
 
 package de.iew.domain;
 
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.MappedSuperclass;
+
 /**
  * Basisklasse für Domainmodelle.
  * <p>
@@ -26,9 +31,12 @@ package de.iew.domain;
  * @author Manuel Schulze <manuel_schulze@i-entwicklung.de>
  * @since 17.11.12 - 10:12
  */
-public class AbstractModel {
+@MappedSuperclass
+public abstract class AbstractModel {
     private Long id;
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
     public Long getId() {
         return id;
     }

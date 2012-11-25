@@ -1,3 +1,4 @@
+<%@ taglib prefix="spring" uri="http://www.springframework.org/tags" %>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%--
   ~ Copyright 2012 Manuel Schulze <manuel_schulze@i-entwicklung.de>
@@ -20,7 +21,7 @@
 <body>
 <div id="content_head">
     <div class="inner">
-        Tree Demo
+        <spring:message code="treedemo.page.title"/>
     </div>
 </div>
 <div id="content">
@@ -28,33 +29,38 @@
         requirejs(['modules/TreeDemoContextMenu', 'modules/IewTreeGrid', 'modules/IewTreeGridRestDataSource'], function () {
             isc.IewTreeGridRestDataSource.create({
                 ID: 'DemoTreeGridDS',
-                addDataURL: isc.Page.getAppBaseUrl('/tree/addNewNode.json'),
-                fetchDataURL: isc.Page.getAppBaseUrl('/tree/fetchNodes.json'),
-                removeDataURL: isc.Page.getAppBaseUrl('/tree/deleteNodeAndSubtree.json'),
-                treeId: ${treeId}
+                addDataURL: isc.Page.getAppBaseUrl('/tree/add.json'),
+                fetchDataURL: isc.Page.getAppBaseUrl('/tree/fetch.json'),
+                removeDataURL: isc.Page.getAppBaseUrl('/tree/delete.json'),
+                treeId: ${rootNode.tree.id}
             });
 
             isc.IewTreeGridRestDataSource.create({
                 ID: 'DemoListGridDS',
                 dataURL: isc.Page.getAppBaseUrl('/list/fetchNodes.json'),
-                treeId: ${treeId}
+                treeId: ${rootNode.tree.id}
             });
 
             var initialCriteria = {
-                treeId: ${treeId},
-                parentId: null
+                treeId: ${treeId}
             };
 
             isc.IewTreeGrid.create({
                 ID: 'DemoTreeGrid',
                 dataSource: 'DemoTreeGridDS',
                 autoFetchData: true,
-                showRoot: false,
+                treeRootValue: ${rootNode.id},
+                showRoot: true,
                 initialCriteria: initialCriteria,
                 contextMenu: isc.TreeDemoContextMenu.create(),
 
                 addNewNodeSuccess: function (node) {
                     console.log('A node was added: ', this, node);
+                    DemoListGrid.invalidateCache();
+                },
+
+                deleteNodeSuccess: function (node) {
+                    console.log('A node was deleted: ', this, node);
                     DemoListGrid.invalidateCache();
                 },
 
@@ -68,7 +74,7 @@
             isc.ListGrid.create({
                 ID: 'DemoListGrid',
                 dataSource: 'DemoListGridDS',
-                treeId: ${treeId},
+                treeId: ${rootNode.tree.id},
                 autoFetchData: true,
                 initialCriteria: initialCriteria,
                 selectTreeNodeById: function (/* Integer */ nodeId) {

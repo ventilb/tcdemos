@@ -30,7 +30,7 @@ isc.TreeDemoContextMenu.addProperties({
         {title: 'Neues Kind', click: 'target.appendNewChildNode(target.getSelectedRecord())'},
         {title: 'Neuen Bruder davor', click: 'target.insertNewNodeBefore(target.getSelectedRecord())', enableIf: '!target.isRootNode(target.getSelectedRecord())'},
         {title: 'Neuen Bruder danach', click: 'target.insertNewNodeAfter(target.getSelectedRecord())', enableIf: '!target.isRootNode(target.getSelectedRecord())'},
-        {title: 'Löschen', click: 'target.deleteNode(target, item, menu)', enableIf: '!target.isRootNode(target.getSelectedRecord())'}
+        {title: 'Löschen', click: 'target.deleteNode(target.getSelectedRecord())', enableIf: '!target.isRootNode(target.getSelectedRecord())'}
     ],
 
     initWidget: function () {

@@ -31,87 +31,96 @@ isc.IewTreeGrid.registerStringMethods({
     /**
      * Wird gemeldet, wenn während des Hinzufügens ein Fehler aufgetreten ist.
      */
-    addNewNodeFailed: ''
+    addNewNodeFailed: '',
+    deleteNodeSuccess: 'node',
+    deleteNodeFailed: ''
 });
 
 isc.IewTreeGrid.addProperties({
     sortField: 'orderInLevel',
 
-    isRootNode: function (/* Object */ node) {
-        var isRootNode = false;
-
-        if (isc.propertyDefined(node, 'parentId')) {
-            isRootNode = !node.parentId;
-        }
-
-        return isRootNode;
+    isRootNode: function (/* TreeNode */ node) {
+        return this.data.isRoot(node);
     },
 
-    insertNewNodeBefore: function (/* Object */ node) {
-        this.newNodeImpl(node, isc.IewNodeOperation.Add.INSERT_BEFORE);
+    insertNewNodeBefore: function (/* TreeNode */ sibling) {
+        this.newNodeImpl(sibling, isc.IewNodeOperation.Add.INSERT_BEFORE);
     },
 
-    insertNewNodeAfter: function (/* Object */ node) {
-        this.newNodeImpl(node, isc.IewNodeOperation.Add.INSERT_AFTER);
+    insertNewNodeAfter: function (/* TreeNode */ sibling) {
+        this.newNodeImpl(sibling, isc.IewNodeOperation.Add.INSERT_AFTER);
     },
 
-    appendNewChildNode: function (/* Object */ node) {
-        this.newNodeImpl(node, isc.IewNodeOperation.Add.APPEND_CHILD);
+    appendNewChildNode: function (/* TreeNode */ parent) {
+        this.newNodeImpl(parent, isc.IewNodeOperation.Add.APPEND_CHILD);
     },
 
     /**
      * Implementierung zum Hinzufügen neuer Knoten mit verschiedenen
      * Strategien.
      *
-     * @param node Knotenbezug für das Hinzufügen.
+     * @param relatedNode Knotenbezug für das Hinzufügen.
      * @param addOperation Add-Strategie.
      */
-    newNodeImpl: function (/* Object */ node, /* IewNodeOperation.Add */ addOperation) {
-        console.log('Adding new node', node);
-        if (isc.IewTreeGridRestDataSource.isATreeNode(node)) {
-            var title = 'Neuer Knoten ' + node.id;
-            var newNodeData = {
-                title: title,
-                treeId: this.getTreeId()
-            }
+    newNodeImpl: function (/* TreeNode */ relatedNode, /* IewNodeOperation.Add */ addOperation) {
+        console.log('Adding new node', relatedNode);
 
-            this.setAddOperation(addOperation);
+        var tree = this.data;
 
-            var callback = {target: this, methodName: 'onAddNewNodeFinished'};
-            this.addData(newNodeData, callback, {
-                params: {
-                    relatedNodeId: node.id
-                }
-            });
+        var title = 'Neuer Knoten ' + relatedNode.id;
+        var newNodeData = {
+            title: title,
+            treeId: this.getTreeId()
         }
+
+        this.setAddOperation(addOperation);
+
+        var callback = {target: this, methodName: 'onAddNewNodeFinished'};
+        this.addData(newNodeData, callback, {
+            params: {
+                relatedNodeId: relatedNode[tree.idField]
+            }
+        });
     },
 
     onAddNewNodeFinished: function (dsResponse, data, dsRequest) {
         if (dsResponse.status == isc.RPCResponse.STATUS_SUCCESS) {
+            var record = null;
             if (isc.isA.Array(data) && data.length > 0) {
-                var record = data[0];
+                record = data[0];
 
-                if (!this.isRootNode(record)) {
-                    this.reloadChildren(record.parentId);
-                }
-
-                this.fireCallback(this.addNewNodeSuccess, 'node', [record]);
+                this.reloadChildren(record[this.data.parentIdField]);
             } else {
-                if (this.isLogErrorEnabled()) {
+                if (this.logIsErrorEnabled()) {
                     this.logError('Add-Operation succeeded but server didn\'t supplied any data.');
                 }
             }
+            this.fireCallback(this.addNewNodeSuccess, 'node', [record]);
         } else {
             this.fireCallback(this.addNewNodeFailed, '', []);
         }
     },
 
-    deleteNode: function (target, item, menu) {
+    deleteNode: function (/* TreeNode */ node) {
         console.log('Deleting selected node');
 
-        var selectedRecord = target.getSelectedRecord();
-        if (selectedRecord) {
-            target.removeData(selectedRecord);
+        var callback = {target: this, methodName: 'onNodeDeleted'};
+        this.removeData(node, callback);
+    },
+
+    onNodeDeleted: function (dsResponse, data, dsRequest) {
+        if (dsResponse.status == isc.RPCResponse.STATUS_SUCCESS) {
+            var record = null;
+            if (isc.isA.Array(data) && data.length > 0) {
+                record = data[0];
+            } else {
+                if (this.logIsErrorEnabled()) {
+                    this.logError('Delete-Operation succeeded but server didn\'t supplied any data.');
+                }
+            }
+            this.fireCallback(this.deleteNodeSuccess, 'node', [record]);
+        } else {
+            this.fireCallback(this.deleteNodeFailed, '', []);
         }
     },
 
@@ -121,17 +130,17 @@ isc.IewTreeGrid.addProperties({
 
             if (node) {
                 var ds = isc.DS.get(this.dataSource);
-                var data = this.data;
+                var iscTree = this.data;
 
                 var openList = [];
 
                 this.bfsVisit(node, function (visit) {
-                    if (data.isOpen(visit)) {
+                    if (iscTree.isOpen(visit)) {
                         openList.add(ds.copyRecord(visit));
                     }
                 });
 
-                data.unloadChildren(node);
+                iscTree.unloadChildren(node);
 
                 var scope = this;
                 var callback = function () {
@@ -139,7 +148,7 @@ isc.IewTreeGrid.addProperties({
                         var node = openList.removeAt(0);
                         node = scope.resolveTreeNodeInstance(node);
                         if (node) {
-                            data.openFolder(node, callback);
+                            iscTree.openFolder(node, callback);
                         }
                     }
                 };
@@ -147,7 +156,7 @@ isc.IewTreeGrid.addProperties({
                 this.data.loadChildren(openList.removeAt(0), callback);
             }
         } catch (e) {
-            if (this.isLogErrorEnabled()) {
+            if (this.logIsErrorEnabled()) {
                 this.logError('Error reloading children' + e);
             }
         }
@@ -180,7 +189,7 @@ isc.IewTreeGrid.addProperties({
         }
 
         if (isc.isA.Number(identifier)) {
-            identifier = this.getNodeById(identifier);
+            identifier = this.data.findById(identifier);
         }
 
         return identifier;
@@ -194,10 +203,6 @@ isc.IewTreeGrid.addProperties({
     getTreeId: function () {
         var ds = isc.DS.get(this.dataSource);
         return ds.treeId;
-    },
-
-    getNodeById: function (/* Integer */ nodeId) {
-        return this.data.findById(nodeId);
     },
 
     setAddOperation: function (/* IewNodeOperation.Add */ addOperation) {

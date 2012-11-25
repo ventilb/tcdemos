@@ -14,31 +14,30 @@
  * limitations under the License.
  */
 
+package de.iew.domain;
+
+import javax.persistence.*;
+import java.util.HashSet;
+import java.util.Set;
+
 /**
- * Führt globale Initialisierungen durch.
+ * Beschreibt ein Domainmodell für die Verwaltung von Textschnipsel.
  *
- * @see <a href="http://requirejs.org/docs/api.html">http://requirejs.org/docs/api.html</a>
  * @author Manuel Schulze <manuel_schulze@i-entwicklung.de>
- * @since 20.11.12 - 23:03
+ * @since 25.11.12 - 03:10
  */
+@Entity
+@Table(name = "text_item_collection")
+public class TextItemCollection extends AbstractModel {
 
-requirejs.config({
-    baseUrl: 'static/js',
-    packages: [
-        {name: 'nls', location: '/tcdemos/nls', main: 'colors'}
-    ],
-    config: {
-        i18n: {
-            locale: 'en-us'
-        }
+    private Set<TextItem> textItems = new HashSet<TextItem>();
+
+    @OneToMany(mappedBy = "textItemCollection", fetch = FetchType.EAGER)
+    public Set<TextItem> getTextItems() {
+        return textItems;
     }
-});
 
-
-define(["i18n!nls/messages"], function(msg) {
-    console.log(msg['treedemo.page.title']);
-    console.log(msg['test.title']);
-    return {
-        testMessage: "The name for red in this locale is: " + msg.red
+    public void setTextItems(Set<TextItem> textItems) {
+        this.textItems = textItems;
     }
-});
+}

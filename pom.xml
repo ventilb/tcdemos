@@ -74,16 +74,25 @@
             <artifactId>spring-aop</artifactId>
             <version>3.1.2.RELEASE</version>
         </dependency>
-
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-orm</artifactId>
+            <version>3.1.2.RELEASE</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-test</artifactId>
+            <version>3.1.2.RELEASE</version>
+        </dependency>
         <!--
         Benötigen wir für AOP Funktionen
 
         Lizenz: Eclipse Public License - v 1.0 (http://www.eclipse.org/legal/epl-v10.html)
         -->
         <dependency>
-        	<groupId>org.aspectj</groupId>
-        	<artifactId>aspectjweaver</artifactId>
-        	<version>1.7.0</version>
+            <groupId>org.aspectj</groupId>
+            <artifactId>aspectjweaver</artifactId>
+            <version>1.7.0</version>
         </dependency>
 
         <!--
@@ -137,6 +146,52 @@
             <artifactId>jsp-api</artifactId>
             <version>2.0</version>
             <scope>provided</scope>
+        </dependency>
+
+        <!--
+        Hibernate Datenbankzugriff.
+
+        Lizenz: LGPL v2.1 http://www.hibernate.org/license
+        -->
+        <dependency>
+            <groupId>org.hibernate</groupId>
+            <artifactId>hibernate-c3p0</artifactId>
+            <version>4.1.7.Final</version>
+        </dependency>
+        <dependency>
+            <groupId>org.hibernate</groupId>
+            <artifactId>hibernate-core</artifactId>
+            <version>4.1.7.Final</version>
+        </dependency>
+        <dependency>
+            <groupId>org.hibernate</groupId>
+            <artifactId>hibernate-ehcache</artifactId>
+            <version>4.1.7.Final</version>
+        </dependency>
+        <!--
+        MySQL Treiber für Datenbank.
+
+        Lizenz: GPL v2.0 with FOSS Exception granted by Oracle
+
+        see http://dev.mysql.com/downloads/connector/j/
+        see http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
+        see http://www.mysql.com/about/legal/licensing/foss-exception/
+        see http://www.mysql.com/about/legal/licensing/oem/#5
+        -->
+        <dependency>
+            <groupId>mysql</groupId>
+            <artifactId>mysql-connector-java</artifactId>
+            <version>5.1.21</version>
+        </dependency>
+        <!--
+        Liquibase für einfache Datenbank-Überarbeitungen.
+
+        Lizenz: Apache 2.0 laut Webseite http://www.liquibase.org/
+        -->
+        <dependency>
+            <groupId>org.liquibase</groupId>
+            <artifactId>liquibase-core</artifactId>
+            <version>2.0.5</version>
         </dependency>
     </dependencies>
     <build>

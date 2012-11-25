@@ -27,10 +27,7 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.Collection;
 
@@ -76,6 +73,14 @@ public class DemoListController {
         Collection<Node> allNodes = this.treeService.getAllNodes(treeId);
 
         return new DSResponseCollection(NodeModels.fromCollection(allNodes));
+    }
+
+    @ExceptionHandler(Exception.class)
+    public Model onException(Exception e) {
+        if (log.isErrorEnabled()) {
+            log.error("Fehler während der Webservice Verarbeitung", e);
+        }
+        return new DSResponseObject();
     }
 
     @Autowired

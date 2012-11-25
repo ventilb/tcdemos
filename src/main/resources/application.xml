@@ -18,22 +18,41 @@
 <beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xmlns:context="http://www.springframework.org/schema/context"
-       xmlns:mvc="http://www.springframework.org/schema/mvc"
+       xmlns:mvc="http://www.springframework.org/schema/mvc" xmlns:util="http://www.springframework.org/schema/util"
+       xmlns:p="http://www.springframework.org/schema/p"
        xsi:schemaLocation="http://www.springframework.org/schema/beans
 http://www.springframework.org/schema/beans/spring-beans-3.1.xsd
 http://www.springframework.org/schema/context
 http://www.springframework.org/schema/context/spring-context-3.1.xsd
 http://www.springframework.org/schema/mvc
-http://www.springframework.org/schema/mvc/spring-mvc.xsd">
+http://www.springframework.org/schema/mvc/spring-mvc.xsd
+http://www.springframework.org/schema/util
+http://www.springframework.org/schema/util/spring-util-2.0.xsd">
+
+    <import resource="classpath:spring-db-config.xml"/>
+
+    <util:properties id="config" location="classpath:config.properties"/>
 
     <context:annotation-config/>
-    <context:component-scan base-package="de.iew.services, de.iew.demos, de.iew.sketchpad">
+
+    <mvc:annotation-driven/>
+
+    <context:component-scan
+            base-package="de.iew.services, de.iew.demos, de.iew.sketchpad, de.iew.web.controllers, de.iew.web.view">
         <context:exclude-filter type="aspectj" expression="de.iew.persistence..*"/>
     </context:component-scan>
-    <mvc:annotation-driven/>
-    <!--
-        <import resource="classpath:database.xml"/>
-    -->
 
-    <import resource="dao-mock.xml"/>
+
+    <util:list id="messageBundles" value-type="java.lang.String">
+        <value>classpath:i18n/messages</value>
+    </util:list>
+
+    <bean id="messageBundleService" class="de.iew.services.impl.MessageBundleServiceImpl">
+        <property name="messageBundles" ref="messageBundles"/>
+    </bean>
+    <!--
+    Alias für den messageBundleService damit wir den Service auch gleich als
+    Qualle für die I18N-Strings nehmen können.
+    -->
+    <alias name="messageBundleService" alias="messageSource"/>
 </beans>

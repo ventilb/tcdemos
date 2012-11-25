@@ -72,6 +72,7 @@
     <servlet-mapping>
         <servlet-name>spring-html</servlet-name>
         <url-pattern>*.html</url-pattern>
+        <url-pattern>*.js</url-pattern>
         <url-pattern>/</url-pattern>
     </servlet-mapping>
 
@@ -79,4 +80,35 @@
         <servlet-name>spring-json</servlet-name>
         <url-pattern>*.json</url-pattern>
     </servlet-mapping>
+
+    <!--
+    Wir verwenden das "Open Session In View Pattern". Damit können wir die
+    Beziehungen im Domainmodell mit LAZY initialisieren und
+    trotzdem in den Controllern über Collections iterieren. Würden wir
+    das nicht machen müssten wir sicherstellen, dass beim iterieren
+    über Domainmodelle eine Hibernate-Session existiert (z.B. die Action als
+    @Transactional deklarieren). Ansonsten werden LazyInitializationExceptions
+    gemeldet.
+
+    Das "Open Session In View Pattern" ist umstritten, da es auch Nachteile hat.
+
+    @see http://stackoverflow.com/questions/1103363/why-is-hibernate-open-session-in-view-considered-a-bad-practice
+    @see http://blog.frankel.ch/the-opensessioninview-antipattern
+    -->
+    <filter>
+        <filter-name>openSessionInViewFilter</filter-name>
+        <filter-class>org.springframework.orm.hibernate4.support.OpenSessionInViewFilter</filter-class>
+        <init-param>
+            <param-name>sessionFactoryBeanName</param-name>
+            <param-value>sessionFactory</param-value>
+        </init-param>
+    </filter>
+
+    <filter-mapping>
+        <filter-name>openSessionInViewFilter</filter-name>
+        <url-pattern>*.html</url-pattern>
+        <url-pattern>*.json</url-pattern>
+        <url-pattern>*.js</url-pattern>
+        <url-pattern>/</url-pattern>
+    </filter-mapping>
 </web-app>

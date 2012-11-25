@@ -16,6 +16,7 @@
 
 package de.iew.domain;
 
+import javax.persistence.*;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -25,12 +26,15 @@ import java.util.Set;
  * @author Manuel Schulze <manuel_schulze@i-entwicklung.de>
  * @since 17.11.12 - 10:16
  */
+@Entity
+@Table(name = "tree")
 public class Tree extends AbstractModel {
 
     private Node root;
 
     private Set<Node> nodes = new HashSet<Node>();
 
+    @OneToOne(fetch = FetchType.EAGER)
     public Node getRoot() {
         return root;
     }
@@ -39,6 +43,7 @@ public class Tree extends AbstractModel {
         this.root = root;
     }
 
+    @OneToMany(mappedBy = "tree", fetch = FetchType.LAZY)
     public Set<Node> getNodes() {
         return nodes;
     }

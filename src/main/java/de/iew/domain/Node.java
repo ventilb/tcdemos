@@ -16,6 +16,7 @@
 
 package de.iew.domain;
 
+import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -26,6 +27,8 @@ import java.util.List;
  * @author Manuel Schulze <manuel_schulze@i-entwicklung.de>
  * @since 16.11.12 - 19:29
  */
+@Entity
+@Table(name = "node")
 public class Node extends AbstractModel {
 
     private String title;
@@ -45,6 +48,7 @@ public class Node extends AbstractModel {
 
     private long nestedSetRight;
 
+    @Column
     public String getTitle() {
         return title;
     }
@@ -53,6 +57,7 @@ public class Node extends AbstractModel {
         this.title = title;
     }
 
+    @ManyToOne(fetch = FetchType.LAZY)
     public Node getParent() {
         return parent;
     }
@@ -61,6 +66,8 @@ public class Node extends AbstractModel {
         this.parent = parent;
     }
 
+    @OneToMany(mappedBy = "parent", fetch = FetchType.LAZY)
+    @OrderBy(value = "orderInLevel")
     public List<Node> getChildren() {
         return children;
     }
@@ -69,6 +76,7 @@ public class Node extends AbstractModel {
         this.children = children;
     }
 
+    @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.REMOVE)
     public Tree getTree() {
         return tree;
     }
@@ -77,6 +85,7 @@ public class Node extends AbstractModel {
         this.tree = tree;
     }
 
+    @Column
     public int getOrderInLevel() {
         return orderInLevel;
     }
@@ -85,6 +94,7 @@ public class Node extends AbstractModel {
         this.orderInLevel = orderInLevel;
     }
 
+    @Column
     public long getNestedSetLeft() {
         return nestedSetLeft;
     }
@@ -93,6 +103,7 @@ public class Node extends AbstractModel {
         this.nestedSetLeft = nestedSetLeft;
     }
 
+    @Column
     public long getNestedSetRight() {
         return nestedSetRight;
     }

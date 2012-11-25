@@ -24,6 +24,8 @@ import de.iew.persistence.TreeDao;
 import de.iew.services.TreeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collection;
 import java.util.List;
@@ -101,23 +103,19 @@ public class TreeServiceImpl implements TreeService {
             }
         }
 
-        long nestedSetLeft = nestedSetRightToShiftFrom + 1;
-        long nestedSetRight = nestedSetRightToShiftFrom + 2;
-
-        this.nodeDao.moveNestedSetBorder(tree.getId(), nestedSetRightToShiftFrom);
-
         Node newNode = new Node();
         newNode.setTitle(title);
         newNode.setOrderInLevel(orderToAppendAt);
-        newNode.setNestedSetLeft(nestedSetLeft);
-        newNode.setNestedSetRight(nestedSetRight);
-        newNode = this.nodeDao.save(newNode);
+        newNode.setNestedSetLeft(nestedSetRightToShiftFrom + 1);
+        newNode.setNestedSetRight(nestedSetRightToShiftFrom + 2);
 
         newNode.setTree(tree);
         tree.getNodes().add(newNode);
 
         newNode.setParent(parent);
         parent.getChildren().add(orderToAppendAt, newNode);
+
+        newNode = this.nodeDao.save(newNode);
 
         return newNode;
     }

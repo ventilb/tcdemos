@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
-package de.iew.demos.controllers;
+package de.iew.web.controllers;
 
 import de.iew.demos.model.NodeModel;
 import de.iew.demos.model.NodeModels;
+import de.iew.domain.ModelNotFoundException;
 import de.iew.domain.Node;
 import de.iew.services.TreeService;
 import de.iew.web.isc.DSResponseCollection;
@@ -28,7 +29,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.ModelAndView;
 
 import java.util.Collection;
 import java.util.HashSet;
@@ -46,18 +46,9 @@ public class TreeController {
 
     private TreeService treeService;
 
-    @RequestMapping
-    public ModelAndView indexAction() {
-        ModelAndView mav = new ModelAndView("treedemo");
-
-        mav.addObject("treeId", 1);
-
-        return mav;
-    }
-
-    @RequestMapping(value = "/fetchNodes", method = RequestMethod.GET)
+    @RequestMapping(value = "/fetch", method = RequestMethod.GET)
     @ResponseBody
-    public Model fetchNodesAction(
+    public Model fetchAction(
             @RequestParam(value = "treeId", required = true) Long treeId,
             @RequestParam(value = "parentId", required = false) Long parentId
     ) throws Exception {
@@ -75,13 +66,12 @@ public class TreeController {
             nodes = this.treeService.getDirectChildNodes(treeId, parentId);
         }
 
-
         return new DSResponseCollection(NodeModels.fromCollection(nodes), nodes.size());
     }
 
-    @RequestMapping(value = "/addNewNode", method = RequestMethod.POST)
+    @RequestMapping(value = "/add", method = RequestMethod.POST)
     @ResponseBody
-    public Model addNewNodeAction(
+    public Model addAction(
             @ModelAttribute NodeModel nodeModel,
             @RequestParam(value = "relatedNodeId", required = false) Long relatedNodeId,
             @RequestParam(value = "operation", defaultValue = "APPEND_CHILD") AddNodeOperation addOperation
@@ -113,14 +103,27 @@ public class TreeController {
         return new DSResponseObject(NodeModel.fromNode(newNode));
     }
 
-    @RequestMapping(value = "/deleteNodeAndSubtree")
+    @RequestMapping(value = "/delete")
     @ResponseBody
-    public Model deleteNodeAndSubtreeNodeAction(
+    public Model deleteAction(
             @ModelAttribute NodeModel nodeModel
     ) throws Exception {
         this.treeService.deleteNodeAndSubtree(nodeModel.getTreeId(), nodeModel.getId());
 
         return new DSResponseObject(nodeModel);
+    }
+
+    @ExceptionHandler(ModelNotFoundException.class)
+    public Model onModelNotFoundException(ModelNotFoundException e) {
+        return new DSResponseObject();
+    }
+
+    @ExceptionHandler(Exception.class)
+    public Model onException(Exception e) {
+        if (log.isErrorEnabled()) {
+            log.error("Fehler während der Webservice Verarbeitung", e);
+        }
+        return null;
     }
 
     @Autowired
