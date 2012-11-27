@@ -42,6 +42,14 @@ http://www.springframework.org/schema/util/spring-util-2.0.xsd">
         <context:exclude-filter type="aspectj" expression="de.iew.persistence..*"/>
     </context:component-scan>
 
+    <!--
+    LocaleResolver zum Finden des Locale des aufrufenden Nutzers. Alternativen:
+    * CookieLocaleResolver
+    * AcceptHeaderLocaleResolver
+    -->
+    <bean id="localeResolver" class="org.springframework.web.servlet.i18n.SessionLocaleResolver">
+        <property name="defaultLocale" value="#{config['locale.default']}"/>
+    </bean>
 
     <util:list id="messageBundles" value-type="java.lang.String">
         <value>classpath:i18n/messages</value>
@@ -52,7 +60,7 @@ http://www.springframework.org/schema/util/spring-util-2.0.xsd">
     </bean>
     <!--
     Alias für den messageBundleService damit wir den Service auch gleich als
-    Qualle für die I18N-Strings nehmen können.
+    Quelle für die I18N-Strings nehmen können.
     -->
     <alias name="messageBundleService" alias="messageSource"/>
 </beans>
