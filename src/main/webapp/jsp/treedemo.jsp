@@ -26,18 +26,18 @@
 </div>
 <div id="content">
     <script type="text/javascript">
-        requirejs(['modules/TreeDemoContextMenu', 'modules/IewTreeGrid', 'modules/IewTreeGridRestDataSource'], function () {
+        requirejs(['core', 'modules/TreeDemoContextMenu', 'modules/IewTreeGrid', 'modules/IewTreeGridRestDataSource'], function (core) {
             isc.IewTreeGridRestDataSource.create({
                 ID: 'DemoTreeGridDS',
-                addDataURL: isc.Page.getAppBaseUrl('/tree/add.json'),
-                fetchDataURL: isc.Page.getAppBaseUrl('/tree/fetch.json'),
-                removeDataURL: isc.Page.getAppBaseUrl('/tree/delete.json'),
+                addDataURL: core.baseUrl('/tree/add.json'),
+                fetchDataURL: core.baseUrl('/tree/fetch.json'),
+                removeDataURL: core.baseUrl('/tree/delete.json'),
                 treeId: ${rootNode.tree.id}
             });
 
             isc.IewTreeGridRestDataSource.create({
                 ID: 'DemoListGridDS',
-                dataURL: isc.Page.getAppBaseUrl('/list/fetchNodes.json'),
+                dataURL: core.baseUrl('/list/fetchNodes.json'),
                 treeId: ${rootNode.tree.id}
             });
 

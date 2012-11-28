@@ -5,9 +5,12 @@
         http://java.sun.com/xml/ns/j2ee
         http://java.sun.com/xml/ns/j2ee/web-jsptaglibrary_2_0.xsd"
         version="2.0">
-    <tlib-version>1.0</tlib-version>
+    <tlib-version>1.1</tlib-version>
     <short-name>iew</short-name>
 
+    <!--
+    @since v1.0
+    -->
     <tag>
         <name>loadIsc</name>
         <tag-class>de.iew.web.taglibs.LoadIsc</tag-class>
@@ -22,6 +25,80 @@
         </attribute>
         <attribute>
             <name>autoDraw</name>
+            <required>false</required>
+        </attribute>
+    </tag>
+
+    <!--
+    @since 1.1
+    -->
+    <tag>
+        <name>requireJS_Package</name>
+        <tag-class>de.iew.web.taglibs.requirejs.Package</tag-class>
+        <body-content>empty</body-content>
+        <attribute>
+            <name>name</name>
+            <required>true</required>
+        </attribute>
+        <attribute>
+            <name>location</name>
+            <required>false</required>
+        </attribute>
+        <attribute>
+            <name>main</name>
+            <required>false</required>
+        </attribute>
+    </tag>
+
+    <!--
+    @since 1.1
+    -->
+    <tag>
+        <name>requireJS_I18nConfig</name>
+        <tag-class>de.iew.web.taglibs.requirejs.I18n</tag-class>
+        <body-content>empty</body-content>
+        <attribute>
+            <name>locale</name>
+            <required>false</required>
+            <type>java.util.Locale</type>
+        </attribute>
+        <attribute>
+            <name>autodetect</name>
+            <required>false</required>
+            <type>boolean</type>
+        </attribute>
+    </tag>
+
+    <!--
+    @since 1.1
+    -->
+    <tag>
+        <name>requireJS</name>
+        <tag-class>de.iew.web.taglibs.RequireJS</tag-class>
+        <body-content>JSP</body-content>
+        <attribute>
+            <name>src</name>
+            <required>true</required>
+        </attribute>
+        <attribute>
+            <name>baseUrl</name>
+            <required>false</required>
+        </attribute>
+    </tag>
+
+    <!--
+    @since 1.1
+    -->
+    <tag>
+        <name>headScript</name>
+        <tag-class>de.iew.web.taglibs.HeadScript</tag-class>
+        <body-content>empty</body-content>
+        <attribute>
+            <name>type</name>
+            <required>false</required>
+        </attribute>
+        <attribute>
+            <name>src</name>
             <required>false</required>
         </attribute>
     </tag>

@@ -15,7 +15,8 @@
  */
 
 /**
- * Beschreibt die Knotenoperationen.
+ * Smartclient DataSource Erweiterung um auf unsere Iew-Bäume zugreifen zu
+ * können.
  *
  * @author Manuel Schulze <manuel_schulze@i-entwicklung.de>
  * @since 24.11.12 - 14:54

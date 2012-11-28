@@ -20,8 +20,11 @@
 <body>
 
 <div id="content">
-    <script src="${pageContext.request.contextPath}/static/js/paint.js" type="text/javascript"></script>
-    <script src="${pageContext.request.contextPath}/static/js/photo.js" type="text/javascript"></script>
+    <script type="text/javascript">
+        require(['photo'], function() {
+
+        });
+    </script>
     <div id="photo_editor" class="photo_editor">
         <img src="${pageContext.request.contextPath}/static/img/sonnenuntergang.jpg"/>
         <canvas width="480" height="270">

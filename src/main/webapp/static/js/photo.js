@@ -22,114 +22,118 @@
  * @since 10.11.12 - 16:59
  */
 
-$(document).ready(function () {
-    var element = $('#photo_editor canvas');
-    var offset = element.offset();
+define(['jquery', 'core', 'paint'], function ($, core) {
 
-    var photoCanvas = element.get(0);
-    var photoContext = photoCanvas.getContext('2d');
+    $(document).ready(function () {
+        var element = $('#photo_editor canvas');
+        var offset = element.offset();
 
-    if (photoContext) {
-        var paint = new Paint(photoContext, photoCanvas.width, photoCanvas.height);
-        paint.clearPaintOnDraw = true;
+        var photoCanvas = element.get(0);
+        var photoContext = photoCanvas.getContext('2d');
 
-        var topLeftRect = new Rect(0, 0, 20, 20);
-        var bottomRightRect = new Rect(0, 0, 20, 20);
+        if (photoContext) {
+            var paint = new Paint(photoContext, photoCanvas.width, photoCanvas.height);
+            paint.clearPaintOnDraw = true;
 
-        buildImageFrame(paint, topLeftRect, bottomRightRect);
+            var topLeftRect = new Rect(0, 0, 20, 20);
+            var bottomRightRect = new Rect(0, 0, 20, 20);
 
-        paint.animate(1000);
+            buildImageFrame(paint, topLeftRect, bottomRightRect);
 
-        var dragShape = null;
-        var dx = 0;
-        var dy = 0;
-        element.mousedown(function (evt) {
-            $(document).get(0).onselectstart = function () {
-                return false;
-            }
+            paint.animate(1000);
 
-            var mx = (evt.pageX - offset.left);
-            var my = (evt.pageY - offset.top);
-
-            dragShape = paint.pickShapeAt(mx, my);
-            if (dragShape != null) {
-                dx = mx - dragShape.rx;
-                dy = my - dragShape.ry;
-
-                paint.stopAnimation();
-                paint.animate(50);
-            }
-        });
-
-        element.mouseup(function (evt) {
-            $(document).get(0).onselectstart = function () {
-                return true;
-            }
-
-            var mx = (evt.pageX - offset.left);
-            var my = (evt.pageY - offset.top);
-
-            if (dragShape != null) {
-                dragShape.moveTo(mx - dx, my - dy);
-
-                paint.stopAnimation();
-                paint.animate(1000);
-            }
-            dragShape = null;
-        });
-
-        element.mousemove(function (evt) {
-            var mx = (evt.pageX - offset.left);
-            var my = (evt.pageY - offset.top);
-
-            if (dragShape != null) {
-                switch (dragShape.getName()) {
-                    case 'Rect':
-                        jQuery.ajax({
-                            url: baseUrl('/photo/setimageframe.json'),
-                            type: 'POST',
-                            contentType: 'application/json',
-                            data: JSON.stringify({
-                                px1: topLeftRect.rx,
-                                py1: topLeftRect.ry,
-                                px2: bottomRightRect.rx,
-                                py2: bottomRightRect.ry
-                            }),
-                            success: function (data) {
-                                dragShape.moveTo(mx - dx, my - dy);
-                            }
-                        });
-                        break;
+            var dragShape = null;
+            var dx = 0;
+            var dy = 0;
+            element.mousedown(function (evt) {
+                $(document).get(0).onselectstart = function () {
+                    return false;
                 }
+
+                var mx = (evt.pageX - offset.left);
+                var my = (evt.pageY - offset.top);
+
+                dragShape = paint.pickShapeAt(mx, my);
+                if (dragShape != null) {
+                    dx = mx - dragShape.rx;
+                    dy = my - dragShape.ry;
+
+                    paint.stopAnimation();
+                    paint.animate(50);
+                }
+            });
+
+            element.mouseup(function (evt) {
+                $(document).get(0).onselectstart = function () {
+                    return true;
+                }
+
+                var mx = (evt.pageX - offset.left);
+                var my = (evt.pageY - offset.top);
+
+                if (dragShape != null) {
+                    dragShape.moveTo(mx - dx, my - dy);
+
+                    paint.stopAnimation();
+                    paint.animate(1000);
+                }
+                dragShape = null;
+            });
+
+            element.mousemove(function (evt) {
+                var mx = (evt.pageX - offset.left);
+                var my = (evt.pageY - offset.top);
+
+                if (dragShape != null) {
+                    switch (dragShape.getName()) {
+                        case 'Rect':
+                            jQuery.ajax({
+                                url: core.baseUrl('/photo/setimageframe.json'),
+                                type: 'POST',
+                                contentType: 'application/json',
+                                data: JSON.stringify({
+                                    px1: topLeftRect.rx,
+                                    py1: topLeftRect.ry,
+                                    px2: bottomRightRect.rx,
+                                    py2: bottomRightRect.ry
+                                }),
+                                success: function (data) {
+                                    dragShape.moveTo(mx - dx, my - dy);
+                                }
+                            });
+                            break;
+                    }
+                }
+            });
+
+        }
+    });
+
+    function buildImageFrame(/* Paint */ paint, /* Rect */ topLeftRect, /* Rect */ bottomRightRect) {
+        jQuery.ajax({
+            url: core.baseUrl('/photo/getimageframe.json'),
+            type: 'GET',
+            contentType: 'application/json',
+            success: function (data) {
+                topLeftRect.moveTo(data.px1, data.py1);
+                bottomRightRect.moveTo(data.px2, data.py2);
+
+                var rect3 = new Rect(topLeftRect.cx, topLeftRect.cy, bottomRightRect.cx - topLeftRect.cx, bottomRightRect.cy - topLeftRect.cy);
+                rect3.pickable = false;
+
+                topLeftRect.moved = function () {
+                    rect3.moveTopLeftTo(this.cx, this.cy);
+                }
+                bottomRightRect.moved = function () {
+                    rect3.moveBottomRightTo(this.cx, this.cy);
+                }
+
+                paint.addShape(rect3);
+                paint.addShape(topLeftRect);
+                paint.addShape(bottomRightRect);
             }
         });
 
     }
+
 });
-
-function buildImageFrame(/* Paint */ paint, /* Rect */ topLeftRect, /* Rect */ bottomRightRect) {
-    jQuery.ajax({
-        url: baseUrl('/photo/getimageframe.json'),
-        type: 'GET',
-        contentType: 'application/json',
-        success: function (data) {
-            topLeftRect.moveTo(data.px1, data.py1);
-            bottomRightRect.moveTo(data.px2, data.py2);
-
-            var rect3 = new Rect(topLeftRect.cx, topLeftRect.cy, bottomRightRect.cx - topLeftRect.cx, bottomRightRect.cy - topLeftRect.cy);
-            rect3.pickable = false;
-
-            topLeftRect.moved = function () {
-                rect3.moveTopLeftTo(this.cx, this.cy);
-            }
-            bottomRightRect.moved = function () {
-                rect3.moveBottomRightTo(this.cx, this.cy);
-            }
-
-            paint.addShape(rect3);
-            paint.addShape(topLeftRect);
-            paint.addShape(bottomRightRect);
-        }
-    });
-
-}

@@ -22,32 +22,36 @@
  * @since 10.11.12 - 15:51
  */
 
-var demos = {
-    demo1Action: function () {
-        jQuery.ajax({
-            url: baseUrl('/modelandview.html'),
-            success: demos.populateResult
-        });
-    },
-    demo2Action: function () {
-        jQuery.ajax({
-            url: baseUrl('/modelandview.json'),
-            success: demos.populateResult
-        });
-    },
+define(['jquery', 'core'], function (jQuery, core) {
+    return {
+        demo1Action: function () {
+            jQuery.ajax({
+                url: core.baseUrl('/modelandview.html'),
+                success: function (data) {
+                    var resultContainer = $('#demo_result');
 
-    populateResult: function (data) {
-        var resultContainer = $('#demo_result');
+                    if (jQuery.isPlainObject(data)) {
+                        resultContainer.val(JSON.stringify(data));
+                    } else {
+                        resultContainer.val(data);
+                    }
+                }
+            });
+        },
+        demo2Action: function () {
+            jQuery.ajax({
+                url: core.baseUrl('/modelandview.json'),
+                success: function (data) {
+                    var resultContainer = $('#demo_result');
 
-        if (jQuery.isPlainObject(data)) {
-            resultContainer.val(JSON.stringify(data));
-        } else {
-            resultContainer.val(data);
+                    if (jQuery.isPlainObject(data)) {
+                        resultContainer.val(JSON.stringify(data));
+                    } else {
+                        resultContainer.val(data);
+                    }
+                }
+            });
         }
-    }
-}
+    };
 
-$(document).ready(function () {
-    $('#demo1_link').click(demos.demo1Action);
-    $('#demo2_link').click(demos.demo2Action);
-})
+});

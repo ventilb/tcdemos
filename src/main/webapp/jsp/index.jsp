@@ -20,8 +20,15 @@
 <body>
 <div id="content">
     <h1>Startseite</h1>
+    <script type="text/javascript">
+        require(['jquery', 'demos'], function ($, demos) {
+            $(document).ready(function () {
+                $('#demo1_link').click(demos.demo1Action);
+                $('#demo2_link').click(demos.demo2Action);
+            })
+        });
+    </script>
 
-    <script src="${pageContext.request.contextPath}/static/js/demos.js" type="text/javascript"></script>
     <ul>
         <li><a id="demo1_link" href="javascript:void(0)">Demo 1</a>
         <li><a id="demo2_link" href="javascript:void(0)">Demo 2</a>

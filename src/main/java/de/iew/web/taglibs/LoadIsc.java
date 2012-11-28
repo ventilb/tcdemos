@@ -71,7 +71,6 @@ public class LoadIsc extends SimpleTagSupport {
 
         JspWriter out = jspContext.getOut();
         out.println("<script type=\"text/javascript\">");
-        includeBaseUrlHook();
 
         if (!empty(appImgDir)) {
             out.print("isc.Page.setAppImgDir('");
@@ -129,18 +128,6 @@ public class LoadIsc extends SimpleTagSupport {
         }
 
         headScript(skinsBase + "/" + skin + "/load_skin.js");
-    }
-
-    public void includeBaseUrlHook() throws IOException {
-        JspWriter out = getJspContext().getOut();
-
-        out.println("isc.Page.addClassProperties({");
-        out.println("getAppBaseUrl: function(/* String? */ file){");
-        out.print("return '");
-        out.print(JspUtils.getContextPath(getJspContext()));
-        out.println("' + file;");
-        out.println("}");
-        out.println("});");
     }
 
     public boolean empty(String test) {

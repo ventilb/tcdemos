@@ -30,8 +30,27 @@ import javax.servlet.jsp.PageContext;
 public class JspUtils {
     private static final String URL_SEPARATOR = "/";
 
-    public static String getContextPath(JspContext jspContext, String file) {
-        PageContext pageContext = (PageContext) jspContext;
+    public static String openTag(String tag, String[] attrs) {
+        StringBuffer sb = new StringBuffer("<");
+        sb.append(tag);
+        if (attrs != null && attrs.length > 0) {
+            for (String attr : attrs) {
+                if (attr != null && !"".equals(attr.trim())) {
+                    if (!attr.startsWith(" ")) {
+                        sb.append(" ");
+                    }
+                    sb.append(attr);
+                }
+            }
+        }
+        return sb.append(">").toString();
+    }
+
+    public static String closeTag(String tag) {
+        return "</" + tag + ">";
+    }
+
+    public static String getContextPath(PageContext pageContext, String file) {
         HttpServletRequest request = (HttpServletRequest) pageContext.getRequest();
         String contextPath = request.getContextPath();
 
@@ -43,6 +62,11 @@ public class JspUtils {
         }
 
         return contextPath;
+    }
+
+    public static String getContextPath(JspContext jspContext, String file) {
+        PageContext pageContext = (PageContext) jspContext;
+        return getContextPath(pageContext, file);
     }
 
     public static String getContextPath(JspContext jspContext) {

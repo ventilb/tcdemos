@@ -20,13 +20,10 @@
 <head>
     <title>i-entwicklung Tomcat Demos</title>
     <link href="${pageContext.request.contextPath}/static/css/page.css" rel="stylesheet" type="text/css"/>
-    <script data-main="${pageContext.request.contextPath}/static/js/main.js" src="${pageContext.request.contextPath}/static/js/require.js"></script>
-    <script type="text/javascript">
-        function baseUrl(/* String|NULL */ url) {
-            var baseUrl = '${pageContext.request.contextPath}';
-            return baseUrl + '' + url;
-        }
-    </script>
-    <script src="${pageContext.request.contextPath}/static/js/jquery-1.8.2.js" type="text/javascript"></script>
     <iew:loadIsc/>
+    <iew:requireJS baseUrl="static/js" src="static/js/require-jquery.js">
+        <iew:requireJS_Package name="nls" location="nls" main="nls"/>
+        <iew:requireJS_Package name="core" main="jsconfig"/>
+        <iew:requireJS_I18nConfig autodetect="true"/>
+    </iew:requireJS>
 </head>

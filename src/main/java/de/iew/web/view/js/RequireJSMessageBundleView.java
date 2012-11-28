@@ -34,7 +34,7 @@ import java.util.Map;
  * Javascript.
  * <p>
  * Wir verwenden diese View um requireJS kompatible Sprachpakete zu rendern.
- * Damit können wir den i18n-Mechanismus von requireJS verwenden.
+ * Damit können wir das I18n-Paket von requireJS verwenden.
  * </p>
  *
  * @author Manuel Schulze <manuel_schulze@i-entwicklung.de>
@@ -53,10 +53,10 @@ public class RequireJSMessageBundleView extends AbstractView {
     private Locale defaultLocale;
 
     @Override
-    protected void renderMergedOutputModel(Map<String, Object> stringObjectMap, HttpServletRequest request, HttpServletResponse httpServletResponse) throws Exception {
-        httpServletResponse.setContentType("text/javascript");
+    protected void renderMergedOutputModel(Map<String, Object> stringObjectMap, HttpServletRequest request, HttpServletResponse response) throws Exception {
+        response.setContentType("text/javascript");
 
-        PrintWriter writer = httpServletResponse.getWriter();
+        PrintWriter writer = response.getWriter();
 
         // Ja, Javascript Hölle :-)
         writer.write("define({");

@@ -24,8 +24,12 @@
     </div>
 </div>
 <div id="content">
-    <script src="${pageContext.request.contextPath}/static/js/paint.js" type="text/javascript"></script>
-    <script src="${pageContext.request.contextPath}/static/js/sketchPad.js" type="text/javascript"></script>
+    <script type="text/javascript">
+        require(['sketch-pad'], function() {
+
+        });
+    </script>
+
     <div id="sketch_pad" class="sketch_pad">
         <canvas width="1000" height="700"></canvas>
         <div id="right_margin_toolbar">
