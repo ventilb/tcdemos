@@ -76,15 +76,7 @@ public class HbmMessageBundleDaoImpl extends AbstractHbmDomainModelDaoImpl<Messa
                                         .add(Projections.property("countryCode")))
                 );
         crit.setCacheable(true);
-        crit.setResultTransformer(new ResultTransformer() {
-            public Object transformTuple(Object[] tuple, String[] aliases) {
-                return new Locale((String) tuple[0], (String) tuple[1]);
-            }
-
-            public List transformList(List collection) {
-                return collection;
-            }
-        });
+        crit.setResultTransformer(LocaleTupleResultTransformer.DEFAULT);
         return crit.list();
     }
 }
