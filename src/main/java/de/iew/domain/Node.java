@@ -29,7 +29,7 @@ import java.util.List;
  */
 @Entity
 @Table(name = "node")
-public class Node extends AbstractModel {
+public class Node extends AbstractModel implements TreeNode, AdjacencyNode<Node>, NestedSetNode {
 
     private String title;
 
@@ -40,7 +40,7 @@ public class Node extends AbstractModel {
     private Tree tree;
 
     /**
-     * Die Reihenfolgenummer dieses Knotens innerhalb seiner Baumebene.
+     * Die Position dieses Knotens innerhalb der Geschwisterliste.
      */
     private int orderInLevel;
 
