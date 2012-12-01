@@ -54,7 +54,7 @@ public class RequireJSMessageBundleView extends AbstractView {
 
     @Override
     protected void renderMergedOutputModel(Map<String, Object> stringObjectMap, HttpServletRequest request, HttpServletResponse response) throws Exception {
-        response.setContentType("text/javascript");
+        response.setContentType("text/javascript; charset=utf-8");
 
         PrintWriter writer = response.getWriter();
 
