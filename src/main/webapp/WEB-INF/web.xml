@@ -106,9 +106,6 @@
 
     <filter-mapping>
         <filter-name>openSessionInViewFilter</filter-name>
-        <url-pattern>*.html</url-pattern>
-        <url-pattern>*.json</url-pattern>
-        <url-pattern>*.js</url-pattern>
-        <url-pattern>/</url-pattern>
+        <url-pattern>*</url-pattern>
     </filter-mapping>
 </web-app>
