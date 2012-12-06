@@ -32,7 +32,7 @@ import javax.persistence.MappedSuperclass;
  * @since 17.11.12 - 10:12
  */
 @MappedSuperclass
-public abstract class AbstractModel {
+public abstract class AbstractModel implements DomainModel {
     private Long id;
 
     @Id
