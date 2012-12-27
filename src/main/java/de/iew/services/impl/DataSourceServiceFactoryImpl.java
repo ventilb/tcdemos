@@ -17,17 +17,19 @@
 package de.iew.services.impl;
 
 import de.iew.domain.SimpleTextData;
-import de.iew.services.DataSourceServiceFactory;
 import de.iew.services.DataSourceService;
+import de.iew.services.DataSourceServiceFactory;
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.stereotype.Service;
 
 /**
- * Klassenkommentar.
+ * Implementiert einen Dienst zum Auflösen von
+ * {@link DataSourceService}-Implementierungen.
  *
  * @author Manuel Schulze <manuel_schulze@i-entwicklung.de>
+ * @TODO Ausbauen und Services bspw anhand einer speziellen Annotation deklarieren und in PostConstruct suchen lassen.
  * @since 30.11.12 - 20:56
  */
 @Service(value = "dataSourceServiceFactory")

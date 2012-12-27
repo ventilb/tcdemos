@@ -17,7 +17,9 @@
 package de.iew.services;
 
 /**
- * Klassenkommentar.
+ * Beschreibt eine Schnittstelle für Dienste zum Auflösen spezieller
+ * {@link DataSourceService}-Implementierungen für die Verwaltung der
+ * {@link de.iew.domain.DataSource}-Modelle.
  *
  * @author Manuel Schulze <manuel_schulze@i-entwicklung.de>
  * @since 30.11.12 - 20:54
