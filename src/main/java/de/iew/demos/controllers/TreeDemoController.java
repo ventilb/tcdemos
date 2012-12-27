@@ -37,12 +37,14 @@ public class TreeDemoController {
 
     @RequestMapping
     public ModelAndView indexAction() throws Exception {
-        Node rootNode = this.treeService.getTreeRootNode(1);
+        long treeId = 2;
+
+        Node rootNode = this.treeService.getTreeRootNode(treeId);
 
         ModelAndView mav = new ModelAndView("treedemo");
 
         mav.addObject("rootNode", rootNode);
-        mav.addObject("treeId", 1);
+        mav.addObject("treeId", treeId);
 
         return mav;
     }

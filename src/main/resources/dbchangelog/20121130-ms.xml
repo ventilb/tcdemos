@@ -1,0 +1,144 @@
+<!--
+  ~ Copyright 2012 Manuel Schulze <manuel_schulze@i-entwicklung.de>
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~     http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+    http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-2.0.xsd">
+    <changeSet id="8-ms" author="Manuel Schulze">
+        <createTable tableName="simple_text_data">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="node_id" type="bigint">
+                <constraints nullable="true"/>
+            </column>
+            <column name="text_item_collection_id" type="bigint">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <modifySql dbms="mysql">
+            <!--
+            http://www.liquibase.org/manual/modify_sql
+            -->
+            <append value=" engine innodb"/>
+        </modifySql>
+    </changeSet>
+
+    <changeSet id="9-ms" author="Manuel Schulze">
+        <addForeignKeyConstraint baseTableName="simple_text_data" baseColumnNames="node_id"
+                                 constraintName="fk_simple_text_data_node"
+                                 referencedTableName="node"
+                                 referencedColumnNames="id" onDelete="RESTRICT" onUpdate="RESTRICT"/>
+        <addForeignKeyConstraint baseTableName="simple_text_data" baseColumnNames="text_item_collection_id"
+                                 constraintName="fk_simple_text_data_text_item_collection"
+                                 referencedTableName="text_item_collection"
+                                 referencedColumnNames="id" onDelete="RESTRICT" onUpdate="RESTRICT"/>
+    </changeSet>
+
+    <changeSet id="10-ms" author="Manuel Schulze">
+        <dropNotNullConstraint tableName="node" columnName="tree_id" columnDataType="bigint"/>
+    </changeSet>
+
+    <changeSet id="11-ms" author="Manuel Schulze">
+        <createTable tableName="data_source">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="node_id" type="bigint"/>
+        </createTable>
+        <modifySql dbms="mysql">
+            <!--
+            http://www.liquibase.org/manual/modify_sql
+            -->
+            <append value=" engine innodb"/>
+        </modifySql>
+    </changeSet>
+
+    <changeSet id="12-ms" author="Manuel Schulze">
+        <dropTable tableName="simple_text_data"/>
+    </changeSet>
+
+    <changeSet id="13-ms" author="Manuel Schulze">
+        <createTable tableName="simple_text_data">
+            <column name="id" type="bigint" autoIncrement="false">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="node_id" type="bigint">
+                <constraints nullable="true"/>
+            </column>
+            <column name="text_item_collection_id" type="bigint">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <modifySql dbms="mysql">
+            <!--
+            http://www.liquibase.org/manual/modify_sql
+            -->
+            <append value=" engine innodb"/>
+        </modifySql>
+    </changeSet>
+
+    <changeSet id="14-ms" author="Manuel Schulze">
+        <addForeignKeyConstraint baseTableName="simple_text_data" baseColumnNames="id"
+                                 constraintName="fk_simple_text_data_data_source"
+                                 referencedTableName="data_source"
+                                 referencedColumnNames="id" onDelete="RESTRICT" onUpdate="RESTRICT"/>
+        <addForeignKeyConstraint baseTableName="simple_text_data" baseColumnNames="node_id"
+                                 constraintName="fk_simple_text_data_node"
+                                 referencedTableName="node"
+                                 referencedColumnNames="id" onDelete="RESTRICT" onUpdate="RESTRICT"/>
+        <addForeignKeyConstraint baseTableName="simple_text_data" baseColumnNames="text_item_collection_id"
+                                 constraintName="fk_simple_text_data_text_item_collection"
+                                 referencedTableName="text_item_collection"
+                                 referencedColumnNames="id" onDelete="RESTRICT" onUpdate="RESTRICT"/>
+    </changeSet>
+
+    <changeSet id="15-ms" author="Manuel Schulze">
+        <dropColumn tableName="node" columnName="title"/>
+    </changeSet>
+
+    <changeSet id="16-ms" author="Manuel Schulze">
+        <addColumn tableName="node">
+            <column name="data_source_id" type="bigint"></column>
+        </addColumn>
+        <addForeignKeyConstraint baseTableName="node" baseColumnNames="data_source_id"
+                                 constraintName="fk_node_data_source"
+                                 referencedTableName="data_source"
+                                 referencedColumnNames="id" onDelete="RESTRICT" onUpdate="RESTRICT"/>
+    </changeSet>
+
+    <changeSet id="17-ms" author="Manuel Schulze">
+        <dropColumn tableName="data_source" columnName="node_id"/>
+    </changeSet>
+
+    <changeSet id="18-ms" author="Manuel Schulze">
+        <dropForeignKeyConstraint baseTableName="simple_text_data" constraintName="fk_simple_text_data_node"/>
+        <dropColumn tableName="simple_text_data" columnName="node_id"/>
+    </changeSet>
+
+    <changeSet id="19-ms" author="Manuel Schulze">
+        <dropForeignKeyConstraint baseTableName="node" constraintName="fk_node_node_parentNode"/>
+
+        <addForeignKeyConstraint baseTableName="node" baseColumnNames="parent_id"
+                                 constraintName="fk_node_node_parent"
+                                 referencedTableName="node"
+                                 referencedColumnNames="id" onUpdate="CASCADE" onDelete="CASCADE"/>
+
+    </changeSet>
+
+</databaseChangeLog>

@@ -34,52 +34,73 @@ public interface TreeService {
      * Fügt eine neue Wurzel mit dem angegebenen Titel in den angegebenen Baum
      * ein.
      *
-     * @param title  Der Titel der Wurzel.
      * @param treeId Die Id des Baumes.
      * @return Die neu erstellte Wurzel.
      * @throws ModelNotFoundException Wenn das Baum-Domainmodell nicht
      *                                ermittelt wurde.
      */
-    public Node prependNewTreeRootNode(String title, long treeId) throws ModelNotFoundException;
+    public Node migrateRootNode(long treeId) throws ModelNotFoundException;
 
     /**
      * Fügt ein neues Kind mit dem angegebenen Vater hinzu. Das Kind wird an
-     * die Kindes des Vatera angehängt.
+     * die Kinder des Vaters angehängt.
      *
-     * @param title    Der Knotentitel.
-     * @param treeId   Die Id des Baums.
-     * @param parentId Die Id des Vater-Knotens.
+     * @param treeId       Die Id des Baums.
+     * @param parentId     Die Id des Vater-Knotens.
+     * @param dataSourceId Die Id der {@link de.iew.domain.DataSource},
+     *                     die mit dem Knoten verknüpft werden soll.
      * @return Der erstellte Knoten.
      * @throws ModelNotFoundException Wenn der Knoten nicht im Baum existiert.
      */
-    public Node appendNewNode(String title, long treeId, long parentId) throws ModelNotFoundException;
+    public Node appendNewNode(long treeId, long parentId, long dataSourceId) throws ModelNotFoundException;
 
     /**
      * Fügt einen neuen Knoten als Bruder vor dem Knoten <code>nodeToInsertBefore</code>
      * im angegebenen Baum, ein.
      *
-     * @param title              Der Knotentitel.
      * @param treeId             Die Id des Baums.
      * @param nodeToInsertBefore Die Id des Knotens vor dem eingefügt werden soll.
+     * @param dataSourceId       Die Id der {@link de.iew.domain.DataSource},
+     *                           die mit dem Knoten verknüpft werden soll.
      * @return Der erstellte Knoten.
      * @throws ModelNotFoundException Wenn der Knoten nicht im Baum existiert.
      */
-    public Node insertNewNodeBefore(String title, long treeId, long nodeToInsertBefore) throws ModelNotFoundException;
+    public Node insertNewNodeBefore(long treeId, long nodeToInsertBefore, long dataSourceId) throws ModelNotFoundException;
 
     /**
      * Fügt einen neuen Knoten als Bruder nach dem Knoten <code>nodeToInsertAfter</code>
      * im angegebenen Baum, ein.
      *
-     * @param title             Der Knotentitel.
      * @param treeId            Die Id des Baums.
      * @param nodeToInsertAfter Die Id des Knotens dem dem eingefügt werden soll.
+     * @param dataSourceId      Die Id der {@link de.iew.domain.DataSource},
+     *                          die mit dem Knoten verknüpft werden soll.
      * @return Der erstellte Knoten.
      * @throws ModelNotFoundException Wenn der Knoten nicht im Baum existiert.
      */
-    public Node insertNewNodeAfter(String title, long treeId, long nodeToInsertAfter) throws ModelNotFoundException;
+    public Node insertNewNodeAfter(long treeId, long nodeToInsertAfter, long dataSourceId) throws ModelNotFoundException;
+
+    /**
+     * Löscht den angegebenen Knoten im angegebenen Baum.
+     * <p>
+     * Es wird nur der Knoten gelöscht. Die Kinder dieses Knotens werden an der
+     * Stelle an der, der zu löschende Knoten stand, eingefügt.
+     * </p>
+     *
+     * @param treeId Die Id des Baums.
+     * @param nodeId Die Knoten-Id des zu löschenden Knotens.
+     * @return Der gelöschte Knoten.
+     * @throws ModelNotFoundException Wenn der Knoten nicht im Baum existiert.
+     */
+    public Node deleteNodeAndMigrateChildren(long treeId, long nodeId) throws ModelNotFoundException;
 
     /**
      * Löscht den gesamten Teilbaum ab dem angegebenen Knoten im angegebenen Baum.
+     * <p>
+     * Der Teilbaum wird inklusive des angegebenen Wurzelknotens gelöscht. Die
+     * gelöschte Wurzel wird zurückgegeben. Die Id des zurückgegebenen Knotens
+     * wird nicht auf NULL gesetzt.
+     * </p>
      *
      * @param treeId Die Id des Baums.
      * @param nodeId Die Knoten-Id des zu löschenden Teilbaums.

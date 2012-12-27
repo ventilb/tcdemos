@@ -1,0 +1,246 @@
+<!--
+  ~ Copyright 2012 Manuel Schulze <manuel_schulze@i-entwicklung.de>
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~     http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+    http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-2.0.xsd">
+
+    <changeSet id="20-ms" author="Manuel Schulze">
+        <createTable tableName="group">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+        </createTable>
+        <modifySql dbms="mysql">
+            <!--
+            http://www.liquibase.org/manual/modify_sql
+            -->
+            <append value=" engine innodb"/>
+        </modifySql>
+    </changeSet>
+
+    <!--
+    Spring Security ACL
+
+    see http://krams915.blogspot.de/2011/01/spring-security-3-full-acl-tutorial.html
+    see http://springinpractice.com/2010/07/06/spring-security-database-schemas-for-mysql/
+    see http://static.springsource.org/spring-security/site/docs/3.0.x/reference/domain-acls.html
+    -->
+    <changeSet id="21-ms" author="Manuel Schulze">
+        <createTable tableName="acl_sid">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="principal" type="bit">
+                <constraints nullable="false"/>
+            </column>
+            <column name="sid" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <modifySql dbms="mysql">
+            <!--
+            http://www.liquibase.org/manual/modify_sql
+            -->
+            <append value=" engine innodb"/>
+        </modifySql>
+    </changeSet>
+
+    <changeSet id="22-ms" author="Manuel Schulze">
+        <createTable tableName="acl_class">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="class" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <modifySql dbms="mysql">
+            <!--
+            http://www.liquibase.org/manual/modify_sql
+            -->
+            <append value=" engine innodb"/>
+        </modifySql>
+    </changeSet>
+
+    <changeSet id="23-ms" author="Manuel Schulze">
+        <createTable tableName="acl_object_identity">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="object_id_class" type="bigint">
+                <constraints nullable="false"/>
+            </column>
+            <column name="object_id_identity" type="bigint">
+                <constraints nullable="false"/>
+            </column>
+            <column name="parent_object_id" type="bigint"></column>
+            <column name="owner_sid" type="bigint"></column>
+            <column name="entries_inheriting" type="bit">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <modifySql dbms="mysql">
+            <!--
+            http://www.liquibase.org/manual/modify_sql
+            -->
+            <append value=" engine innodb"/>
+        </modifySql>
+    </changeSet>
+
+    <changeSet id="24-ms" author="Manuel Schulze">
+        <createTable tableName="acl_entry">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="acl_object_identity" type="bigint">
+                <constraints nullable="false"/>
+            </column>
+            <column name="ace_order" type="int">
+                <constraints nullable="false"/>
+            </column>
+            <column name="sid" type="bigint">
+                <constraints nullable="false"/>
+            </column>
+            <column name="mask" type="int">
+                <constraints nullable="false"/>
+            </column>
+            <column name="granting" type="bit">
+                <constraints nullable="false"/>
+            </column>
+            <column name="audit_success" type="bit">
+                <constraints nullable="false"/>
+            </column>
+            <column name="audit_failure" type="bit">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <modifySql dbms="mysql">
+            <!--
+            http://www.liquibase.org/manual/modify_sql
+            -->
+            <append value=" engine innodb"/>
+        </modifySql>
+    </changeSet>
+
+    <changeSet id="25-ms" author="Manuel Schulze">
+        <addForeignKeyConstraint baseTableName="acl_object_identity" baseColumnNames="object_id_class"
+                                 constraintName="fk_acl_object_identity_acl_class"
+                                 referencedTableName="acl_class"
+                                 referencedColumnNames="id" onDelete="RESTRICT" onUpdate="RESTRICT"/>
+        <addForeignKeyConstraint baseTableName="acl_object_identity" baseColumnNames="owner_sid"
+                                 constraintName="fk_acl_object_identity_acl_sid"
+                                 referencedTableName="acl_sid"
+                                 referencedColumnNames="id" onDelete="RESTRICT" onUpdate="RESTRICT"/>
+        <addForeignKeyConstraint baseTableName="acl_entry" baseColumnNames="sid" constraintName="fk_acl_entry_acl_sid"
+                                 referencedTableName="acl_sid"
+                                 referencedColumnNames="id" onDelete="RESTRICT" onUpdate="RESTRICT"/>
+    </changeSet>
+
+    <changeSet id="26-ms" author="Manuel Schulze">
+        <createTable tableName="account">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="username" type="varchar(255)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="password" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="locked" type="bit">
+                <constraints nullable="false"/>
+            </column>
+            <column name="enabled" type="bit">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <modifySql dbms="mysql">
+            <!--
+            http://www.liquibase.org/manual/modify_sql
+            -->
+            <append value=" engine innodb"/>
+        </modifySql>
+    </changeSet>
+
+    <changeSet id="27-ms" author="Manuel Schulze">
+        <dropTable tableName="account"/>
+    </changeSet>
+
+    <changeSet id="28-ms" author="Manuel Schulze">
+        <createTable tableName="account">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="username" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="password" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="locked" type="boolean">
+                <constraints nullable="false"/>
+            </column>
+            <column name="enabled" type="boolean">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <modifySql dbms="mysql">
+            <!--
+            http://www.liquibase.org/manual/modify_sql
+            -->
+            <append value=" engine innodb"/>
+        </modifySql>
+    </changeSet>
+
+    <changeSet id="29-ms" author="Manuel Schulze">
+        <renameColumn tableName="acl_object_identity" oldColumnName="parent_object_id" newColumnName="parent_object"
+                      columnDataType="bigint"/>
+    </changeSet>
+
+    <changeSet id="30-ms" author="Manuel Schulze">
+        <createTable tableName="authority">
+            <column name="id" type="bigint" autoIncrement="false">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="system_name" type="varchar(255)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="display_name_id" type="bigint">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <modifySql dbms="mysql">
+            <!--
+            http://www.liquibase.org/manual/modify_sql
+            -->
+            <append value=" engine innodb"/>
+        </modifySql>
+    </changeSet>
+
+    <changeSet id="31-ms" author="Manuel Schulze">
+        <addForeignKeyConstraint baseTableName="authority" baseColumnNames="id"
+                                 constraintName="fk_authority_data_source"
+                                 referencedTableName="data_source"
+                                 referencedColumnNames="id" onDelete="RESTRICT" onUpdate="RESTRICT"/>
+        <addForeignKeyConstraint baseTableName="authority" baseColumnNames="display_name_id"
+                                 constraintName="fk_authority_text_item_collection_display_name"
+                                 referencedTableName="text_item_collection"
+                                 referencedColumnNames="id" onDelete="RESTRICT" onUpdate="RESTRICT"/>
+    </changeSet>
+</databaseChangeLog>

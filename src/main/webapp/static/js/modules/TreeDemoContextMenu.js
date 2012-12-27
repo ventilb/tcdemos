@@ -21,21 +21,26 @@
  * @since 20.11.12 - 22:41
  */
 
-isc.defineClass('TreeDemoContextMenu', 'Menu');
+define(['i18n!nls/messages'], function (msg) {
+    isc.defineClass('TreeDemoContextMenu', 'Menu');
 
-isc.TreeDemoContextMenu.registerStringMethods({});
+    isc.TreeDemoContextMenu.registerStringMethods({});
 
-isc.TreeDemoContextMenu.addProperties({
-    data: [
-        {title: 'Neues Kind', click: 'target.appendNewChildNode(target.getSelectedRecord())'},
-        {title: 'Neuen Bruder davor', click: 'target.insertNewNodeBefore(target.getSelectedRecord())', enableIf: '!target.isRootNode(target.getSelectedRecord())'},
-        {title: 'Neuen Bruder danach', click: 'target.insertNewNodeAfter(target.getSelectedRecord())', enableIf: '!target.isRootNode(target.getSelectedRecord())'},
-        {title: 'Löschen', click: 'target.deleteNode(target.getSelectedRecord())', enableIf: '!target.isRootNode(target.getSelectedRecord())'}
-    ],
+    isc.TreeDemoContextMenu.addProperties({
+        data: [
+            {title: msg['tree.context_menu.item.title.new_child'], click: 'target.appendNewChildNode(target.getSelectedRecord(), "de.iew.domain.SimpleTextData")'},
+            {title: msg['tree.context_menu.item.title.sibling_before'], click: 'target.insertNewNodeBefore(target.getSelectedRecord(), "de.iew.domain.SimpleTextData")', enableIf: '!target.isRootNode(target.getSelectedRecord())'},
+            {title: msg['tree.context_menu.item.title.sibling_after'], click: 'target.insertNewNodeAfter(target.getSelectedRecord(), "de.iew.domain.SimpleTextData")', enableIf: '!target.isRootNode(target.getSelectedRecord())'},
+            {title: msg['tree.context_menu.submenu.title.delete'], submenu: [
+                {title: msg['tree.context_menu.item.title.delete_node'], click: 'target.deleteMigrate(target.getSelectedRecord())', enableIf: '!target.isRootNode(target.getSelectedRecord())'},
+                {title: msg['tree.context_menu.item.title.delete_subtree'], click: 'target.deleteSubtree(target.getSelectedRecord())', enableIf: '!target.isRootNode(target.getSelectedRecord())'}
+            ]}
+        ],
 
-    initWidget: function () {
-        this.Super('initWidget', arguments);
-    }
+        initWidget: function () {
+            this.Super('initWidget', arguments);
+        }
+    });
+
+    isc.TreeDemoContextMenu.addClassProperties({});
 });
-
-isc.TreeDemoContextMenu.addClassProperties({});

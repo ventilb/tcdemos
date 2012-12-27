@@ -16,35 +16,29 @@
 
 package de.iew.persistence.hibernate;
 
-import de.iew.domain.Node;
 import de.iew.domain.Tree;
 import de.iew.persistence.TreeDao;
 import org.hibernate.Criteria;
 import org.hibernate.criterion.Restrictions;
-import org.hibernate.sql.JoinType;
 import org.springframework.stereotype.Repository;
 
 /**
- * Hibernate Implementierung der {@link TreeDao}-Schnittstelle.
+ * Hibernate Implementierung der {@link de.iew.persistence.TreeDao}-Schnittstelle.
  *
  * @author Manuel Schulze <manuel_schulze@i-entwicklung.de>
- * @since 24.11.12 - 20:24
+ * @since 07.12.12 - 22:29
  */
 @Repository(value = "treeDao")
 public class HbmTreeDaoImpl extends AbstractHbmDomainModelDaoImpl<Tree> implements TreeDao {
-    public Node findRootNodeForTree(long treeId) {
-        Criteria crit = getCurrentSession().createCriteria(Node.class);
-        crit.add(Restrictions.eq("tree.id", treeId))
-                .add(Restrictions.isNull("parent"));
 
-        return (Node) crit.uniqueResult();
+    public Tree findTreeByLookupKey(String lookupKey) {
+        if (lookupKey == null) {
+            throw new IllegalArgumentException("lookupKey can't be null");
+        }
+        Criteria crit = getCurrentSession().createCriteria(Tree.class);
+        crit.add(Restrictions.eq("lookupKey", lookupKey));
+
+        return (Tree) crit.uniqueResult();
     }
 
-    public Node findNodeForTreeAndId(long treeId, long nodeId) {
-        Criteria crit = getCurrentSession().createCriteria(Node.class);
-        crit.createAlias("tree", "tree", JoinType.INNER_JOIN)
-                .add(Restrictions.eq("id", nodeId))
-                .add(Restrictions.eq("tree.id", treeId));
-        return (Node) crit.uniqueResult();
-    }
 }

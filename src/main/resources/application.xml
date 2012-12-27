@@ -28,9 +28,11 @@ http://www.springframework.org/schema/mvc
 http://www.springframework.org/schema/mvc/spring-mvc.xsd
 http://www.springframework.org/schema/util
 http://www.springframework.org/schema/util/spring-util-2.0.xsd">
-
+<!--
     <import resource="classpath:spring-db-config.xml"/>
-
+    <import resource="classpath:spring-security-config.xml"/>
+    <import resource="classpath:spring-acl-config.xml"/>
+-->
     <util:properties id="config" location="classpath:config.properties"/>
 
     <context:annotation-config/>
@@ -38,7 +40,7 @@ http://www.springframework.org/schema/util/spring-util-2.0.xsd">
     <mvc:annotation-driven/>
 
     <context:component-scan
-            base-package="de.iew.services, de.iew.demos, de.iew.sketchpad, de.iew.web.controllers, de.iew.web.view">
+            base-package="de.iew.services, de.iew.demos, de.iew.sketchpad, de.iew.web.controllers, de.iew.web">
         <context:exclude-filter type="aspectj" expression="de.iew.persistence..*"/>
     </context:component-scan>
 

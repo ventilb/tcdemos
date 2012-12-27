@@ -17,9 +17,14 @@
 package de.iew.web.controllers;
 
 import de.iew.demos.model.NodeModel;
-import de.iew.demos.model.NodeModels;
-import de.iew.domain.ModelNotFoundException;
+import de.iew.demos.model.NodeToNodelModelTransformer;
+import de.iew.domain.DataSource;
 import de.iew.domain.Node;
+import de.iew.framework.utils.LocaleStringResolver;
+import de.iew.services.DataSourceServiceFactory;
+import de.iew.services.DataSourceService;
+import de.iew.services.tree.NodeVisitor;
+import de.iew.domain.ModelNotFoundException;
 import de.iew.services.TreeService;
 import de.iew.web.isc.DSResponseCollection;
 import de.iew.web.isc.DSResponseObject;
@@ -30,6 +35,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.Collection;
 import java.util.HashSet;
 
@@ -46,32 +52,36 @@ public class TreeController {
 
     private TreeService treeService;
 
+    private DataSourceServiceFactory dataSourceServiceFactory;
+
     @RequestMapping(value = "/fetch", method = RequestMethod.GET)
     @ResponseBody
     public Model fetchAction(
+            HttpServletRequest request,
             @RequestParam(value = "treeId", required = true) Long treeId,
             @RequestParam(value = "parentId", required = false) Long parentId
     ) throws Exception {
-
         if (log.isDebugEnabled()) {
             log.debug("Lade Knoten mit Vater " + parentId + " aus Baum " + treeId + ".");
         }
-        Collection<Node> nodes;
+        NodeVisitor<NodeModel> nodeVisitor = getNodeTransformer(request);
+        Collection<NodeModel> nodes;
 
         if (parentId == null) {
             Node rootNode = this.treeService.getTreeRootNode(treeId);
-            nodes = new HashSet<Node>();
-            nodes.add(rootNode);
+            nodes = new HashSet<NodeModel>();
+            nodes.add(nodeVisitor.visitNode(rootNode));
         } else {
-            nodes = this.treeService.getDirectChildNodes(treeId, parentId);
+            nodes = nodeVisitor.visitNodeCollection(this.treeService.getDirectChildNodes(treeId, parentId));
         }
 
-        return new DSResponseCollection(NodeModels.fromCollection(nodes), nodes.size());
+        return new DSResponseCollection(nodes);
     }
 
     @RequestMapping(value = "/add", method = RequestMethod.POST)
     @ResponseBody
     public Model addAction(
+            HttpServletRequest request,
             @ModelAttribute NodeModel nodeModel,
             @RequestParam(value = "relatedNodeId", required = false) Long relatedNodeId,
             @RequestParam(value = "operation", defaultValue = "APPEND_CHILD") AddNodeOperation addOperation
@@ -80,37 +90,61 @@ public class TreeController {
             log.debug("Füge neuen Knoten " + nodeModel + " mit Operation " + addOperation + " hinzu.");
         }
 
-        Node newNode;
+        DataSourceService dataSourceService = this.dataSourceServiceFactory.lookupDataSourceService(nodeModel.getDataSourceClassname());
+        DataSource dataSource = dataSourceService.createPersistedDefaultDataSource(nodeModel);
 
+        NodeVisitor nodeVisitor = getNodeTransformer(request);
+
+        Node newNode;
         if (relatedNodeId == null) {
-            newNode = this.treeService.prependNewTreeRootNode(nodeModel.getTitle(), nodeModel.getTreeId());
+            newNode = this.treeService.migrateRootNode(nodeModel.getTreeId());
         } else {
             switch (addOperation) {
                 case APPEND_CHILD:
-                    newNode = this.treeService.appendNewNode(nodeModel.getTitle(), nodeModel.getTreeId(), relatedNodeId);
+                    newNode = this.treeService.appendNewNode(nodeModel.getTreeId(), relatedNodeId, dataSource.getId());
                     break;
                 case INSERT_BEFORE:
-                    newNode = this.treeService.insertNewNodeBefore(nodeModel.getTitle(), nodeModel.getTreeId(), relatedNodeId);
+                    newNode = this.treeService.insertNewNodeBefore(nodeModel.getTreeId(), relatedNodeId, dataSource.getId());
                     break;
                 case INSERT_AFTER:
-                    newNode = this.treeService.insertNewNodeAfter(nodeModel.getTitle(), nodeModel.getTreeId(), relatedNodeId);
+                    newNode = this.treeService.insertNewNodeAfter(nodeModel.getTreeId(), relatedNodeId, dataSource.getId());
                     break;
                 default:
                     throw new UnsupportedOperationException("The requested Add-Operation " + addOperation + " is not supported.");
             }
         }
 
-        return new DSResponseObject(NodeModel.fromNode(newNode));
+        return new DSResponseObject(nodeVisitor.visitNode(newNode));
     }
 
     @RequestMapping(value = "/delete")
     @ResponseBody
     public Model deleteAction(
-            @ModelAttribute NodeModel nodeModel
+            @ModelAttribute NodeModel nodeModel,
+            @RequestParam(value = "operation", defaultValue = "DELETE_SUBTREE") DeleteNodeOperation deleteOperation
     ) throws Exception {
-        this.treeService.deleteNodeAndSubtree(nodeModel.getTreeId(), nodeModel.getId());
+        switch (deleteOperation) {
+            case DELETE_MIGRATE:
+                this.treeService.deleteNodeAndMigrateChildren(nodeModel.getTreeId(), nodeModel.getId());
+                break;
+            case DELETE_SUBTREE:
+                this.treeService.deleteNodeAndSubtree(nodeModel.getTreeId(), nodeModel.getId());
+                break;
+            default:
+                throw new UnsupportedOperationException("The requested Delete-Operation " + deleteOperation + " is not supported.");
+
+        }
 
         return new DSResponseObject(nodeModel);
+    }
+
+    public NodeVisitor<NodeModel> getNodeTransformer(HttpServletRequest request) {
+        LocaleStringResolver localeStringResolver = new LocaleStringResolver();
+        localeStringResolver.setLocale(request.getLocale());
+
+        NodeToNodelModelTransformer nodeToNodelVisitorVisitor = new NodeToNodelModelTransformer();
+        nodeToNodelVisitorVisitor.setStringResolver(localeStringResolver);
+        return nodeToNodelVisitorVisitor;
     }
 
     @ExceptionHandler(ModelNotFoundException.class)
@@ -131,10 +165,19 @@ public class TreeController {
         this.treeService = treeService;
     }
 
+    @Autowired
+    public void setDataSourceServiceFactory(DataSourceServiceFactory dataSourceServiceFactory) {
+        this.dataSourceServiceFactory = dataSourceServiceFactory;
+    }
+
     public static enum AddNodeOperation {
         INSERT_BEFORE,
         INSERT_AFTER,
         APPEND_CHILD
     }
 
+    public static enum DeleteNodeOperation {
+        DELETE_MIGRATE,
+        DELETE_SUBTREE
+    }
 }

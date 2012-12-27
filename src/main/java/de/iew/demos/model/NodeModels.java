@@ -29,13 +29,4 @@ import java.util.Collection;
  */
 public class NodeModels extends ArrayList<NodeModel> {
 
-    public static NodeModels fromCollection(Collection<Node> nodes) {
-        NodeModels nodeModels = new NodeModels();
-
-        for (Node node : nodes) {
-            nodeModels.add(NodeModel.fromNode(node));
-        }
-
-        return nodeModels;
-    }
 }

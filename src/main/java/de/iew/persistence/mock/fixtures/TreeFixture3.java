@@ -28,13 +28,13 @@ import javax.annotation.PostConstruct;
  * <pre>
  * +- rootNode1(1)    ---> tree1(1) 0:[1, 10]
  * |  |
- * |  +- child1(2)    ---> tree1(1) 1:[4, 9]
- * |  |  |
- * |  |  +- child3(4) ---> tree1(1) 1:[7, 8]
- * |  |  |
- * |  |  +- child4(5) ---> tree1(1) 0:[5, 6]
+ * |  +- child1(2)    ---> tree1(1) 1:[8, 9]
  * |  |
- * |  +- child2(3)    ---> tree1(1) 0:[2, 3]
+ * |  +- child2(3)    ---> tree1(1) 0:[2, 7]
+ * |  |  |
+ * |  |  +- child3(4) ---> tree1(1) 1:[5, 6]
+ * |  |  |
+ * |  |  +- child4(5) ---> tree1(1) 0:[3, 4]
  *
  * +- rootNode2(6)    ---> tree2(2) 0:[1, 6]
  * |  |
@@ -56,6 +56,7 @@ public class TreeFixture3 {
     public void setUp() {
         Tree tree1 = new Tree();
         tree1.setId(1l);
+        tree1.setLookupKey("TestTree1");
         tree1 = this.treeDao.save(tree1);
 
         Node rootNode1 = new Node();
@@ -63,35 +64,35 @@ public class TreeFixture3 {
         rootNode1 = this.nodeDao.save(rootNode1);
         rootNode1.setNestedSetLeft(1);
         rootNode1.setNestedSetRight(10);
-        rootNode1.setOrderInLevel(0);
+        rootNode1.setOrdinalNumber(0);
 
         Node child1 = new Node();
         child1.setId(2l);
         child1 = this.nodeDao.save(child1);
-        child1.setNestedSetLeft(4);
+        child1.setNestedSetLeft(8);
         child1.setNestedSetRight(9);
-        child1.setOrderInLevel(1);
+        child1.setOrdinalNumber(1);
 
         Node child2 = new Node();
         child2.setId(3l);
         child2 = this.nodeDao.save(child2);
         child2.setNestedSetLeft(2);
-        child2.setNestedSetRight(3);
-        child2.setOrderInLevel(0);
+        child2.setNestedSetRight(7);
+        child2.setOrdinalNumber(0);
 
         Node child3 = new Node();
         child3.setId(4l);
         child3 = this.nodeDao.save(child3);
-        child3.setNestedSetLeft(7);
-        child3.setNestedSetRight(8);
-        child3.setOrderInLevel(1);
+        child3.setNestedSetLeft(5);
+        child3.setNestedSetRight(6);
+        child3.setOrdinalNumber(1);
 
         Node child4 = new Node();
         child4.setId(5l);
         child4 = this.nodeDao.save(child4);
-        child4.setNestedSetLeft(5);
-        child4.setNestedSetRight(6);
-        child4.setOrderInLevel(0);
+        child4.setNestedSetLeft(3);
+        child4.setNestedSetRight(4);
+        child4.setOrdinalNumber(0);
 
         // Wurzel für den Baum setzen
         tree1.setRoot(rootNode1);
@@ -136,21 +137,21 @@ public class TreeFixture3 {
         rootNode2 = this.nodeDao.save(rootNode2);
         rootNode2.setNestedSetLeft(1);
         rootNode2.setNestedSetRight(6);
-        rootNode2.setOrderInLevel(0);
+        rootNode2.setOrdinalNumber(0);
 
         Node child5 = new Node();
         child5.setId(7l);
         child5 = this.nodeDao.save(child5);
         child5.setNestedSetLeft(4);
         child5.setNestedSetRight(5);
-        child5.setOrderInLevel(1);
+        child5.setOrdinalNumber(1);
 
         Node child6 = new Node();
         child6.setId(8l);
         child6 = this.nodeDao.save(child6);
         child6.setNestedSetLeft(2);
         child6.setNestedSetRight(3);
-        child6.setOrderInLevel(0);
+        child6.setOrdinalNumber(0);
 
         // Wurzel für den Baum setzen
         tree2.setRoot(rootNode2);

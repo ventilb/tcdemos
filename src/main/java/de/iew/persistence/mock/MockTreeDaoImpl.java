@@ -16,44 +16,23 @@
 
 package de.iew.persistence.mock;
 
-import de.iew.domain.Node;
 import de.iew.domain.Tree;
 import de.iew.persistence.TreeDao;
 
-import java.util.ArrayList;
-import java.util.Collection;
-
 /**
- * Klassenkommentar.
+ * Mock-Implementierung der {@link de.iew.persistence.TreeDao}-Schnittstelle.
  *
  * @author Manuel Schulze <manuel_schulze@i-entwicklung.de>
- * @since 17.11.12 - 10:08
+ * @since 07.12.12 - 22:41
  */
 public class MockTreeDaoImpl extends AbstractMockDomainModelDaoImpl<Tree> implements TreeDao {
 
-    public Node findRootNodeForTree(long treeId) {
-        Node treeRoot = null;
-
+    public Tree findTreeByLookupKey(String lookupKey) {
         for (Tree tree : findAll()) {
-            if (tree.getId() == treeId) {
-                treeRoot = tree.getRoot();
-            }
-        }
-
-        return treeRoot;
-    }
-
-    public Node findNodeForTreeAndId(long treeId, long nodeId) {
-        for (Tree tree : findAll()) {
-            if (tree.getId() == treeId) {
-                for (Node node : tree.getNodes()) {
-                    if (node.getId() == nodeId) {
-                        return node;
-                    }
-                }
+            if (lookupKey.equalsIgnoreCase(tree.getLookupKey())) {
+                return tree;
             }
         }
         return null;
     }
-
 }

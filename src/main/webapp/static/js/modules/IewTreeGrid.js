@@ -25,6 +25,7 @@ define(['i18n!nls/messages'], function (msg) {
     isc.defineClass('IewTreeGrid', 'TreeGrid');
 
     isc.IewTreeGrid.registerStringMethods({
+        dataSourceRequested: 'dataSourceClassname, callback',
         /**
          * Wird gemeldet, wenn der angegebene Knoten erfolgreich hinzugefügt wurde.
          */
@@ -38,22 +39,22 @@ define(['i18n!nls/messages'], function (msg) {
     });
 
     isc.IewTreeGrid.addProperties({
-        sortField: 'orderInLevel',
+        sortField: 'ordinalNumber',
 
         isRootNode: function (/* TreeNode */ node) {
             return this.data.isRoot(node);
         },
 
-        insertNewNodeBefore: function (/* TreeNode */ sibling) {
-            this.newNodeImpl(sibling, isc.IewNodeOperation.Add.INSERT_BEFORE);
+        insertNewNodeBefore: function (/* TreeNode */ sibling, /* String */ dataSourceClassname) {
+            this.newNodeImpl(sibling, dataSourceClassname, isc.IewNodeOperation.Add.INSERT_BEFORE);
         },
 
-        insertNewNodeAfter: function (/* TreeNode */ sibling) {
-            this.newNodeImpl(sibling, isc.IewNodeOperation.Add.INSERT_AFTER);
+        insertNewNodeAfter: function (/* TreeNode */ sibling, /* String */ dataSourceClassname) {
+            this.newNodeImpl(sibling, dataSourceClassname, isc.IewNodeOperation.Add.INSERT_AFTER);
         },
 
-        appendNewChildNode: function (/* TreeNode */ parent) {
-            this.newNodeImpl(parent, isc.IewNodeOperation.Add.APPEND_CHILD);
+        appendNewChildNode: function (/* TreeNode */ parent, /* String */ dataSourceClassname) {
+            this.newNodeImpl(parent, dataSourceClassname, isc.IewNodeOperation.Add.APPEND_CHILD);
         },
 
         /**
@@ -61,23 +62,28 @@ define(['i18n!nls/messages'], function (msg) {
          * Strategien.
          *
          * @param relatedNode Knotenbezug für das Hinzufügen.
+         * @param dataSourceClassname Klassenname der DataSource.
          * @param addOperation Add-Strategie.
          */
-        newNodeImpl: function (/* TreeNode */ relatedNode, /* IewNodeOperation.Add */ addOperation) {
+        newNodeImpl: function (/* TreeNode */ relatedNode, /* String */ dataSourceClassname, /* IewNodeOperation.Add */ addOperation) {
             console.log('Adding new node', relatedNode);
-
-            var tree = this.data;
-
-            var title = msg['sc.iew_tree_grid.new_node.title'] + relatedNode.id;
-            var newNodeData = {
-                title: title,
-                treeId: this.getTreeId()
-            }
 
             this.setAddOperation(addOperation);
 
+            var callback = function (dataSourceClassname, dataSourceData) {
+                this._addDataImpl(relatedNode, dataSourceClassname, dataSourceData);
+            };
+            this.fireCallback(this.dataSourceRequested, 'dataSourceClassname, callback', [dataSourceClassname, callback]);
+        },
+
+        _addDataImpl: function (/* TreeNode */ relatedNode, /* String */ dataSourceClassname, /* Object */ dataSourceData) {
+            var tree = this.data;
+
+            dataSourceData.treeId = this.getTreeId();
+            dataSourceData.dataSourceClassname = dataSourceClassname;
+
             var callback = {target: this, methodName: 'onAddNewNodeFinished'};
-            this.addData(newNodeData, callback, {
+            this.addData(dataSourceData, callback, {
                 params: {
                     relatedNodeId: relatedNode[tree.idField]
                 }
@@ -102,11 +108,30 @@ define(['i18n!nls/messages'], function (msg) {
             }
         },
 
-        deleteNode: function (/* TreeNode */ node) {
+        deleteMigrate: function (/* TreeNode */ nodeToDelete) {
+            this.deleteNodeImpl(nodeToDelete, isc.IewNodeOperation.Delete.DELETE_MIGRATE);
+        },
+
+        deleteSubtree: function (/* TreeNode */ nodeToDelete) {
+            this.deleteNodeImpl(nodeToDelete, isc.IewNodeOperation.Delete.DELETE_SUBTREE);
+        },
+
+        /**
+         * Implementierung einer Lösch-Methode für Knoten mit
+         * unterschiedlichen Strategien.
+         *
+         * @TODO Das Löschen sollte vor der Durchführung durch ein Event angemeldet werden.
+         *
+         * @param nodeToDelete Der zu löschende Knoten.
+         * @param deleteOperation Die Lösch-Operation.
+         */
+        deleteNodeImpl: function (/* TreeNode */ nodeToDelete, /* IewNodeOperation.Delete */ deleteOperation) {
             console.log('Deleting selected node');
 
+            this.setDeleteOperation(deleteOperation);
+
             var callback = {target: this, methodName: 'onNodeDeleted'};
-            this.removeData(node, callback);
+            this.removeData(nodeToDelete, callback);
         },
 
         onNodeDeleted: function (dsResponse, data, dsRequest) {
@@ -114,6 +139,8 @@ define(['i18n!nls/messages'], function (msg) {
                 var record = null;
                 if (isc.isA.Array(data) && data.length > 0) {
                     record = data[0];
+
+                    this.reloadChildren(record[this.data.parentIdField]);
                 } else {
                     if (this.logIsErrorEnabled()) {
                         this.logError('Delete-Operation succeeded but server didn\'t supplied any data.');
@@ -210,6 +237,13 @@ define(['i18n!nls/messages'], function (msg) {
             var ds = isc.DS.get(this.dataSource);
             if (ds) {
                 ds.setAddOperation(addOperation);
+            }
+        },
+
+        setDeleteOperation: function (/* IewNodeOperation.Delete */ deleteOperation) {
+            var ds = isc.DS.get(this.dataSource);
+            if (ds) {
+                ds.setDeleteOperation(deleteOperation);
             }
         },
 

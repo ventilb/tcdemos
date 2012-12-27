@@ -16,36 +16,26 @@
 
 package de.iew.persistence;
 
-import de.iew.domain.Node;
 import de.iew.domain.Tree;
-
-import java.util.Collection;
 
 /**
  * Beschreibt die Schnittstelle für den Zugriff auf
- * {@link Tree}-Domainmodelle.
+ * {@link de.iew.domain.Tree}-Domainmodelle.
  *
  * @author Manuel Schulze <manuel_schulze@i-entwicklung.de>
- * @since 17.11.12 - 10:07
+ * @since 07.12.12 - 22:20
  */
 public interface TreeDao extends DomainModelDao<Tree> {
-
     /**
-     * Liefert die Wurzel für den angegebenen Baum.
+     * Liefert den Baum mit dem angegebenen LookupKey.
+     * <p>
+     * Die Prüfung ist Case-Insensitive.
+     * </p>
      *
-     * @param treeId Die Id des Baums.
-     * @return Der angeforderte Knoten oder NULL wenn der Knoten nicht
-     *         ermittelt werden kann.
+     * @param lookupKey Der LookupKey. Darf nicht NULL sein.
+     * @return Der angeforderte Baum oder NULL wenn kein Baum für den
+     *         LookupKey existiert.
      */
-    public Node findRootNodeForTree(long treeId);
+    public Tree findTreeByLookupKey(String lookupKey);
 
-    /**
-     * Liefert den Knoten mit der angegebenen Id für den angegebenen Baum.
-     *
-     * @param treeId Die Id des Baums.
-     * @param nodeId Die Id des angeforderten Knotens.
-     * @return Der angeforderte Knoten oder NULL wenn der Knoten nicht
-     *         ermittelt werden kann.
-     */
-    public Node findNodeForTreeAndId(long treeId, long nodeId);
 }

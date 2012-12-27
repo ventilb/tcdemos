@@ -1,8 +1,8 @@
   i-entwicklung.de Tomcat Demos
   Copyright 2012 Manuel Schulze <manuel_schulze@i-entwicklung.de>
 
-  This product includes or uses software developed at
-  The Apache Software Foundation (http://www.apache.org/).
+  This product includes or uses software developed by third party
+  developers.
 
 * The Spring Framework (http://www.springsource.org/) is licensed
   under the terms of the Apache 2.0 license.
@@ -44,3 +44,10 @@
 
 * The Liquibase library (http://www.liquibase.org/) is licensed under the terms
   of the Apache 2.0 license.
+
+* The cglib Code Generation Library (http://cglib.sourceforge.net/) is licensed
+  under the terms of the Apache 2.0 license.
+
+* The libraries released from the Apache Commons repository (http://commons.apache.org/)
+  are licensed under the terms of the Apache 2.0 license.
+  * commons-beanutils

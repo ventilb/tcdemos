@@ -22,8 +22,8 @@
     <display-name>Tomcat Demos Web Application</display-name>
 
     <!--
-    Das folgende ist wichtig, da wir damit Springs ROOT-Context initialisieren.
-    Wenn wir das nicht tun würden alle uns Services und DAOs für jedes DispatcherServlet
+    Das Folgende ist wichtig, da wir damit Springs ROOT-Context initialisieren.
+    Wenn wir das nicht tun, würden alle uns Services und DAOs für jedes DispatcherServlet
     erstellt werden (Die selbe Bean wird für jedes DispatcherServlet erstellt).
 
     In der application.xml, die wir für die Initialisierung des ROOT-Context angelegt
@@ -31,13 +31,18 @@
     ROOT-Context. Die speziellen Dispatcher-Kontexte leiten quasi vom ROOT-Kontext ab
     und bietet somit zusätzlich eine DispatcherServlet spezifische Konfiguration.
 
+    Wir teilen die Konfiguration auf um in JUnit bei Bedarf einzelne Konfigurationen
+    ersetzen zu können.
+
     see http://stackoverflow.com/questions/7833767/why-dispatcherservlet-creates-another-application-context
     see http://stackoverflow.com/questions/7451325/spring-mvc-what-are-a-context-and-namespace/7451389#7451389
     see http://forum.springsource.org/showthread.php?50079-DispatcherServlet-and-ContextLoaderListener
     -->
     <context-param>
         <param-name>contextConfigLocation</param-name>
-        <param-value>classpath:application.xml</param-value>
+        <param-value>classpath:application.xml classpath:spring-db-config.xml classpath:spring-security-config.xml
+            classpath:spring-acl-config.xml
+        </param-value>
     </context-param>
 
     <listener>
@@ -104,8 +109,22 @@
         </init-param>
     </filter>
 
+    <!--
+    Wir benötigen den DelegatingFilterProxy für Spring Security. Der Filtername
+    muss in der Standardverwendung springSecurityFilterChain heißen denn
+    <security:http> erwartet automatisch eine Bean unter diesem Namen.
+    -->
+    <filter>
+        <filter-name>springSecurityFilterChain</filter-name>
+        <filter-class>org.springframework.web.filter.DelegatingFilterProxy</filter-class>
+    </filter>
+
     <filter-mapping>
         <filter-name>openSessionInViewFilter</filter-name>
         <url-pattern>*</url-pattern>
+    </filter-mapping>
+    <filter-mapping>
+        <filter-name>springSecurityFilterChain</filter-name>
+        <url-pattern>/*</url-pattern>
     </filter-mapping>
 </web-app>

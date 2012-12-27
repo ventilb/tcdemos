@@ -80,8 +80,27 @@
             <version>3.1.2.RELEASE</version>
         </dependency>
         <dependency>
+            <!-- Damit wir Spring Beans in JUnit Tests verwenden können -->
             <groupId>org.springframework</groupId>
             <artifactId>spring-test</artifactId>
+            <version>3.1.2.RELEASE</version>
+        </dependency>
+        <dependency>
+            <!-- Damit wir den security: namespace in den XML-Dateien haben -->
+            <groupId>org.springframework.security</groupId>
+            <artifactId>spring-security-config</artifactId>
+            <version>3.1.2.RELEASE</version>
+        </dependency>
+        <dependency>
+            <!-- Für unsere DomainModel ACLs -->
+            <groupId>org.springframework.security</groupId>
+            <artifactId>spring-security-acl</artifactId>
+            <version>3.1.2.RELEASE</version>
+        </dependency>
+        <dependency>
+            <!-- Zum Schützen der Webseiten und Webservices -->
+            <groupId>org.springframework.security</groupId>
+            <artifactId>spring-security-web</artifactId>
             <version>3.1.2.RELEASE</version>
         </dependency>
         <!--
@@ -93,6 +112,17 @@
             <groupId>org.aspectj</groupId>
             <artifactId>aspectjweaver</artifactId>
             <version>1.7.0</version>
+        </dependency>
+
+        <!--
+        Benötigen wir aktuell für die Integrationstests.
+
+        Lizenz: Apache Lizenz 2.0 laut LICENSE file im JAR
+        -->
+        <dependency>
+            <groupId>cglib</groupId>
+            <artifactId>cglib</artifactId>
+            <version>2.2.2</version>
         </dependency>
 
         <!--
@@ -192,6 +222,16 @@
             <groupId>org.liquibase</groupId>
             <artifactId>liquibase-core</artifactId>
             <version>2.0.5</version>
+        </dependency>
+        <!--
+        Bibliotheken aus dem Jakarta-Commons Repository.
+
+        Lizenz: Apache 2.0 (http://commons.apache.org/beanutils/license.html)
+        -->
+        <dependency>
+            <groupId>commons-beanutils</groupId>
+            <artifactId>commons-beanutils</artifactId>
+            <version>1.8.3</version>
         </dependency>
     </dependencies>
     <build>

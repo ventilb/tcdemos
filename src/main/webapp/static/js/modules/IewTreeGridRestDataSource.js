@@ -29,6 +29,10 @@ isc.IewNodeOperation.addClassProperties({
         INSERT_BEFORE: 'INSERT_BEFORE',
         INSERT_AFTER: 'INSERT_AFTER',
         APPEND_CHILD: 'APPEND_CHILD'
+    },
+    Delete: {
+        DELETE_MIGRATE: 'DELETE_MIGRATE',
+        DELETE_SUBTREE: 'DELETE_SUBTREE'
     }
 });
 
@@ -68,12 +72,14 @@ isc.IewTreeGridRestDataSource.addProperties({
         {name: 'treeId', type: 'integer', primaryKey: true},
         {name: 'title', type: 'string'},
         {name: 'parentId', type: 'integer', foreignKey: 'id', rootValue: ''},
-        {name: 'orderInLevel', type: 'integer'},
+        {name: 'ordinalNumber', type: 'integer'},
         {name: 'nestedSetLeft', type: 'integer'},
-        {name: 'nestedSetRight', type: 'integer'}
+        {name: 'nestedSetRight', type: 'integer'},
+        {name: 'dataSourceClassname', type: 'string'}
     ],
 
     addOperation: isc.IewNodeOperation.Add.APPEND_CHILD,
+    deleteOperation: isc.IewNodeOperation.Delete.DELETE_SUBTREE,
 
 //    operationBindings: [
 //        {operationType: 'add', dataProtocol: 'postParams', defaultParams: {operation: 'add'}}
@@ -95,6 +101,9 @@ isc.IewTreeGridRestDataSource.addProperties({
             case 'add':
                 dsRequest.data.operation = this.addOperation;
                 break;
+            case 'remove':
+                dsRequest.data.operation = this.deleteOperation;
+                break;
         }
 
         return this.Super('transformRequest', arguments);
@@ -102,6 +111,10 @@ isc.IewTreeGridRestDataSource.addProperties({
 
     setAddOperation: function (/* IewNodeOperation.Add */ addOperation) {
         this.addOperation = addOperation;
+    },
+
+    setDeleteOperation: function (/* IewNodeOperation.Delete */ deleteOperation) {
+        this.deleteOperation = deleteOperation;
     }
 
 });

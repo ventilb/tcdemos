@@ -16,7 +16,7 @@
 
 package de.iew.demos.model;
 
-import de.iew.domain.Node;
+import de.iew.web.dto.WebDTO;
 
 /**
  * Ein DTO für die Übermittlung von Knoten-Daten zwischen Service- und
@@ -25,7 +25,7 @@ import de.iew.domain.Node;
  * @author Manuel Schulze <manuel_schulze@i-entwicklung.de>
  * @since 17.11.12 - 13:05
  */
-public class NodeModel {
+public class NodeModel extends WebDTO {
 
     private Long id;
 
@@ -35,28 +35,15 @@ public class NodeModel {
 
     private Long parentId;
 
-    private int orderInLevel;
+    private int ordinalNumber;
 
     private long nestedSetLeft;
 
     private long nestedSetRight;
 
+    private String dataSourceClassname;
+
     public NodeModel() {
-    }
-
-    public NodeModel(Node node) {
-        setId(node.getId());
-        setTitle(node.getTitle());
-        setTreeId(node.getTree().getId());
-
-        this.orderInLevel = node.getOrderInLevel();
-        this.nestedSetLeft = node.getNestedSetLeft();
-        this.nestedSetRight = node.getNestedSetRight();
-
-        Node parent = node.getParent();
-        if (parent != null) {
-            setParentId(parent.getId());
-        }
     }
 
     public Long getId() {
@@ -94,12 +81,12 @@ public class NodeModel {
         this.parentId = parentId;
     }
 
-    public int getOrderInLevel() {
-        return orderInLevel;
+    public int getOrdinalNumber() {
+        return ordinalNumber;
     }
 
-    public void setOrderInLevel(int orderInLevel) {
-        this.orderInLevel = orderInLevel;
+    public void setOrdinalNumber(int ordinalNumber) {
+        this.ordinalNumber = ordinalNumber;
     }
 
     public long getNestedSetLeft() {
@@ -118,7 +105,11 @@ public class NodeModel {
         this.nestedSetRight = nestedSetRight;
     }
 
-    public static NodeModel fromNode(Node node) {
-        return new NodeModel(node);
+    public String getDataSourceClassname() {
+        return dataSourceClassname;
+    }
+
+    public void setDataSourceClassname(String dataSourceClassname) {
+        this.dataSourceClassname = dataSourceClassname;
     }
 }

@@ -19,10 +19,14 @@ package de.iew.services.impl;
 import de.iew.domain.ModelNotFoundException;
 import de.iew.domain.Node;
 import de.iew.domain.Tree;
+import de.iew.persistence.DataSourceDao;
 import de.iew.persistence.NodeDao;
 import de.iew.persistence.TreeDao;
+import de.iew.persistence.TreeOperationDao;
+import de.iew.persistence.mock.MockDataSourceDaoImpl;
 import de.iew.persistence.mock.MockNodeDaoImpl;
 import de.iew.persistence.mock.MockTreeDaoImpl;
+import de.iew.persistence.mock.MockTreeOperationDaoImpl;
 import de.iew.persistence.mock.fixtures.TreeFixture1;
 import de.iew.persistence.mock.fixtures.TreeFixture2;
 import de.iew.persistence.mock.fixtures.TreeFixture3;
@@ -31,27 +35,66 @@ import org.junit.Before;
 import org.junit.Test;
 
 import static junit.framework.Assert.*;
-import static junit.framework.Assert.assertNotNull;
+import static junit.framework.Assert.assertEquals;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 /**
- * Tested die {@link TreeServiceImpl} Implementierung für den
- * {@link de.iew.services.TreeService}.
+ * Tested die {@link TreeServiceImpl} Implementierung.
  *
  * @author Manuel Schulze <manuel_schulze@i-entwicklung.de>
  * @since 17.11.12 - 11:00
  */
 public class TreeServiceImplTest {
 
-    private TreeDao treeDao;
+    private TreeOperationDao treeOperationDao;
 
     private NodeDao nodeDao;
+
+    private TreeDao treeDao;
+
+    private DataSourceDao dataSourceDao;
 
     @Before
     public void setUp() throws Exception {
         this.treeDao = new MockTreeDaoImpl();
         this.nodeDao = new MockNodeDaoImpl();
+        this.dataSourceDao = new MockDataSourceDaoImpl();
+
+        MockTreeOperationDaoImpl treeOperationDao = new MockTreeOperationDaoImpl();
+        treeOperationDao.setNodeDao(this.nodeDao);
+        treeOperationDao.setTreeDao(this.treeDao);
+        this.treeOperationDao = treeOperationDao;
+    }
+
+    @Test
+    public void testGetTreeByLookupKey1() throws Exception {
+        // Testfix erstellen
+        setupTestfixture3();
+
+        // Das Testobjekt erstellen
+        TreeServiceImpl treeService = newTreeServiceImpl();
+
+        // Test und Auswertung
+        Tree tree = treeService.getTreeByLookupKey("TestTree1");
+        assertEquals(this.treeDao.findById(1), tree);
+
+        tree = treeService.getTreeByLookupKey("TESTTREE1");
+        assertEquals(this.treeDao.findById(1), tree);
+    }
+
+    @Test(expected = ModelNotFoundException.class)
+    public void testGetTreeByLookupKey2() throws Exception {
+        // Testfix erstellen
+        setupTestfixture3();
+
+        // Das Testobjekt erstellen
+        TreeServiceImpl treeService = newTreeServiceImpl();
+
+        // Test und Auswertung
+        treeService.getTreeByLookupKey("A_Tree_that_does_not_exist");
     }
 
     @Test
@@ -61,13 +104,11 @@ public class TreeServiceImplTest {
         Tree tree = this.treeDao.findById(1);
 
         // Das Testobjekt erstellen
-        TreeServiceImpl treeService = new TreeServiceImpl();
-        treeService.setTreeDao(this.treeDao);
-        treeService.setNodeDao(this.nodeDao);
+        TreeServiceImpl treeService = newTreeServiceImpl();
 
         // Test und Auswertung
 
-        Collection<Node> allNodes = treeService.getAllNodes(tree.getId());
+        Collection<Node> allNodes = (Collection<Node>) treeService.getAllNodes(tree.getId());
         assertEquals(3, allNodes.size());
     }
 
@@ -98,14 +139,11 @@ public class TreeServiceImplTest {
         Node rootNode = tree.getRoot();
 
         // Das Testobjekt erstellen
-        TreeServiceImpl treeService = new TreeServiceImpl();
-        treeService.setTreeDao(this.treeDao);
-        treeService.setNodeDao(this.nodeDao);
+        TreeServiceImpl treeService = newTreeServiceImpl();
 
         // Test und Auswertung 1
         Node deletedNode1 = treeService.deleteNodeAndSubtree(tree.getId(), 2);
         assertNotNull(deletedNode1);
-        assertNull(deletedNode1.getId());
 
         assertNull(this.nodeDao.findById(2));
 
@@ -121,7 +159,6 @@ public class TreeServiceImplTest {
         // Test und Auswertung 2
         Node deletedNode2 = treeService.deleteNodeAndSubtree(tree.getId(), 1);
         assertNotNull(deletedNode2);
-        assertNull(deletedNode2.getId());
 
         assertNull(this.nodeDao.findById(1));
         assertNull(this.nodeDao.findById(3));
@@ -135,36 +172,291 @@ public class TreeServiceImplTest {
         // Testfix erstellen
         setupTestfixture3();
         Tree tree = this.treeDao.findById(1);
-        Node rootNode = tree.getRoot();
 
         // Das Testobjekt erstellen
-        TreeServiceImpl treeService = new TreeServiceImpl();
-        treeService.setTreeDao(this.treeDao);
-        treeService.setNodeDao(this.nodeDao);
+        TreeServiceImpl treeService = newTreeServiceImpl();
 
         // Test und Auswertung 1
-        Node deletedNode1 = treeService.deleteNodeAndSubtree(tree.getId(), 3);
-        assertNotNull(deletedNode1);
-        assertNull(deletedNode1.getId());
-        assertNull(this.nodeDao.findById(3));
+        Node deletedNode = treeService.deleteNodeAndSubtree(tree.getId(), 2);
+        assertNotNull(deletedNode);
+        assertNull(this.nodeDao.findById(2));
 
         assertEquals(1, this.nodeDao.findById(1).getNestedSetLeft());
         assertEquals(8, this.nodeDao.findById(1).getNestedSetRight());
-        assertEquals(0, this.nodeDao.findById(1).getOrderInLevel());
+        assertEquals(0, this.nodeDao.findById(1).getOrdinalNumber());
 
-        assertEquals(2, this.nodeDao.findById(2).getNestedSetLeft());
-        assertEquals(7, this.nodeDao.findById(2).getNestedSetRight());
-        assertEquals(0, this.nodeDao.findById(2).getOrderInLevel());
+        assertEquals(2, this.nodeDao.findById(3).getNestedSetLeft());
+        assertEquals(7, this.nodeDao.findById(3).getNestedSetRight());
+        assertEquals(0, this.nodeDao.findById(3).getOrdinalNumber());
 
         assertEquals(5, this.nodeDao.findById(4).getNestedSetLeft());
         assertEquals(6, this.nodeDao.findById(4).getNestedSetRight());
-        assertEquals(1, this.nodeDao.findById(4).getOrderInLevel());
+        assertEquals(1, this.nodeDao.findById(4).getOrdinalNumber());
 
         assertEquals(3, this.nodeDao.findById(5).getNestedSetLeft());
         assertEquals(4, this.nodeDao.findById(5).getNestedSetRight());
-        assertEquals(0, this.nodeDao.findById(5).getOrderInLevel());
+        assertEquals(0, this.nodeDao.findById(5).getOrdinalNumber());
+    }
 
+    @Test
+    public void testDeleteNode1() throws Exception {
+        // Testfix erstellen
+        setupTestfixture3();
+        Tree tree = this.treeDao.findById(1);
 
+        // Das Testobjekt erstellen
+        TreeServiceImpl treeService = newTreeServiceImpl();
+
+        // Test und Auswertung
+        Node deletedNode = treeService.deleteNodeAndMigrateChildren(tree.getId(), 3);
+        assertNotNull(deletedNode);
+        assertNull(deletedNode.getParent());
+        assertNull(this.nodeDao.findById(3));
+        assertEquals(new Long(3), deletedNode.getId());
+
+        assertEquals(4, tree.getNodes().size());
+
+        // Die Kinder des gelöschten Knotens existieren noch
+        assertNotNull(this.nodeDao.findById(4));
+        assertNotNull(this.nodeDao.findById(5));
+
+        // Die Kinder des gelöschten Knotens hängen in diesem Szenario an der
+        // Wurzel
+        assertEquals(this.nodeDao.findById(1), this.nodeDao.findById(4).getParent());
+        assertEquals(this.nodeDao.findById(1), this.nodeDao.findById(5).getParent());
+
+        assertEquals(1, this.nodeDao.findById(1).getNestedSetLeft());
+        assertEquals(8, this.nodeDao.findById(1).getNestedSetRight());
+        assertEquals(0, this.nodeDao.findById(1).getOrdinalNumber());
+
+        assertEquals(6, this.nodeDao.findById(2).getNestedSetLeft());
+        assertEquals(7, this.nodeDao.findById(2).getNestedSetRight());
+        assertEquals(2, this.nodeDao.findById(2).getOrdinalNumber());
+
+        assertEquals(4, this.nodeDao.findById(4).getNestedSetLeft());
+        assertEquals(5, this.nodeDao.findById(4).getNestedSetRight());
+        assertEquals(1, this.nodeDao.findById(4).getOrdinalNumber());
+
+        assertEquals(2, this.nodeDao.findById(5).getNestedSetLeft());
+        assertEquals(3, this.nodeDao.findById(5).getNestedSetRight());
+        assertEquals(0, this.nodeDao.findById(5).getOrdinalNumber());
+    }
+
+    @Test
+    public void testMigrateMyChildrenToParent() {
+        // Testfix erstellen
+        Node parent = new Node();
+        parent.setId(1l);
+        parent.setOrdinalNumber(0);
+
+        Node child1 = new Node();
+        child1.setId(2l);
+        child1.setOrdinalNumber(0);
+
+        Node child2 = new Node();
+        child2.setId(3l);
+        child2.setOrdinalNumber(1);
+
+        Node child3 = new Node();
+        child3.setId(4l);
+        child3.setOrdinalNumber(2);
+
+        Node child4 = new Node();
+        child4.setId(5l);
+        child4.setOrdinalNumber(0);
+
+        Node child5 = new Node();
+        child5.setId(6l);
+        child5.setOrdinalNumber(1);
+
+        child1.setParent(parent);
+        parent.getChildren().add(child1);
+
+        child2.setParent(parent);
+        parent.getChildren().add(child2);
+
+        child3.setParent(parent);
+        parent.getChildren().add(child3);
+
+        child4.setParent(child2);
+        child2.getChildren().add(child4);
+
+        child5.setParent(child2);
+        child2.getChildren().add(child5);
+
+        // Das Testobjekt erstellen
+        TreeServiceImpl treeService = newTreeServiceImpl();
+
+        // Test und Auswertung
+        treeService.migrateMyChildrenToParent(child2);
+
+        assertEquals(5, parent.getChildren().size());
+        assertTrue(child2.getChildren().isEmpty());
+
+        assertEquals(parent, child4.getParent());
+        assertTrue(parent.getChildren().contains(child4));
+
+        assertEquals(parent, child5.getParent());
+        assertTrue(parent.getChildren().contains(child5));
+
+        assertEquals(0, child1.getOrdinalNumber());
+        assertEquals(1, child2.getOrdinalNumber());
+        assertEquals(2, child4.getOrdinalNumber());
+        assertEquals(3, child5.getOrdinalNumber());
+        assertEquals(4, child3.getOrdinalNumber());
+    }
+
+    @Test
+    public void testReorderNodeList() {
+        // Testfix erstellen
+        List<Node> nodes = new ArrayList<Node>();
+        Node n1 = new Node();
+        n1.setOrdinalNumber(0);
+
+        Node n2 = new Node();
+        n2.setOrdinalNumber(1);
+
+        Node n3 = new Node();
+        n3.setOrdinalNumber(3);
+
+        nodes.add(n1);
+        nodes.add(n2);
+        nodes.add(n3);
+
+        // Das Testobjekt erstellen
+        TreeServiceImpl treeService = newTreeServiceImpl();
+
+        // Test und Auswertung
+        treeService.reorderNodeList(nodes);
+
+        assertEquals(0, n1.getOrdinalNumber());
+        assertEquals(1, n2.getOrdinalNumber());
+        assertEquals(2, n3.getOrdinalNumber());
+
+        // Testfix erstellen
+        Node n4 = new Node();
+        n4.setOrdinalNumber(7);
+
+        nodes.add(n4);
+
+        // Das Testobjekt erstellen
+        treeService = newTreeServiceImpl();
+
+        // Test und Auswertung
+        treeService.reorderNodeList(nodes);
+
+        assertEquals(0, n1.getOrdinalNumber());
+        assertEquals(1, n2.getOrdinalNumber());
+        assertEquals(2, n3.getOrdinalNumber());
+        assertEquals(3, n4.getOrdinalNumber());
+
+        // Testfix erstellen
+        nodes = new ArrayList<Node>();
+        n1 = new Node();
+        n1.setOrdinalNumber(1);
+
+        n2 = new Node();
+        n2.setOrdinalNumber(2);
+
+        n3 = new Node();
+        n3.setOrdinalNumber(3);
+
+        nodes.add(n1);
+        nodes.add(n2);
+        nodes.add(n3);
+
+        // Das Testobjekt erstellen
+        treeService = newTreeServiceImpl();
+
+        // Test und Auswertung
+        treeService.reorderNodeList(nodes);
+
+        assertEquals(0, n1.getOrdinalNumber());
+        assertEquals(1, n2.getOrdinalNumber());
+        assertEquals(2, n3.getOrdinalNumber());
+    }
+
+    @Test
+    public void testReorderMyParentChildren() {
+        // Testfix erstellen
+        Node parent = new Node();
+        parent.setId(1l);
+        parent.setOrdinalNumber(0);
+
+        Node child1 = new Node();
+        child1.setId(2l);
+        child1.setOrdinalNumber(2);
+
+        Node child2 = new Node();
+        child2.setId(3l);
+        child2.setOrdinalNumber(5);
+
+        Node child3 = new Node();
+        child3.setId(4l);
+        child3.setOrdinalNumber(1);
+
+        child1.setParent(parent);
+        parent.getChildren().add(child1);
+
+        child2.setParent(parent);
+        parent.getChildren().add(child2);
+
+        child3.setParent(parent);
+        parent.getChildren().add(child3);
+
+        // Das Testobjekt erstellen
+        TreeServiceImpl treeService = newTreeServiceImpl();
+
+        // Test und Auswertung
+        treeService.reorderMyParentChildren(child2);
+
+        assertEquals(0, child3.getOrdinalNumber());
+        assertEquals(1, child1.getOrdinalNumber());
+        assertEquals(2, child2.getOrdinalNumber());
+    }
+
+    @Test
+    public void testRemoveMeFromParent() {
+        // Testfix erstellen
+        Node parent = new Node();
+        parent.setId(1l);
+
+        Node child1 = new Node();
+        child1.setId(2l);
+
+        Node child2 = new Node();
+        child2.setId(3l);
+
+        Node child3 = new Node();
+        child3.setId(4l);
+
+        child1.setParent(parent);
+        parent.getChildren().add(child1);
+
+        child2.setParent(parent);
+        parent.getChildren().add(child2);
+
+        child3.setParent(parent);
+        parent.getChildren().add(child3);
+
+        // Das Testobjekt erstellen
+        TreeServiceImpl treeService = newTreeServiceImpl();
+
+        // Test und Auswertung
+        treeService.removeMeFromParent(child3);
+
+        assertNull(child3.getParent());
+        assertEquals(2, parent.getChildren().size());
+
+        treeService.removeMeFromParent(child1);
+
+        assertNull(child1.getParent());
+        assertEquals(1, parent.getChildren().size());
+
+        treeService.removeMeFromParent(parent);
+
+        assertNull(parent.getParent());
+        assertEquals(1, parent.getChildren().size());
     }
 
     @Test
@@ -175,17 +467,15 @@ public class TreeServiceImplTest {
         Node parentNode = this.nodeDao.findById(1);
 
         // Das Testobjekt erstellen
-        TreeServiceImpl treeService = new TreeServiceImpl();
-        treeService.setTreeDao(this.treeDao);
-        treeService.setNodeDao(this.nodeDao);
+        TreeServiceImpl treeService = newTreeServiceImpl();
 
         // Test und Auswertung
-        Node createdNode = treeService.appendNewNodeAt("Ein neuer Knoten", tree.getId(), parentNode.getId(), 2);
+        Node createdNode = (Node) treeService.appendNewNodeAt(tree.getId(), parentNode.getId(), 0, 2);
 
-        assertEquals(0, this.nodeDao.findById(1).getOrderInLevel());
-        assertEquals(1, this.nodeDao.findById(2).getOrderInLevel());
-        assertEquals(0, this.nodeDao.findById(3).getOrderInLevel());
-        assertEquals(2, createdNode.getOrderInLevel()); // Der Knoten wurde an das Ende der Kinderliste angehängt
+        assertEquals(0, this.nodeDao.findById(1).getOrdinalNumber());
+        assertEquals(1, this.nodeDao.findById(2).getOrdinalNumber());
+        assertEquals(0, this.nodeDao.findById(3).getOrdinalNumber());
+        assertEquals(2, createdNode.getOrdinalNumber()); // Der Knoten wurde an das Ende der Kinderliste angehängt
     }
 
     @Test
@@ -196,28 +486,26 @@ public class TreeServiceImplTest {
         Node parentNode = this.nodeDao.findById(1);
 
         // Das Testobjekt erstellen
-        TreeServiceImpl treeService = new TreeServiceImpl();
-        treeService.setTreeDao(this.treeDao);
-        treeService.setNodeDao(this.nodeDao);
+        TreeServiceImpl treeService = newTreeServiceImpl();
 
         // Test und Auswertung
-        Node createdNode = treeService.appendNewNodeAt("Ein neuer Knoten", tree.getId(), parentNode.getId(), 10);
+        Node createdNode = (Node) treeService.appendNewNodeAt(tree.getId(), parentNode.getId(), -1, 10);
 
         assertEquals(1, this.nodeDao.findById(1).getNestedSetLeft());
         assertEquals(8, this.nodeDao.findById(1).getNestedSetRight());
-        assertEquals(0, this.nodeDao.findById(1).getOrderInLevel());
+        assertEquals(0, this.nodeDao.findById(1).getOrdinalNumber());
 
         assertEquals(4, this.nodeDao.findById(2).getNestedSetLeft());
         assertEquals(5, this.nodeDao.findById(2).getNestedSetRight());
-        assertEquals(1, this.nodeDao.findById(2).getOrderInLevel());
+        assertEquals(1, this.nodeDao.findById(2).getOrdinalNumber());
 
         assertEquals(2, this.nodeDao.findById(3).getNestedSetLeft());
         assertEquals(3, this.nodeDao.findById(3).getNestedSetRight());
-        assertEquals(0, this.nodeDao.findById(3).getOrderInLevel());
+        assertEquals(0, this.nodeDao.findById(3).getOrdinalNumber());
 
         assertEquals(6, createdNode.getNestedSetLeft());
         assertEquals(7, createdNode.getNestedSetRight());
-        assertEquals(2, createdNode.getOrderInLevel()); // Der Knoten wurde an das Ende der Kinderliste angehängt
+        assertEquals(2, createdNode.getOrdinalNumber()); // Der Knoten wurde an das Ende der Kinderliste angehängt
     }
 
     @Test
@@ -228,28 +516,26 @@ public class TreeServiceImplTest {
         Node parentNode = this.nodeDao.findById(1);
 
         // Das Testobjekt erstellen
-        TreeServiceImpl treeService = new TreeServiceImpl();
-        treeService.setTreeDao(this.treeDao);
-        treeService.setNodeDao(this.nodeDao);
+        TreeServiceImpl treeService = newTreeServiceImpl();
 
         // Test und Auswertung
-        Node createdNode = treeService.appendNewNodeAt("Ein neuer Knoten", tree.getId(), parentNode.getId(), 1);
+        Node createdNode = (Node) treeService.appendNewNodeAt(tree.getId(), parentNode.getId(), 0, 1);
 
         assertEquals(1, this.nodeDao.findById(1).getNestedSetLeft());
         assertEquals(8, this.nodeDao.findById(1).getNestedSetRight());
-        assertEquals(0, this.nodeDao.findById(1).getOrderInLevel());
+        assertEquals(0, this.nodeDao.findById(1).getOrdinalNumber());
 
         assertEquals(6, this.nodeDao.findById(2).getNestedSetLeft());
         assertEquals(7, this.nodeDao.findById(2).getNestedSetRight());
-        assertEquals(2, this.nodeDao.findById(2).getOrderInLevel());
+        assertEquals(2, this.nodeDao.findById(2).getOrdinalNumber());
 
         assertEquals(2, this.nodeDao.findById(3).getNestedSetLeft());
         assertEquals(3, this.nodeDao.findById(3).getNestedSetRight());
-        assertEquals(0, this.nodeDao.findById(3).getOrderInLevel());
+        assertEquals(0, this.nodeDao.findById(3).getOrdinalNumber());
 
         assertEquals(4, createdNode.getNestedSetLeft());
         assertEquals(5, createdNode.getNestedSetRight());
-        assertEquals(1, createdNode.getOrderInLevel());
+        assertEquals(1, createdNode.getOrdinalNumber());
     }
 
     @Test
@@ -260,28 +546,26 @@ public class TreeServiceImplTest {
         Node parentNode = this.nodeDao.findById(1);
 
         // Das Testobjekt erstellen
-        TreeServiceImpl treeService = new TreeServiceImpl();
-        treeService.setTreeDao(this.treeDao);
-        treeService.setNodeDao(this.nodeDao);
+        TreeServiceImpl treeService = newTreeServiceImpl();
 
         // Test und Auswertung
-        Node createdNode = treeService.appendNewNodeAt("Ein neuer Knoten", tree.getId(), parentNode.getId(), 0);
+        Node createdNode = (Node) treeService.appendNewNodeAt(tree.getId(), parentNode.getId(), 0, 0);
 
         assertEquals(1, this.nodeDao.findById(1).getNestedSetLeft());
         assertEquals(8, this.nodeDao.findById(1).getNestedSetRight());
-        assertEquals(0, this.nodeDao.findById(1).getOrderInLevel());
+        assertEquals(0, this.nodeDao.findById(1).getOrdinalNumber());
 
         assertEquals(6, this.nodeDao.findById(2).getNestedSetLeft());
         assertEquals(7, this.nodeDao.findById(2).getNestedSetRight());
-        assertEquals(2, this.nodeDao.findById(2).getOrderInLevel());
+        assertEquals(2, this.nodeDao.findById(2).getOrdinalNumber());
 
         assertEquals(4, this.nodeDao.findById(3).getNestedSetLeft());
         assertEquals(5, this.nodeDao.findById(3).getNestedSetRight());
-        assertEquals(1, this.nodeDao.findById(3).getOrderInLevel());
+        assertEquals(1, this.nodeDao.findById(3).getOrdinalNumber());
 
         assertEquals(2, createdNode.getNestedSetLeft());
         assertEquals(3, createdNode.getNestedSetRight());
-        assertEquals(0, createdNode.getOrderInLevel());
+        assertEquals(0, createdNode.getOrdinalNumber());
     }
 
     /**
@@ -298,7 +582,6 @@ public class TreeServiceImplTest {
      * |  |
      * |  +- createdNode1 -> tree1 [2, 3]
      * </pre>
-     * <p/>
      * <p>
      * Szenarion 2:
      * </p>
@@ -357,109 +640,107 @@ public class TreeServiceImplTest {
         Tree tree = this.treeDao.findById(1);
 
         // Das Testobjekt erstellen
-        TreeServiceImpl treeService = new TreeServiceImpl();
-        treeService.setTreeDao(this.treeDao);
-        treeService.setNodeDao(this.nodeDao);
+        TreeServiceImpl treeService = newTreeServiceImpl();
 
         // Test und Auswertung 1
-        Node createdNode1 = treeService.appendNewNodeAt("Ein neuer Knoten 1", tree.getId(), 1, 0);
+        Node createdNode1 = (Node) treeService.appendNewNodeAt(tree.getId(), 1, 0, 0);
 
         assertEquals(1, this.nodeDao.findById(1).getNestedSetLeft());
         assertEquals(8, this.nodeDao.findById(1).getNestedSetRight());
-        assertEquals(0, this.nodeDao.findById(1).getOrderInLevel());
+        assertEquals(0, this.nodeDao.findById(1).getOrdinalNumber());
 
         assertEquals(6, this.nodeDao.findById(2).getNestedSetLeft());
         assertEquals(7, this.nodeDao.findById(2).getNestedSetRight());
-        assertEquals(2, this.nodeDao.findById(2).getOrderInLevel());
+        assertEquals(2, this.nodeDao.findById(2).getOrdinalNumber());
 
         assertEquals(4, this.nodeDao.findById(3).getNestedSetLeft());
         assertEquals(5, this.nodeDao.findById(3).getNestedSetRight());
-        assertEquals(1, this.nodeDao.findById(3).getOrderInLevel());
+        assertEquals(1, this.nodeDao.findById(3).getOrdinalNumber());
 
         assertEquals(2, createdNode1.getNestedSetLeft());
         assertEquals(3, createdNode1.getNestedSetRight());
-        assertEquals(0, createdNode1.getOrderInLevel());
+        assertEquals(0, createdNode1.getOrdinalNumber());
 
         // Test und Auswertung 2
-        Node createdNode2 = treeService.appendNewNodeAt("Ein neuer Knoten 2", tree.getId(), createdNode1.getId(), 0);
+        Node createdNode2 = (Node) treeService.appendNewNodeAt(tree.getId(), createdNode1.getId(), 0, 0);
 
         assertEquals(1, this.nodeDao.findById(1).getNestedSetLeft());
         assertEquals(10, this.nodeDao.findById(1).getNestedSetRight());
-        assertEquals(0, this.nodeDao.findById(1).getOrderInLevel());
+        assertEquals(0, this.nodeDao.findById(1).getOrdinalNumber());
 
         assertEquals(8, this.nodeDao.findById(2).getNestedSetLeft());
         assertEquals(9, this.nodeDao.findById(2).getNestedSetRight());
-        assertEquals(2, this.nodeDao.findById(2).getOrderInLevel());
+        assertEquals(2, this.nodeDao.findById(2).getOrdinalNumber());
 
         assertEquals(6, this.nodeDao.findById(3).getNestedSetLeft());
         assertEquals(7, this.nodeDao.findById(3).getNestedSetRight());
-        assertEquals(1, this.nodeDao.findById(3).getOrderInLevel());
+        assertEquals(1, this.nodeDao.findById(3).getOrdinalNumber());
 
         assertEquals(2, createdNode1.getNestedSetLeft());
         assertEquals(5, createdNode1.getNestedSetRight());
-        assertEquals(0, createdNode1.getOrderInLevel());
+        assertEquals(0, createdNode1.getOrdinalNumber());
 
         assertEquals(3, createdNode2.getNestedSetLeft());
         assertEquals(4, createdNode2.getNestedSetRight());
-        assertEquals(0, createdNode2.getOrderInLevel());
+        assertEquals(0, createdNode2.getOrdinalNumber());
 
         // Test und Auswertung 3
-        Node createdNode3 = treeService.appendNewNodeAt("Ein neuer Knoten 3", tree.getId(), createdNode1.getId(), 1);
+        Node createdNode3 = (Node) treeService.appendNewNodeAt(tree.getId(), createdNode1.getId(), 0, 1);
 
         assertEquals(1, this.nodeDao.findById(1).getNestedSetLeft());
         assertEquals(12, this.nodeDao.findById(1).getNestedSetRight());
-        assertEquals(0, this.nodeDao.findById(1).getOrderInLevel());
+        assertEquals(0, this.nodeDao.findById(1).getOrdinalNumber());
 
         assertEquals(10, this.nodeDao.findById(2).getNestedSetLeft());
         assertEquals(11, this.nodeDao.findById(2).getNestedSetRight());
-        assertEquals(2, this.nodeDao.findById(2).getOrderInLevel());
+        assertEquals(2, this.nodeDao.findById(2).getOrdinalNumber());
 
         assertEquals(8, this.nodeDao.findById(3).getNestedSetLeft());
         assertEquals(9, this.nodeDao.findById(3).getNestedSetRight());
-        assertEquals(1, this.nodeDao.findById(3).getOrderInLevel());
+        assertEquals(1, this.nodeDao.findById(3).getOrdinalNumber());
 
         assertEquals(2, createdNode1.getNestedSetLeft());
         assertEquals(7, createdNode1.getNestedSetRight());
-        assertEquals(0, createdNode1.getOrderInLevel());
+        assertEquals(0, createdNode1.getOrdinalNumber());
 
         assertEquals(3, createdNode2.getNestedSetLeft());
         assertEquals(4, createdNode2.getNestedSetRight());
-        assertEquals(0, createdNode2.getOrderInLevel());
+        assertEquals(0, createdNode2.getOrdinalNumber());
 
         assertEquals(5, createdNode3.getNestedSetLeft());
         assertEquals(6, createdNode3.getNestedSetRight());
-        assertEquals(1, createdNode3.getOrderInLevel());
+        assertEquals(1, createdNode3.getOrdinalNumber());
 
         // Test und Auswertung 4
-        Node createdNode4 = treeService.appendNewNodeAt("Ein neuer Knoten 4", tree.getId(), 1, 2);
+        Node createdNode4 = (Node) treeService.appendNewNodeAt(tree.getId(), 1, 0, 2);
 
         assertEquals(1, this.nodeDao.findById(1).getNestedSetLeft());
         assertEquals(14, this.nodeDao.findById(1).getNestedSetRight());
-        assertEquals(0, this.nodeDao.findById(1).getOrderInLevel());
+        assertEquals(0, this.nodeDao.findById(1).getOrdinalNumber());
 
         assertEquals(12, this.nodeDao.findById(2).getNestedSetLeft());
         assertEquals(13, this.nodeDao.findById(2).getNestedSetRight());
-        assertEquals(3, this.nodeDao.findById(2).getOrderInLevel());
+        assertEquals(3, this.nodeDao.findById(2).getOrdinalNumber());
 
         assertEquals(10, createdNode4.getNestedSetLeft());
         assertEquals(11, createdNode4.getNestedSetRight());
-        assertEquals(2, createdNode4.getOrderInLevel());
+        assertEquals(2, createdNode4.getOrdinalNumber());
 
         assertEquals(8, this.nodeDao.findById(3).getNestedSetLeft());
         assertEquals(9, this.nodeDao.findById(3).getNestedSetRight());
-        assertEquals(1, this.nodeDao.findById(3).getOrderInLevel());
+        assertEquals(1, this.nodeDao.findById(3).getOrdinalNumber());
 
         assertEquals(2, createdNode1.getNestedSetLeft());
         assertEquals(7, createdNode1.getNestedSetRight());
-        assertEquals(0, createdNode1.getOrderInLevel());
+        assertEquals(0, createdNode1.getOrdinalNumber());
 
         assertEquals(3, createdNode2.getNestedSetLeft());
         assertEquals(4, createdNode2.getNestedSetRight());
-        assertEquals(0, createdNode2.getOrderInLevel());
+        assertEquals(0, createdNode2.getOrdinalNumber());
 
         assertEquals(5, createdNode3.getNestedSetLeft());
         assertEquals(6, createdNode3.getNestedSetRight());
-        assertEquals(1, createdNode3.getOrderInLevel());
+        assertEquals(1, createdNode3.getOrdinalNumber());
     }
 
     @Test
@@ -470,16 +751,13 @@ public class TreeServiceImplTest {
         Node parentNode = this.nodeDao.findById(1);
 
         // Das Testobjekt erstellen
-        TreeServiceImpl treeService = new TreeServiceImpl();
-        treeService.setTreeDao(this.treeDao);
-        treeService.setNodeDao(this.nodeDao);
+        TreeServiceImpl treeService = newTreeServiceImpl();
 
         // Test und Auswertung
-        Node createdNode = treeService.appendNewNode("Ein neuer Knoten", tree.getId(), parentNode.getId());
+        Node createdNode = (Node) treeService.appendNewNode(tree.getId(), parentNode.getId(), -1);
 
         assertNotNull(createdNode);
         assertNotNull(createdNode.getId());
-        assertEquals("Ein neuer Knoten", createdNode.getTitle());
         assertEquals(parentNode, createdNode.getParent());
         assertTrue(parentNode.getChildren().contains(createdNode));
 
@@ -506,15 +784,12 @@ public class TreeServiceImplTest {
         Tree tree = this.treeDao.findById(1);
 
         // Das Testobjekt erstellen
-        TreeServiceImpl treeService = new TreeServiceImpl();
-        treeService.setTreeDao(this.treeDao);
-        treeService.setNodeDao(this.nodeDao);
+        TreeServiceImpl treeService = newTreeServiceImpl();
 
         // Test und Auswertung
-        Node createdNode = treeService.prependNewTreeRootNode("Ein neuer Knoten", tree.getId());
+        Node createdNode = (Node) treeService.migrateRootNode(tree.getId());
         assertNotNull(createdNode);
         assertNotNull(createdNode.getId());
-        assertEquals("Ein neuer Knoten", createdNode.getTitle());
 
         assertEquals(tree, createdNode.getTree());
         assertTrue(tree.getNodes().contains(createdNode));
@@ -549,15 +824,12 @@ public class TreeServiceImplTest {
         Node oldRoot = tree.getRoot();
 
         // Das Testobjekt erstellen
-        TreeServiceImpl treeService = new TreeServiceImpl();
-        treeService.setTreeDao(this.treeDao);
-        treeService.setNodeDao(this.nodeDao);
+        TreeServiceImpl treeService = newTreeServiceImpl();
 
         // Test und Auswertung
-        Node createdNode = treeService.prependNewTreeRootNode("Ein neuer Knoten", tree.getId());
+        Node createdNode = (Node) treeService.migrateRootNode(tree.getId());
         assertNotNull(createdNode);
         assertNotNull(createdNode.getId());
-        assertEquals("Ein neuer Knoten", createdNode.getTitle());
 
         assertEquals(tree, createdNode.getTree());
         assertTrue(tree.getNodes().contains(createdNode));
@@ -587,9 +859,7 @@ public class TreeServiceImplTest {
         setupTestfixture2();
 
         // Das Testobjekt erstellen
-        TreeServiceImpl treeService = new TreeServiceImpl();
-        treeService.setTreeDao(this.treeDao);
-        treeService.setNodeDao(this.nodeDao);
+        TreeServiceImpl treeService = newTreeServiceImpl();
 
         // Test und Auswertung
         Tree tree = treeService.getTreeById(1);
@@ -601,9 +871,7 @@ public class TreeServiceImplTest {
         // Testfix erstellen
 
         // Das Testobjekt erstellen
-        TreeServiceImpl treeService = new TreeServiceImpl();
-        treeService.setTreeDao(this.treeDao);
-        treeService.setNodeDao(this.nodeDao);
+        TreeServiceImpl treeService = newTreeServiceImpl();
 
         // Test und Auswertung
         treeService.getTreeById(1);
@@ -615,9 +883,7 @@ public class TreeServiceImplTest {
         setupTestfixture1();
 
         // Das Testobjekt erstellen
-        TreeServiceImpl treeService = new TreeServiceImpl();
-        treeService.setTreeDao(this.treeDao);
-        treeService.setNodeDao(this.nodeDao);
+        TreeServiceImpl treeService = newTreeServiceImpl();
 
         // Test und Auswertung
         treeService.getNodeByTreeAndId(2, 1);
@@ -630,9 +896,7 @@ public class TreeServiceImplTest {
         setupTestfixture1();
 
         // Das Testobjekt erstellen
-        TreeServiceImpl treeService = new TreeServiceImpl();
-        treeService.setTreeDao(this.treeDao);
-        treeService.setNodeDao(this.nodeDao);
+        TreeServiceImpl treeService = newTreeServiceImpl();
 
         // Test und Auswertung
         treeService.getNodeByTreeAndId(1, 4);
@@ -644,9 +908,7 @@ public class TreeServiceImplTest {
         setupTestfixture1();
 
         // Das Testobjekt erstellen
-        TreeServiceImpl treeService = new TreeServiceImpl();
-        treeService.setTreeDao(this.treeDao);
-        treeService.setNodeDao(this.nodeDao);
+        TreeServiceImpl treeService = newTreeServiceImpl();
 
         // Test und Auswertung
         Assert.assertEquals(this.nodeDao.findById(1), treeService.getNodeByTreeAndId(1, 1));
@@ -660,12 +922,10 @@ public class TreeServiceImplTest {
         setupTestfixture1();
 
         // Das Testobjekt erstellen
-        TreeServiceImpl treeService = new TreeServiceImpl();
-        treeService.setTreeDao(this.treeDao);
-        treeService.setNodeDao(this.nodeDao);
+        TreeServiceImpl treeService = newTreeServiceImpl();
 
         // Test und Auswertung
-        Collection<Node> treeNodes = treeService.getDirectChildNodes(1, 1);
+        Collection<Node> treeNodes = (Collection<Node>) treeService.getDirectChildNodes(1, 1);
         Assert.assertNotNull(treeNodes);
         Assert.assertEquals(2, treeNodes.size());
         Assert.assertTrue(treeNodes.contains(this.nodeDao.findById(2)));
@@ -678,9 +938,7 @@ public class TreeServiceImplTest {
         setupTestfixture1();
 
         // Das Testobjekt erstellen
-        TreeServiceImpl treeService = new TreeServiceImpl();
-        treeService.setTreeDao(this.treeDao);
-        treeService.setNodeDao(this.nodeDao);
+        TreeServiceImpl treeService = newTreeServiceImpl();
 
         // Test und Auswertung
         treeService.getDirectChildNodes(2, 1);
@@ -701,24 +959,29 @@ public class TreeServiceImplTest {
         rootNode.setTree(tree);
 
         // Das Testobjekt erstellen
-        TreeServiceImpl treeService = new TreeServiceImpl();
-        treeService.setTreeDao(this.treeDao);
-        treeService.setNodeDao(this.nodeDao);
+        TreeServiceImpl treeService = newTreeServiceImpl();
 
         // Test und Auswertung
-        Node root = treeService.getTreeRootNode(1l);
+        Node root = (Node) treeService.getTreeRootNode(1l);
         Assert.assertNotNull(root);
     }
 
     @Test(expected = ModelNotFoundException.class)
     public void testGetTreeRootNode2() throws Exception {
         // Das Testobjekt erstellen
-        TreeServiceImpl treeService = new TreeServiceImpl();
-        treeService.setTreeDao(this.treeDao);
-        treeService.setNodeDao(this.nodeDao);
+        TreeServiceImpl treeService = newTreeServiceImpl();
 
         // Test und Auswertung
         treeService.getTreeRootNode(1l);
+    }
+
+    private TreeServiceImpl newTreeServiceImpl() {
+        TreeServiceImpl treeService = new TreeServiceImpl();
+        treeService.setTreeOperationDao(this.treeOperationDao);
+        treeService.setNodeDao(this.nodeDao);
+        treeService.setTreeDao(this.treeDao);
+        treeService.setDataSourceDao(this.dataSourceDao);
+        return treeService;
     }
 
     /**

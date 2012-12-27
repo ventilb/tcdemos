@@ -16,18 +16,18 @@
 
 package de.iew.services.impl;
 
-import de.iew.domain.ModelNotFoundException;
-import de.iew.domain.Node;
-import de.iew.domain.Tree;
+import de.iew.domain.*;
+import de.iew.persistence.DataSourceDao;
 import de.iew.persistence.NodeDao;
 import de.iew.persistence.TreeDao;
+import de.iew.persistence.TreeOperationDao;
 import de.iew.services.TreeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -42,18 +42,30 @@ import java.util.List;
 @Service(value = "nodeService")
 public class TreeServiceImpl implements TreeService {
 
+    private TreeOperationDao treeOperationDao;
+
     private TreeDao treeDao;
 
     private NodeDao nodeDao;
 
-    public Node prependNewTreeRootNode(String title, long treeId) throws ModelNotFoundException {
+    private DataSourceDao dataSourceDao;
+
+    public Tree getTreeByLookupKey(String lookupKey) throws ModelNotFoundException {
+        Tree tree = this.treeDao.findTreeByLookupKey(lookupKey);
+
+        if (tree == null) {
+            throw new ModelNotFoundException("The requested tree " + lookupKey + " was not found.");
+        }
+        return tree;
+    }
+
+    public Node migrateRootNode(long treeId) throws ModelNotFoundException {
         Tree tree = getTreeById(treeId);
 
         long nestedSetLeft = 1;
         long nestedSetRight = 2;
 
         Node newNode = new Node();
-        newNode.setTitle(title);
         newNode = this.nodeDao.save(newNode);
 
         newNode.setTree(tree);
@@ -64,7 +76,7 @@ public class TreeServiceImpl implements TreeService {
         if (oldRoot != null) {
             nestedSetRight = oldRoot.getNestedSetRight() + 2;
 
-            this.nodeDao.incNestedSetBorders(tree.getId());
+            this.treeOperationDao.incNestedSetBorders(tree.getId());
 
             oldRoot.setParent(newNode);
             newNode.getChildren().add(oldRoot);
@@ -78,11 +90,11 @@ public class TreeServiceImpl implements TreeService {
         return newNode;
     }
 
-    public Node appendNewNode(String title, long treeId, long parentId) throws ModelNotFoundException {
-        return appendNewNodeAt(title, treeId, parentId, Integer.MAX_VALUE);
+    public Node appendNewNode(long treeId, long parentId, long dataSourceId) throws ModelNotFoundException {
+        return appendNewNodeAt(treeId, parentId, dataSourceId, Integer.MAX_VALUE);
     }
 
-    public Node appendNewNodeAt(String title, long treeId, long parentId, int orderToAppendAt) throws ModelNotFoundException {
+    public Node appendNewNodeAt(long treeId, long parentId, long dataSourceId, int orderToAppendAt) throws ModelNotFoundException {
         Node parent = getNodeByTreeAndId(treeId, parentId);
         Tree tree = parent.getTree();
         List<Node> children = parent.getChildren();
@@ -98,14 +110,13 @@ public class TreeServiceImpl implements TreeService {
         }
 
         for (Node child : children) {
-            if (child.getOrderInLevel() >= orderToAppendAt) {
-                child.setOrderInLevel(child.getOrderInLevel() + 1);
+            if (child.getOrdinalNumber() >= orderToAppendAt) {
+                child.setOrdinalNumber(child.getOrdinalNumber() + 1);
             }
         }
 
         Node newNode = new Node();
-        newNode.setTitle(title);
-        newNode.setOrderInLevel(orderToAppendAt);
+        newNode.setOrdinalNumber(orderToAppendAt);
         newNode.setNestedSetLeft(nestedSetRightToShiftFrom + 1);
         newNode.setNestedSetRight(nestedSetRightToShiftFrom + 2);
 
@@ -115,44 +126,53 @@ public class TreeServiceImpl implements TreeService {
         newNode.setParent(parent);
         parent.getChildren().add(orderToAppendAt, newNode);
 
-        newNode = this.nodeDao.save(newNode);
+        newNode = this.treeOperationDao.save(newNode);
+
+        DataSource dataSource = this.dataSourceDao.findById(dataSourceId);
+        newNode.setDataSource(dataSource);
 
         return newNode;
     }
 
-    public Node insertNewNodeBefore(String title, long treeId, long nodeToInsertBefore) throws ModelNotFoundException {
+    public Node insertNewNodeBefore(long treeId, long nodeToInsertBefore, long dataSourceId) throws ModelNotFoundException {
         Node sibling = getNodeByTreeAndId(treeId, nodeToInsertBefore);
 
-        return appendNewNodeAt(title, treeId, sibling.getParent().getId(), sibling.getOrderInLevel());
+        return appendNewNodeAt(treeId, sibling.getParent().getId(), dataSourceId, sibling.getOrdinalNumber());
     }
 
-    public Node insertNewNodeAfter(String title, long treeId, long nodeToInsertAfter) throws ModelNotFoundException {
+    public Node insertNewNodeAfter(long treeId, long nodeToInsertAfter, long dataSourceId) throws ModelNotFoundException {
         Node sibling = getNodeByTreeAndId(treeId, nodeToInsertAfter);
 
-        return appendNewNodeAt(title, treeId, sibling.getParent().getId(), sibling.getOrderInLevel() + 1);
+        return appendNewNodeAt(treeId, sibling.getParent().getId(), dataSourceId, sibling.getOrdinalNumber() + 1);
+    }
+
+    public Node deleteNodeAndMigrateChildren(long treeId, long nodeId) throws ModelNotFoundException {
+        Node deletedNode = getNodeByTreeAndId(treeId, nodeId);
+        Node parent = deletedNode.getParent();
+
+        migrateMyChildrenToParent(deletedNode);
+        removeMeFromParent(deletedNode);
+        reorderNodeList(parent.getChildren());
+
+        this.treeOperationDao.deleteSingleNode(treeId, nodeId);
+
+        return deletedNode;
     }
 
     public Node deleteNodeAndSubtree(long treeId, long nodeId) throws ModelNotFoundException {
         Node deletedNode = getNodeByTreeAndId(treeId, nodeId);
-        int deletedNodeOrder = deletedNode.getOrderInLevel();
+
+        removeMeFromParent(deletedNode);
 
         Node parent = deletedNode.getParent();
         if (parent != null) {
             List<Node> children = parent.getChildren();
 
-            Node childIt;
-            for (int i = deletedNodeOrder; i < children.size(); i++) {
-                childIt = children.get(i);
-                childIt.setOrderInLevel(childIt.getOrderInLevel() - 1);
-            }
-
-            children.remove(deletedNode);
-            deletedNode.setParent(null);
+            reorderNodeList(children);
         }
 
-        this.nodeDao.deleteNodesBetween(treeId, deletedNode.getNestedSetLeft(), deletedNode.getNestedSetRight());
+        this.treeOperationDao.deleteNodesBetween(treeId, deletedNode.getNestedSetLeft(), deletedNode.getNestedSetRight());
 
-        deletedNode.setId(null);
         return deletedNode;
     }
 
@@ -165,7 +185,7 @@ public class TreeServiceImpl implements TreeService {
     public Node getTreeRootNode(long treeId) throws ModelNotFoundException {
         Node rootNode;
 
-        rootNode = this.treeDao.findRootNodeForTree(treeId);
+        rootNode = this.treeOperationDao.findRootNodeForTree(treeId);
 
         if (rootNode == null) {
             throw new ModelNotFoundException("The root node for the requested tree " + treeId + " is not available.");
@@ -193,12 +213,145 @@ public class TreeServiceImpl implements TreeService {
     }
 
     public Node getNodeByTreeAndId(long treeId, long nodeId) throws ModelNotFoundException {
-        Node node = this.treeDao.findNodeForTreeAndId(treeId, nodeId);
+        Node node = this.treeOperationDao.findNodeForTreeAndId(treeId, nodeId);
 
         if (node == null) {
             throw new ModelNotFoundException("The node " + nodeId + " was not found for the requested tree " + treeId + ".");
         }
+
         return node;
+    }
+
+    // Hilfsmethoden //////////////////////////////////////////////////////////
+
+    /**
+     * Hilfsmethode: Migriert die Kinder des angegebenen Knotens zum Vater des
+     * angegebenen Knotens.
+     * <p>
+     * Fügt die Kinder an die Stelle des angegebenen Knotens, fortlaufend ein.
+     * Die Geschwister des angegebenen Knotens folgen dann nach den Kindern des
+     * Knotens. Die Ordnungszahlen werden entsprechend angepasst, sodass die
+     * Reihenfolge erhalten bleibt.
+     * Korrigiert nicht die Ordnungszahlen der Geschwister des Knotens sodass
+     * möglicherweise trotzdem Lücken in den Ordnungszahlen vorhanden sein
+     * können.
+     * </p>
+     *
+     * @param me Der Knoten.
+     */
+    public void migrateMyChildrenToParent(Node me) {
+        int myOrdinalNumber = me.getOrdinalNumber();
+
+        Node parent = me.getParent();
+        if (parent != null) {
+            List<Node> myChildren = me.getChildren();
+            int myChildrenCount = myChildren.size();
+
+            // Verschiebe die Ordnungszahlen der Knoten nach mir um für meine
+            // Kinder Platz zu schaffen.
+            // TODO: Daraus lässt sich eine eigene Methode machen.
+            List<Node> mySiblingsAndMe = parent.getChildren();
+            Collections.sort(mySiblingsAndMe, Order.ASCENDING);
+            for (int i = mySiblingsAndMe.size() - 1; i >= 0; i--) {
+                Node siblingOrMe = mySiblingsAndMe.get(i);
+                if (siblingOrMe.getOrdinalNumber() > myOrdinalNumber) {
+                    siblingOrMe.setOrdinalNumber(siblingOrMe.getOrdinalNumber() + myChildrenCount);
+                }
+            }
+
+            Node[] subTreeNodes = myChildren.toArray(new Node[myChildrenCount]);
+
+            // Wichtig, sonst werden die Kinder evtl. in der falschen
+            // Reihenfolge eingefügt
+            Arrays.sort(subTreeNodes, Order.ASCENDING);
+
+            for (Node node : subTreeNodes) {
+                // Hiermit stellen wir sicher, dass die Knoten nach mir
+                // eingefügt werden.
+                myOrdinalNumber++;
+
+                // Wichtig, sonst würden die Knoten beim nachträglichen
+                // Korrigeren der Ordnungszahlen falsch sortiert werden.
+                node.setOrdinalNumber(myOrdinalNumber);
+                myChildren.remove(node);
+
+                node.setParent(parent);
+                parent.getChildren().add(myOrdinalNumber, node);
+            }
+        }
+    }
+
+    /**
+     * Hilfsmethode: Korrigiert die Ordinalzahlen der Kinder des Vaters des
+     * angegebenen Knotens.
+     * <p>
+     * MaW. korrigiert die Ordinalzahlen der Geschwister des angegebenen
+     * Knotens.
+     * </p>
+     *
+     * @param me Der Knoten.
+     */
+    public void reorderMyParentChildren(Node me) {
+        Node parent = me.getParent();
+        if (parent != null) {
+            reorderNodeList(parent.getChildren());
+        }
+    }
+
+    /**
+     * Hilfsmethode: Korrigiert die Ordnungszahlen in der angegebenen
+     * Knotenliste.
+     * <p>
+     * Die Ordnungszahlen werden fortlaufend ab 0 aktualisiert wobei die
+     * Originalreihenfolge der Knoten nach ihrer Ordnungszahl erhalten bleibt.
+     * </p>
+     * <p>
+     * Die Reihenfolge der Knoten in der angegebenen Knotenliste spielt keine
+     * Rolle. Auch ist die Reihenfolge in der Knotenliste nach dem Korrigieren
+     * unbestimmt.
+     * </p>
+     *
+     * @param nodes Die Knotenliste.
+     */
+    public void reorderNodeList(List<Node> nodes) {
+        Collections.sort(nodes, Order.ASCENDING);
+
+        int ordinalNumber = 0;
+        for (Node node : nodes) {
+            node.setOrdinalNumber(ordinalNumber);
+
+            ordinalNumber++;
+        }
+    }
+
+    /**
+     * Hilfsmethode: Entfernt den angegebenen Knoten von seinm Vaterknoten.
+     * <p>
+     * Hat keinen Effekt wenn der Knoten keinen Vater hat.
+     * </p>
+     *
+     * @param me Der Knoten.
+     */
+    public void removeMeFromParent(Node me) {
+        Node parent = me.getParent();
+        if (parent != null) {
+            List<Node> children = parent.getChildren();
+
+            children.remove(me);
+            me.setParent(null);
+        }
+    }
+
+    // Setter und Getter //////////////////////////////////////////////////////
+
+    @Autowired
+    public void setTreeOperationDao(TreeOperationDao treeOperationDao) {
+        this.treeOperationDao = treeOperationDao;
+    }
+
+    @Autowired
+    public void setNodeDao(NodeDao nodeDao) {
+        this.nodeDao = nodeDao;
     }
 
     @Autowired
@@ -207,7 +360,8 @@ public class TreeServiceImpl implements TreeService {
     }
 
     @Autowired
-    public void setNodeDao(NodeDao nodeDao) {
-        this.nodeDao = nodeDao;
+    public void setDataSourceDao(DataSourceDao dataSourceDao) {
+        this.dataSourceDao = dataSourceDao;
     }
+
 }

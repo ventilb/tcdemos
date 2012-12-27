@@ -26,7 +26,7 @@
 </div>
 <div id="content">
     <script type="text/javascript">
-        requirejs(['core', 'modules/TreeDemoContextMenu', 'modules/IewTreeGrid', 'modules/IewTreeGridRestDataSource'], function (core) {
+        requirejs(['i18n!nls/messages', 'core', 'modules/TreeDemoContextMenu', 'modules/IewTreeGrid', 'modules/IewTreeGridRestDataSource', 'modules/SimpleTextItemEditorDialog'], function (msg, core) {
             isc.IewTreeGridRestDataSource.create({
                 ID: 'DemoTreeGridDS',
                 addDataURL: core.baseUrl('/tree/add.json'),
@@ -41,6 +41,7 @@
                 treeId: ${rootNode.tree.id}
             });
 
+
             var initialCriteria = {
                 treeId: ${treeId}
             };
@@ -53,6 +54,18 @@
                 showRoot: true,
                 initialCriteria: initialCriteria,
                 contextMenu: isc.TreeDemoContextMenu.create(),
+
+                dataSourceRequested: function (dataSourceClassname, callback) {
+                    var dialog = isc.SimpleTextItemEditorDialog.create({
+                        editingDone: function () {
+                            isc.Class.fireCallback(callback, 'dataSourceClassname, dataSourceData', [dataSourceClassname, {title: this.getTitleValue()}], DemoTreeGrid);
+                            this.closeClick();
+                        }
+                    });
+                    dialog.setTitleValue(msg['sc.iew_tree_grid.new_node.title']);
+                    dialog.show();
+
+                },
 
                 addNewNodeSuccess: function (node) {
                     console.log('A node was added: ', this, node);
@@ -115,6 +128,8 @@
                     'DemoListGrid'
                 ]
             });
+
+
         });
     </script>
 </div>

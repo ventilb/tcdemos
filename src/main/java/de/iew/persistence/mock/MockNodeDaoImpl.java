@@ -17,72 +17,44 @@
 package de.iew.persistence.mock;
 
 import de.iew.domain.Node;
+import de.iew.domain.Tree;
 import de.iew.persistence.NodeDao;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 /**
- * Klassenkommentar.
+ * Mock-Implementierung der {@link NodeDao}-Schnittstelle.
  *
  * @author Manuel Schulze <manuel_schulze@i-entwicklung.de>
  * @since 17.11.12 - 10:36
  */
 public class MockNodeDaoImpl extends AbstractMockDomainModelDaoImpl<Node> implements NodeDao {
-    public void incNestedSetBorders(long treeId) {
-        for (Node node : findAll()) {
-            if (node.getTree().getId() == treeId) {
-                node.setNestedSetLeft(node.getNestedSetLeft() + 1);
-                node.setNestedSetRight(node.getNestedSetRight() + 1);
+    /**
+     * {@inheritDoc}
+     * <p>
+     * Diese Methode fügt zusätzlich alle Knoten des Baumes des Knotens nach dem
+     * save() erneut als Knoten in den Baum ein. Hintergrund, ist, dass das
+     * abzuspeichernde Node nach dem save() eine Id erhalten und sich somit der
+     * Hashcode geändert hat. Ohne diesen Fix würde man den Knoten nicht mehr im
+     * Hashset des Knotens finden.
+     * </p>
+     */
+    @Override
+    public Node save(Node domainModel) {
+        Node result = super.save(domainModel);
+
+        Tree tree = domainModel.getTree();
+        if (tree != null) {
+            Node[] nodes = tree.getNodes().toArray(new Node[0]);
+            tree.getNodes().clear();
+            for (Node node : nodes) {
+                tree.getNodes().add(node);
             }
-        }
-    }
 
-    public void moveNestedSetBorder(long treeId, long fromNestedSetIndex) {
-        for (Node node : findAll()) {
-            if (node.getTree().getId() == treeId) {
-                if (node.getNestedSetRight() > fromNestedSetIndex) {
-                    node.setNestedSetRight(node.getNestedSetRight() + 2);
-                }
-
-                if (node.getNestedSetLeft() > fromNestedSetIndex) {
-                    node.setNestedSetLeft(node.getNestedSetLeft() + 2);
-                }
-            }
-        }
-    }
-
-    public void deleteNodesBetween(long treeId, long leftNestedSetIndex, long rightNestedSetIndex) {
-        List<Node> deleteCandidates = new ArrayList<Node>();
-
-        Node[] nodes = findAll().toArray(new Node[0]);
-        for (Node node : nodes) {
-            if (node.getTree().getId() == treeId) {
-                if (node.getNestedSetLeft() >= leftNestedSetIndex && node.getNestedSetRight() <= rightNestedSetIndex) {
-                    if (node.equals(node.getTree().getRoot())) {
-                        node.getTree().setRoot(null);
-                    }
-
-                    deleteCandidates.add(node);
-                    remove(node);
-                }
-            }
         }
 
-        for (Node node : nodes) {
-            if (node.getTree().getId() == treeId) {
-                if (node.getNestedSetLeft() > rightNestedSetIndex) {
-                    node.setNestedSetLeft(node.getNestedSetLeft() - Math.round(rightNestedSetIndex - leftNestedSetIndex + 1));
-                }
-                if (node.getNestedSetRight() > rightNestedSetIndex) {
-                    node.setNestedSetRight(node.getNestedSetRight() - Math.round(rightNestedSetIndex - leftNestedSetIndex + 1));
-                }
-            }
-        }
-
-        for (Node node : deleteCandidates) {
-            node.getTree().getNodes().remove(node);
-            node.setTree(null);
-        }
+        return result;
     }
 }

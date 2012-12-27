@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright 2012 Manuel Schulze <manuel_schulze@i-entwicklung.de>
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~     http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:security="http://www.springframework.org/schema/security"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+  http://www.springframework.org/schema/beans/spring-beans-3.1.xsd
+  http://www.springframework.org/schema/security
+  http://www.springframework.org/schema/security/spring-security-3.1.xsd">
+
+    <!--
+    Hier konfigurieren wir die zu schützenden URLs und Webressourcen.
+    -->
+    <security:http auto-config="true" use-expressions="true" access-denied-page="">
+        <security:intercept-url pattern="/treedemo.html" access="hasRole('ROLE_ADMIN')"/>
+        <security:intercept-url pattern="*" access="hasRole('ROLE_USER')"/>
+    </security:http>
+
+    <!--
+    Der globale Spring AuthenticationManager.
+
+    Das Alias ist wichtig. Sonst ist der AuthenticationManager in Spring nicht
+    eindeutig definiert und Spring startet nicht ordnungsgemäß. Scheinbar
+    scheinen mehrere Beans unter der id "authenticationManager" konfiguriert zu
+    sein.
+    -->
+    <security:authentication-manager alias="authenticationManager">
+        <security:authentication-provider user-service-ref="userDetailsService">
+            <security:password-encoder ref="passwordEncoder"/>
+        </security:authentication-provider>
+    </security:authentication-manager>
+
+    <!--
+    Wir verwenden für den Anfang MD5. Später stellen wir dann auf stärkeres
+    Hashing und Salzen um.
+
+    TODO: Auf stärkeres Hashing und Salz umstellen
+    -->
+    <bean class="org.springframework.security.authentication.encoding.Md5PasswordEncoder" id="passwordEncoder"/>
+</beans>

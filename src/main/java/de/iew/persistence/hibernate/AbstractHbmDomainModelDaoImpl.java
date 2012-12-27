@@ -34,7 +34,7 @@ import java.util.Collection;
  * @see <a href="http://blog.xebia.com/2009/02/07/acessing-generic-types-at-runtime-in-java/">http://blog.xebia.com/2009/02/07/acessing-generic-types-at-runtime-in-java/</a>
  * @since 24.11.12 - 20:25
  */
-public abstract class AbstractHbmDomainModelDaoImpl<M extends AbstractModel> implements DomainModelDao<M> {
+public abstract class AbstractHbmDomainModelDaoImpl<M extends AbstractModel> extends AbstractHbmDao implements DomainModelDao<M> {
 
     private final Class<M> domainModelClass;
 
@@ -46,8 +46,6 @@ public abstract class AbstractHbmDomainModelDaoImpl<M extends AbstractModel> imp
     protected AbstractHbmDomainModelDaoImpl(Class<M> domainModelClass) {
         this.domainModelClass = domainModelClass;
     }
-
-    private SessionFactory sessionFactory;
 
     public M save(M domainModel) {
         return (M) getCurrentSession().merge(domainModel);
@@ -70,12 +68,4 @@ public abstract class AbstractHbmDomainModelDaoImpl<M extends AbstractModel> imp
         return getCurrentSession().createCriteria(this.domainModelClass);
     }
 
-    public Session getCurrentSession() {
-        return this.sessionFactory.getCurrentSession();
-    }
-
-    @Autowired
-    public void setSessionFactory(SessionFactory sessionFactory) {
-        this.sessionFactory = sessionFactory;
-    }
 }

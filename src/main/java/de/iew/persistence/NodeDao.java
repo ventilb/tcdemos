@@ -26,23 +26,4 @@ import de.iew.domain.Node;
  * @since 17.11.12 - 10:06
  */
 public interface NodeDao extends DomainModelDao<Node> {
-    /**
-     * Verschiebt die NestedSet-Grenzen aller Knoten im angegebenen Baum um
-     * 1.
-     *
-     * @param treeId Die Id des Baumes.
-     */
-    public void incNestedSetBorders(long treeId);
-
-    /**
-     * Verschiebt die NestedSet-Grenzen um 2 aller Knoten im angegebenen
-     * Baum, die größer sind als <code>fromNestedSetIndex</code>.
-     *
-     * @param treeId             Die Id des Baumes.
-     * @param fromNestedSetIndex Die NestedSet-Grenze aber der verschoben
-     *                           wird.
-     */
-    public void moveNestedSetBorder(long treeId, long fromNestedSetIndex);
-
-    public void deleteNodesBetween(long treeId, long leftNestedSetIndex, long rightNestedSetIndex);
 }
