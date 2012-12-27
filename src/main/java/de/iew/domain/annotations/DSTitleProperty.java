@@ -14,28 +14,25 @@
  * limitations under the License.
  */
 
-package de.iew.domain;
+package de.iew.domain.annotations;
+
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
 /**
- * Beschreibt die Schnittstelle für die Implementierung von Baumknoten nach
- * dem NestedSets Verfahren.
+ * Annotation um eine Methode für die Titeleigenschaft zu deklarieren.
  * <p>
- * Das NestedSets Verfahren betrachtet jeden Teilbaum im Baum als Menge. Jede
- * Menge eines Teilbaums ist vollständig in der Menge des Vater-Knotens
- * enthalten. Jede Menge wird durch eine linke und rechte Grenze beschrieben.
+ * Einige Module benötigen für die Anzeige einen Titel. Mit dieser Annotation
+ * kann eine Methode für die Rückgabe eines Titels markiert werden. Eine so
+ * deklarierte Methode muss einen Wert zurückgeben.
  * </p>
  *
  * @author Manuel Schulze <manuel_schulze@i-entwicklung.de>
- * @see <a href="http://www.klempert.de/nested_sets/">http://www.klempert.de/nested_sets/</a>
- * @since 29.11.12 - 00:09
+ * @since 01.12.12 - 11:27
  */
-public interface NestedSetNode {
-    public long getNestedSetLeft();
-
-    public void setNestedSetLeft(long nestedSetLeft);
-
-    public long getNestedSetRight();
-
-    public void setNestedSetRight(long nestedSetRight);
-
+@Target(ElementType.METHOD)
+@Retention(RetentionPolicy.RUNTIME) // Wichtig, damit die Annotation zur Laufzeit ausgewertet werden kann
+public @interface DSTitleProperty {
 }

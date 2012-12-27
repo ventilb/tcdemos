@@ -16,13 +16,11 @@
 
 package de.iew.domain;
 
-import javax.persistence.Column;
-
 /**
  * Beschreibt allgemein die Schnittstelle für die Implementierung eines
  * Baumknotens.
  *
- * @author Manuel Schulze <mschulze@geneon.de>
+ * @author Manuel Schulze <manuel_schulze@i-entwicklung.de>
  * @since 29.11.12 - 00:15
  */
 public interface TreeNode {
@@ -43,19 +41,17 @@ public interface TreeNode {
     public void setTree(Tree tree);
 
     /**
-     * Liefert die Position (beginnend bei 0) dieses Knotens innerhalb der
-     * Geschwisterliste dieses Knotens.
+     * Liefert das Datenobjekt, das mit diesem Knoten verknüpft ist.
      *
-     * @return Die Position dieses Knotens innerhalb der Geschwisterliste.
+     * @return Das Datenobjekt zu diesem Knoten.
      */
-    public int getOrderInLevel();
+    public DataSource getDataSource();
 
     /**
-     * Stellt die Position dieses Knotens innerhalb der Geschwisterliste
-     * dieses Knotens auf den angegebenen Wert.
+     * Konfiguriert das Datenobjekt für diesen Knoten.
      *
-     * @param orderInLevel Die Position dieses Knotens (beginnend bei 0).
+     * @param dataSource Das Datenobjekt für diesen Knoten.
      */
-    public void setOrderInLevel(int orderInLevel);
+    public void setDataSource(DataSource dataSource);
 
 }

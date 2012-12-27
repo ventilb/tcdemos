@@ -16,26 +16,26 @@
 
 package de.iew.domain;
 
+import javax.persistence.Entity;
+import javax.persistence.Inheritance;
+import javax.persistence.InheritanceType;
+import javax.persistence.Table;
+
 /**
- * Beschreibt die Schnittstelle für die Implementierung von Baumknoten nach
- * dem NestedSets Verfahren.
+ * Beschreibt ein Domainmodell für die Spezifikation von Datenquellen.
  * <p>
- * Das NestedSets Verfahren betrachtet jeden Teilbaum im Baum als Menge. Jede
- * Menge eines Teilbaums ist vollständig in der Menge des Vater-Knotens
- * enthalten. Jede Menge wird durch eine linke und rechte Grenze beschrieben.
+ * Datenquellen sind die zentrale Schnittstelle für die Daten der Anwendung.
+ * Mit dieser abstrakten Beschreibung soll erreicht werden, dass die Daten
+ * unabhängig von der Strukturierung (Liste, Baum) sind. Die Struktur kann
+ * unabhängig von den Daten und umgekehrt verändert werden.
  * </p>
  *
  * @author Manuel Schulze <manuel_schulze@i-entwicklung.de>
- * @see <a href="http://www.klempert.de/nested_sets/">http://www.klempert.de/nested_sets/</a>
- * @since 29.11.12 - 00:09
+ * @since 30.11.12 - 01:07
  */
-public interface NestedSetNode {
-    public long getNestedSetLeft();
-
-    public void setNestedSetLeft(long nestedSetLeft);
-
-    public long getNestedSetRight();
-
-    public void setNestedSetRight(long nestedSetRight);
+@Entity
+@Table(name = "data_source")
+@Inheritance(strategy = InheritanceType.JOINED)
+public abstract class DataSource extends AbstractModel {
 
 }

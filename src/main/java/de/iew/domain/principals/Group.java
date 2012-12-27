@@ -14,28 +14,25 @@
  * limitations under the License.
  */
 
-package de.iew.domain;
+package de.iew.domain.principals;
+
+import de.iew.domain.AbstractModel;
+
+import javax.persistence.Entity;
+import javax.persistence.Table;
 
 /**
- * Beschreibt die Schnittstelle für die Implementierung von Baumknoten nach
- * dem NestedSets Verfahren.
+ * Beschreibt das Domainmodell für eine Nutzergruppe.
  * <p>
- * Das NestedSets Verfahren betrachtet jeden Teilbaum im Baum als Menge. Jede
- * Menge eines Teilbaums ist vollständig in der Menge des Vater-Knotens
- * enthalten. Jede Menge wird durch eine linke und rechte Grenze beschrieben.
+ * Nutzergruppen stehen konzeptionell höher als Authorities. Als Beispiel
+ * lassen sich die Hierarchien in einem Unternehmen als Gruppen beschreiben.
+ * In der Regel werden die Authorities den Gruppen zugeordnet.
  * </p>
  *
  * @author Manuel Schulze <manuel_schulze@i-entwicklung.de>
- * @see <a href="http://www.klempert.de/nested_sets/">http://www.klempert.de/nested_sets/</a>
- * @since 29.11.12 - 00:09
+ * @since 01.12.12 - 14:04
  */
-public interface NestedSetNode {
-    public long getNestedSetLeft();
-
-    public void setNestedSetLeft(long nestedSetLeft);
-
-    public long getNestedSetRight();
-
-    public void setNestedSetRight(long nestedSetRight);
-
+@Entity
+@Table(name = "group")
+public class Group extends AbstractModel {
 }

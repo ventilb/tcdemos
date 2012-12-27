@@ -50,21 +50,21 @@ public class TreeFixture1 {
 
         Node rootNode = new Node();
         rootNode.setId(1l);
-        rootNode.setOrderInLevel(0);
+        rootNode.setOrdinalNumber(0);
         rootNode = this.nodeDao.save(rootNode);
         rootNode.setNestedSetLeft(1);
         rootNode.setNestedSetRight(6);
 
         Node child1 = new Node();
         child1.setId(2l);
-        child1.setOrderInLevel(1);
+        child1.setOrdinalNumber(1);
         child1 = this.nodeDao.save(child1);
         child1.setNestedSetLeft(4);
         child1.setNestedSetRight(5);
 
         Node child2 = new Node();
         child2.setId(3l);
-        child2.setOrderInLevel(0);
+        child2.setOrdinalNumber(0);
         child2 = this.nodeDao.save(child2);
         child2.setNestedSetLeft(2);
         child2.setNestedSetRight(3);

@@ -29,9 +29,7 @@ import java.util.List;
  */
 @Entity
 @Table(name = "node")
-public class Node extends AbstractModel implements TreeNode, AdjacencyNode<Node>, NestedSetNode {
-
-    private String title;
+public class Node extends AbstractModel implements TreeNode, AdjacencyNode<Node>, NestedSetNode, Order {
 
     private Node parent;
 
@@ -39,23 +37,16 @@ public class Node extends AbstractModel implements TreeNode, AdjacencyNode<Node>
 
     private Tree tree;
 
+    private DataSource dataSource;
+
     /**
      * Die Position dieses Knotens innerhalb der Geschwisterliste.
      */
-    private int orderInLevel;
+    private int ordinalNumber;
 
     private long nestedSetLeft;
 
     private long nestedSetRight;
-
-    @Column
-    public String getTitle() {
-        return title;
-    }
-
-    public void setTitle(String title) {
-        this.title = title;
-    }
 
     @ManyToOne(fetch = FetchType.LAZY)
     public Node getParent() {
@@ -67,7 +58,7 @@ public class Node extends AbstractModel implements TreeNode, AdjacencyNode<Node>
     }
 
     @OneToMany(mappedBy = "parent", fetch = FetchType.LAZY)
-    @OrderBy(value = "orderInLevel")
+    @OrderBy(value = "ordinalNumber")
     public List<Node> getChildren() {
         return children;
     }
@@ -76,7 +67,10 @@ public class Node extends AbstractModel implements TreeNode, AdjacencyNode<Node>
         this.children = children;
     }
 
-    @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.REMOVE)
+    // CascadeType war mal auf REMOVE gestellt. Das geht aber so nicht, da
+    // Hibernate immer den Tree mit löschen möchte wenn ein Knoten gelöscht
+    // werden soll.
+    @ManyToOne(fetch = FetchType.EAGER)
     public Tree getTree() {
         return tree;
     }
@@ -85,13 +79,37 @@ public class Node extends AbstractModel implements TreeNode, AdjacencyNode<Node>
         this.tree = tree;
     }
 
-    @Column
-    public int getOrderInLevel() {
-        return orderInLevel;
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "data_source_id")
+    public DataSource getDataSource() {
+        return dataSource;
     }
 
-    public void setOrderInLevel(int orderInLevel) {
-        this.orderInLevel = orderInLevel;
+    public void setDataSource(DataSource dataSource) {
+        this.dataSource = dataSource;
+    }
+
+    /**
+     * {@inheritDoc}
+     * <p>
+     * Liefert die Position (beginnend bei 0) dieses Knotens innerhalb der
+     * Geschwisterliste dieses Knotens.
+     * </p>
+     */
+    @Column
+    public int getOrdinalNumber() {
+        return ordinalNumber;
+    }
+
+    /**
+     * {@inheritDoc}
+     * <p>
+     * Stellt die Position dieses Knotens innerhalb der Geschwisterliste
+     * dieses Knotens auf den angegebenen Wert.
+     * </p>
+     */
+    public void setOrdinalNumber(int ordinalNumber) {
+        this.ordinalNumber = ordinalNumber;
     }
 
     @Column

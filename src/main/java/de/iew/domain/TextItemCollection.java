@@ -18,6 +18,8 @@ package de.iew.domain;
 
 import javax.persistence.*;
 import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Locale;
 import java.util.Set;
 
 /**
@@ -28,16 +30,64 @@ import java.util.Set;
  */
 @Entity
 @Table(name = "text_item_collection")
-public class TextItemCollection extends AbstractModel {
+public class TextItemCollection extends AbstractModel implements Iterable<TextItem> {
 
     private Set<TextItem> textItems = new HashSet<TextItem>();
 
-    @OneToMany(mappedBy = "textItemCollection", fetch = FetchType.EAGER)
+    @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @JoinColumn(name = "text_item_collection_id")
     public Set<TextItem> getTextItems() {
         return textItems;
     }
 
     public void setTextItems(Set<TextItem> textItems) {
         this.textItems = textItems;
+    }
+
+    // Helper Methoden ////////////////////////////////////////////////////////
+
+    /**
+     * Liefert eine Iterator-Sicht auf diese Sammlung an Textschnipsel.
+     * <pre>
+     * TextItemCollection tic = ....// Get Collection
+     * for (TextItem textItem : tic) {
+     *    // Do something with the text item
+     * }
+     * </pre>
+     *
+     * @return Iterator.
+     */
+    @Transient
+    public Iterator<TextItem> iterator() {
+        return this.textItems.iterator();
+    }
+
+    /**
+     * Liefert eine Array-Sicht auf diese Textschnipsel-Sammlung.
+     * <p>
+     * Liefert ein leeres Array wenn diese Sammlung keine Textschnipsel
+     * enthält.
+     * </p>
+     *
+     * @return Array of {@link TextItem}.
+     */
+    @Transient
+    public TextItem[] toArray() {
+        Set<TextItem> textItems = getTextItems();
+        return new TextItem[textItems.size()];
+    }
+
+    @Transient
+    public TextItem lookupTextItemForLocale(Locale locale) {
+        if (locale == null) {
+            throw new IllegalArgumentException("locale can't be null");
+        }
+        for (TextItem textItem : getTextItems()) {
+            if (locale.getLanguage().equalsIgnoreCase(textItem.getLanguageCode())
+                    && locale.getCountry().equalsIgnoreCase(textItem.getCountryCode())) {
+                return textItem;
+            }
+        }
+        return null;
     }
 }

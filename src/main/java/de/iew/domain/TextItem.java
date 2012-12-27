@@ -16,7 +16,10 @@
 
 package de.iew.domain;
 
-import javax.persistence.*;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Lob;
+import javax.persistence.Table;
 
 /**
  * Beschreibt ein Domainmodell für die Verwaltung eines Textschnipsels.
@@ -38,8 +41,6 @@ public class TextItem extends AbstractModel {
     private String countryCode;
 
     private String content;
-
-    private TextItemCollection textItemCollection;
 
     @Column(length = 5, nullable = false, name = "language_code")
     public String getLanguageCode() {
@@ -67,15 +68,5 @@ public class TextItem extends AbstractModel {
 
     public void setContent(String content) {
         this.content = content;
-    }
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "text_item_collection_id", nullable = true)
-    public TextItemCollection getTextItemCollection() {
-        return textItemCollection;
-    }
-
-    public void setTextItemCollection(TextItemCollection textItemCollection) {
-        this.textItemCollection = textItemCollection;
     }
 }

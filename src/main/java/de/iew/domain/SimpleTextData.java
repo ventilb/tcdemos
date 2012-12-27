@@ -16,50 +16,32 @@
 
 package de.iew.domain;
 
+import de.iew.domain.annotations.DSTitleProperty;
+
 import javax.persistence.*;
-import java.util.HashSet;
-import java.util.Set;
 
 /**
- * Implementiert das Domainmodell für einen Baum.
+ * Beschreibt ein einfaches Demomodell für die Verwaltung von
+ * Textschnipsel als {@link DataSource}.
  *
  * @author Manuel Schulze <manuel_schulze@i-entwicklung.de>
- * @since 17.11.12 - 10:16
+ * @since 30.11.12 - 11:05
  */
 @Entity
-@Table(name = "tree")
-public class Tree extends AbstractModel {
+@Table(name = "simple_text_data")
+@PrimaryKeyJoinColumn(name = "id")
+public class SimpleTextData extends DataSource {
 
-    private String lookupKey;
+    private TextItemCollection textItemCollection;
 
-    private Node root;
-
-    private Set<Node> nodes = new HashSet<Node>();
-
-    @Column(name = "lookup_key", length = 255, nullable = true)
-    public String getLookupKey() {
-        return lookupKey;
-    }
-
-    public void setLookupKey(String lookupKey) {
-        this.lookupKey = lookupKey;
-    }
-
+    @DSTitleProperty
     @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
-    public Node getRoot() {
-        return root;
+    @JoinColumn(name = "text_item_collection_id")
+    public TextItemCollection getTextItemCollection() {
+        return textItemCollection;
     }
 
-    public void setRoot(Node root) {
-        this.root = root;
-    }
-
-    @OneToMany(mappedBy = "tree", fetch = FetchType.LAZY)
-    public Set<Node> getNodes() {
-        return nodes;
-    }
-
-    public void setNodes(Set<Node> nodes) {
-        this.nodes = nodes;
+    public void setTextItemCollection(TextItemCollection textItemCollection) {
+        this.textItemCollection = textItemCollection;
     }
 }
