@@ -17,11 +17,25 @@
 package de.iew.domain;
 
 /**
- * Beschreibung für eine Schnittstelle um die Implementierung für ein
- * Domainmodell als solches zu deklarieren.
+ * Beschreibung für einen Stereotypen um Java-Klassen als Domainmodell zu
+ * deklarieren.
  *
  * @author Manuel Schulze <manuel_schulze@i-entwicklung.de>
  * @since 01.12.12 - 11:37
  */
 public interface DomainModel {
+    /**
+     * Liefert die Id dieses Domainmodells oder NULL wenn dieses Domainmodell
+     * keine Id hat.
+     *
+     * @return Die Id dieses Domainmodells.
+     */
+    public Long getId();
+
+    /**
+     * Konfiguriert die Id dieses Domainmodells.
+     *
+     * @param id Die Id dieses Domainmodells oder NULL.
+     */
+    public void setId(Long id);
 }
