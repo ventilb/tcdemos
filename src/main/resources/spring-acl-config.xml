@@ -48,6 +48,13 @@ We'll rely on the standard AclPermissionEvaluator implementation -->
         <constructor-arg ref="dataSource"/>
         <constructor-arg ref="lookupStrategy"/>
         <constructor-arg ref="aclCache"/>
+        <!--
+        Spring-Security-ACL ist per Default für die Verwendung von HSQLDB
+        konfiguriert. Wir müssen es hier auf die Verwendung von MySQL
+        umstellen.
+        -->
+        <property name="sidIdentityQuery" value="SELECT LAST_INSERT_ID()"/>
+        <property name="classIdentityQuery" value="SELECT LAST_INSERT_ID()"/>
     </bean>
 
     <!-- Declare a lookup strategy-->

@@ -20,17 +20,19 @@ import de.iew.demos.model.NodeModel;
 import de.iew.demos.model.NodeToNodelModelTransformer;
 import de.iew.domain.DataSource;
 import de.iew.domain.Node;
+import de.iew.domain.principals.Authority;
 import de.iew.framework.utils.LocaleStringResolver;
-import de.iew.services.DataSourceServiceFactory;
-import de.iew.services.DataSourceService;
+import de.iew.services.*;
 import de.iew.services.tree.NodeVisitor;
 import de.iew.domain.ModelNotFoundException;
-import de.iew.services.TreeService;
 import de.iew.web.isc.DSResponseCollection;
 import de.iew.web.isc.DSResponseObject;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.acls.domain.BasePermission;
+import org.springframework.security.acls.model.MutableAcl;
+import org.springframework.security.acls.model.Permission;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -53,6 +55,10 @@ public class TreeController {
     private TreeService treeService;
 
     private DataSourceServiceFactory dataSourceServiceFactory;
+
+    private AclEditorService aclEditorService;
+
+    private UserDetailsService userDetailsService;
 
     @RequestMapping(value = "/fetch", method = RequestMethod.GET)
     @ResponseBody
@@ -114,6 +120,17 @@ public class TreeController {
             }
         }
 
+        // ACL Konfigurieren. Hier setzen wir erstmal für ROLE_ADMIN das ADMINISTRATION Privileg
+        MutableAcl acl;
+        Authority administration = this.userDetailsService.getAdministrativeAuthority();
+        Permission admPermission = BasePermission.ADMINISTRATION;
+
+        acl = this.aclEditorService.createAcl(dataSource.getClass(), dataSource.getId());
+        this.aclEditorService.grantPermission(acl, admPermission, administration);
+
+        acl = this.aclEditorService.createAcl(newNode.getClass(), newNode.getId());
+        this.aclEditorService.grantPermission(acl, admPermission, administration);
+
         return new DSResponseObject(nodeVisitor.visitNode(newNode));
     }
 
@@ -168,6 +185,16 @@ public class TreeController {
     @Autowired
     public void setDataSourceServiceFactory(DataSourceServiceFactory dataSourceServiceFactory) {
         this.dataSourceServiceFactory = dataSourceServiceFactory;
+    }
+
+    @Autowired
+    public void setAclEditorService(AclEditorService aclEditorService) {
+        this.aclEditorService = aclEditorService;
+    }
+
+    @Autowired
+    public void setUserDetailsService(UserDetailsService userDetailsService) {
+        this.userDetailsService = userDetailsService;
     }
 
     public static enum AddNodeOperation {

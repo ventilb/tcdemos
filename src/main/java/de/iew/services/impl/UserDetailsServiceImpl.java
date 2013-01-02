@@ -18,7 +18,9 @@ package de.iew.services.impl;
 
 import de.iew.domain.ModelNotFoundException;
 import de.iew.domain.principals.Account;
+import de.iew.domain.principals.Authority;
 import de.iew.persistence.AccountDao;
+import de.iew.persistence.AuthorityDao;
 import de.iew.services.UserDetailsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -38,6 +40,10 @@ public class UserDetailsServiceImpl implements UserDetailsService, org.springfra
 
     private AccountDao accountDao;
 
+    private AuthorityDao authorityDao;
+
+    private String administrativeAuthoritySystemName = "ROLE_ADMIN";
+
     public Account loadUserByLoginName(String loginName) throws ModelNotFoundException {
         Account account = getAccountById(1);
 
@@ -54,6 +60,19 @@ public class UserDetailsServiceImpl implements UserDetailsService, org.springfra
         return account;
     }
 
+    public Authority getAdministrativeAuthority() throws ModelNotFoundException, UnsupportedOperationException {
+        if (this.administrativeAuthoritySystemName == null || "".equals(this.administrativeAuthoritySystemName.trim())) {
+            throw new UnsupportedOperationException("getAdministrativeAuthority() is not supported. The administrativeAuthoritySystemName property is not configured.");
+        }
+        Authority authority = this.authorityDao.findBySystemName(this.administrativeAuthoritySystemName);
+
+        if (authority == null) {
+            throw new ModelNotFoundException("The configured administrative authority " + this.administrativeAuthoritySystemName + " was not found.");
+        }
+
+        return authority;
+    }
+
     // org.springframework.security.core.userdetails.UserDetailsService Implementierung ////////////////////////////////
     public UserDetails loadUserByUsername(String s) throws UsernameNotFoundException {
         try {
@@ -68,4 +87,12 @@ public class UserDetailsServiceImpl implements UserDetailsService, org.springfra
         this.accountDao = accountDao;
     }
 
+    @Autowired
+    public void setAuthorityDao(AuthorityDao authorityDao) {
+        this.authorityDao = authorityDao;
+    }
+
+    public void setAdministrativeAuthoritySystemName(String administrativeAuthoritySystemName) {
+        this.administrativeAuthoritySystemName = administrativeAuthoritySystemName;
+    }
 }

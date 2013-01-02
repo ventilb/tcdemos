@@ -18,6 +18,7 @@ package de.iew.services;
 
 import de.iew.domain.ModelNotFoundException;
 import de.iew.domain.principals.Account;
+import de.iew.domain.principals.Authority;
 
 /**
  * Beschreibt die Schnittstelle für einen Dienst zur Nutzerverwaltung.
@@ -39,4 +40,15 @@ public interface UserDetailsService {
      *                                existiert.
      */
     public Account loadUserByLoginName(String loginName) throws ModelNotFoundException;
+
+    /**
+     * Liefert das {@link Authority}-Domainmodell für administrative Aufgaben.
+     *
+     * @return Das Authority-Domainmodell für administrative Aufgaben.
+     * @throws ModelNotFoundException        Wenn das Domainmodell nicht gefunden
+     *                                       wurde.
+     * @throws UnsupportedOperationException Wenn diese Operation nicht unterstützt
+     *                                       wird.
+     */
+    public Authority getAdministrativeAuthority() throws ModelNotFoundException, UnsupportedOperationException;
 }
