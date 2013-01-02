@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-package de.iew.sketchpad.services;
+package de.iew.services;
 
-import de.iew.sketchpad.services.model.*;
+import de.iew.domain.sketchpad.*;
 
 /**
  * Beschreibt die Schnittstelle für den Sketchpad-Dienst.

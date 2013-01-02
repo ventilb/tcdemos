@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-package de.iew.sketchpad.services.impl;
+package de.iew.services.impl;
 
-import de.iew.sketchpad.services.SketchPadService;
-import de.iew.sketchpad.services.model.*;
+import de.iew.domain.sketchpad.*;
+import de.iew.services.SketchPadService;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.stereotype.Service;
@@ -32,7 +32,7 @@ import java.util.TreeMap;
 
 /**
  * Implementiert einen {@link SketchPadService}, der die Polygone im Speicher
- * verwalter.
+ * verwaltet.
  *
  * @author Manuel Schulze <manuel_schulze@i-entwicklung.de>
  * @since 11.11.12 - 10:35

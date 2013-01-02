@@ -14,36 +14,62 @@
  * limitations under the License.
  */
 
-package de.iew.sketchpad.services.model;
+package de.iew.domain.sketchpad;
 
 import java.io.Serializable;
 
 /**
- * Implementiert das Domainmodell für eine Farbe im RGB-Farbraum mit
- * Alpha-Kanal.
+ * Implementiert das Domainmodell für eine Farbe im RGB-Farbraum.
  *
  * @author Manuel Schulze <manuel_schulze@i-entwicklung.de>
- * @since 11.11.12 - 14:04
+ * @since 11.11.12 - 13:12
  */
-public class RgbaColor extends RgbColor implements Serializable {
+public class RgbColor implements Serializable {
 
-    private double a;
+    private Long id;
 
-    public double getA() {
-        return a;
+    private int r;
+    private int g;
+    private int b;
+
+    public Long getId() {
+        return id;
     }
 
-    public void setA(double a) {
-        this.a = a;
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public int getR() {
+        return r;
+    }
+
+    public void setR(int r) {
+        this.r = r;
+    }
+
+    public int getG() {
+        return g;
+    }
+
+    public void setG(int g) {
+        this.g = g;
+    }
+
+    public int getB() {
+        return b;
+    }
+
+    public void setB(int b) {
+        this.b = b;
     }
 
     @Override
     public String toString() {
-        return "RgbaColor{" +
-                "r=" + getR() +
-                ", g=" + getG() +
-                ", b=" + getB() +
-                "a=" + a +
+        return "RgbColor{" +
+                "r=" + r +
+                ", g=" + g +
+                ", b=" + b +
                 '}';
     }
 }

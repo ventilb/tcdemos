@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package de.iew.sketchpad.services.model;
+package de.iew.domain.sketchpad;
 
 import java.io.Serializable;
 import java.util.Arrays;

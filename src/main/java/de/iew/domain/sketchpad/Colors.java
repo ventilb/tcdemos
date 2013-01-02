@@ -14,27 +14,27 @@
  * limitations under the License.
  */
 
-package de.iew.sketchpad.services.model;
+package de.iew.domain.sketchpad;
 
 import java.util.ArrayList;
 import java.util.Collection;
 
 /**
- * Implementiert das Domainmodell für die Verwaltung einer Polygon-Liste.
+ * Implementiert das Domainmodell für eine Farbliste.
  *
  * @author Manuel Schulze <manuel_schulze@i-entwicklung.de>
  * @see <a href="http://stackoverflow.com/questions/10864049/map-json-array-of-objects-to-requestbody-listt-using-jackson">JSON-Array in Liste serialisieren</a>
- * @since 11.11.12 - 10:30
+ * @since 11.11.12 - 14:18
  */
-public class Polygons extends ArrayList<Polygon> {
-    public Polygons(int initialCapacity) {
+public class Colors extends ArrayList<RgbColor> {
+    public Colors(int initialCapacity) {
         super(initialCapacity);
     }
 
-    public Polygons() {
+    public Colors() {
     }
 
-    public Polygons(Collection<? extends Polygon> c) {
+    public Colors(Collection<? extends RgbColor> c) {
         super(c);
     }
 }

@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-package de.iew.sketchpad.controllers;
+package de.iew.demos.controllers;
 
-import de.iew.sketchpad.services.SketchPadService;
-import de.iew.sketchpad.services.model.*;
+import de.iew.domain.sketchpad.*;
+import de.iew.services.SketchPadService;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;

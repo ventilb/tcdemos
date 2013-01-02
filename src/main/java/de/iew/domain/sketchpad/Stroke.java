@@ -14,27 +14,34 @@
  * limitations under the License.
  */
 
-package de.iew.sketchpad.services.model;
+package de.iew.domain.sketchpad;
 
-import java.util.ArrayList;
-import java.util.Collection;
+import java.io.Serializable;
 
 /**
- * Implementiert das Domainmodell für eine Farbliste.
+ * Implementiert das Domainmodell für eine Strich-Einstellung.
  *
  * @author Manuel Schulze <manuel_schulze@i-entwicklung.de>
- * @see <a href="http://stackoverflow.com/questions/10864049/map-json-array-of-objects-to-requestbody-listt-using-jackson">JSON-Array in Liste serialisieren</a>
- * @since 11.11.12 - 14:18
+ * @since 11.11.12 - 17:44
  */
-public class Colors extends ArrayList<RgbColor> {
-    public Colors(int initialCapacity) {
-        super(initialCapacity);
+public class Stroke implements Serializable {
+    private long id;
+
+    private double strokeWidth;
+
+    public long getId() {
+        return id;
     }
 
-    public Colors() {
+    public void setId(long id) {
+        this.id = id;
     }
 
-    public Colors(Collection<? extends RgbColor> c) {
-        super(c);
+    public double getStrokeWidth() {
+        return strokeWidth;
+    }
+
+    public void setStrokeWidth(double strokeWidth) {
+        this.strokeWidth = strokeWidth;
     }
 }
