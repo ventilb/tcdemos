@@ -21,12 +21,10 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Table;
-import javax.persistence.Transient;
+import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 /**
  * Beschreibt ein Domainmodell für die Verwaltung eines Accounts.
@@ -45,6 +43,8 @@ public class Account extends AbstractModel implements UserDetails {
     private boolean locked;
 
     private boolean enabled;
+
+    private List<Authority> authorities = new ArrayList<Authority>();
 
     public void setUsername(String username) {
         this.username = username;
@@ -68,11 +68,14 @@ public class Account extends AbstractModel implements UserDetails {
     }
 
     // UserDetails Methodenimplementierungen //////////////////////////////////
-    @Transient
-    public Collection<? extends GrantedAuthority> getAuthorities() {
-        ArrayList<GrantedAuthority> authorities = new ArrayList<GrantedAuthority>();
-        authorities.add(new SimpleGrantedAuthority("ROLE_ADMIN"));
-        return authorities;
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(name = "account_authority", joinColumns = {@JoinColumn(name = "account_id")}, inverseJoinColumns = {@JoinColumn(name = "authority_id")})
+    public List<Authority> getAuthorities() {
+        return this.authorities;
+    }
+
+    public void setAuthorities(List<Authority> authorities) {
+        this.authorities = authorities;
     }
 
     @Column(length = 255)
