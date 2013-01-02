@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 Manuel Schulze <manuel_schulze@i-entwicklung.de>
+ * Copyright 2013 Manuel Schulze <manuel_schulze@i-entwicklung.de>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,88 +15,14 @@
  */
 
 /**
- * Stellt Hilfsklassen und Primitive für das Sketchpad bereit.
+ * Implementiert Grafikobjekte.
  *
  * @author Manuel Schulze <manuel_schulze@i-entwicklung.de>
- * @since 11.11.12 - 00:42
+ * @since 02.01.13 - 13:22
  */
 
 define(function () {
-
-    function Paint(context, width, height) {
-        var animator = null;
-        var animating = false;
-
-        this.context = context;
-        this.clearPaintOnDraw = false;
-        this.shapes = new Array();
-
-        this.addShape = function (/* Shape */ shape) {
-            shape.context = this.context;
-            this.shapes.push(shape);
-        }
-
-        this.removeAllShapes = function () {
-            this.shapes.length = 0;
-        }
-
-        this.pickShapeAt = function (/* Integer */ x, /* Integer */ y) {
-            var shape = null;
-            var length = this.shapes.length;
-            for (var i = length - 1; i >= 0; i--) {
-                shape = this.shapes[i];
-                if (shape.pickable && shape.contains(x, y)) {
-                    return shape;
-                }
-            }
-            return null;
-        }
-
-        this.draw = function () {
-            if (this.clearPaintOnDraw) {
-                this.clearPaint();
-            }
-
-            var shape = null;
-            var shapeCount = this.shapes.length;
-            for (var i = 0; i < shapeCount; i++) {
-                shape = this.shapes[i];
-                if (shape.dirty || this.clearPaintOnDraw) {
-                    shape.draw();
-                }
-            }
-        }
-
-        this.clearPaint = function () {
-            this.clearArea(0, 0, width, height);
-        }
-
-        this.clearArea = function (x, y, w, h) {
-            this.context.clearRect(x, y, w, h);
-        }
-
-        this.animate = function (/* Integer */ refresh) {
-            if (animating) {
-                return;
-            }
-            var paint = this;
-
-            paint.draw();
-            animator = setInterval(function () {
-                paint.draw();
-            }, refresh);
-            animating = true;
-        }
-
-        this.stopAnimation = function () {
-            if (animating) {
-                clearInterval(animator);
-                animating = false;
-            }
-        }
-    }
-
-// Shape Basisklasse //////////////////////////////////////////////////////////
+    // Shape Basisklasse //////////////////////////////////////////////////////////
     function Shape() {
 
         /**
@@ -113,6 +39,11 @@ define(function () {
          */
         this.pickable = true;
 
+        /**
+         * Flag ob dieses Shape verändert wurde.
+         *
+         * @type {boolean}
+         */
         this.dirty = false;
     }
 
@@ -132,7 +63,7 @@ define(function () {
         return (results && results.length > 1) ? results[1] : "";
     };
 
-// Rect Shape /////////////////////////////////////////////////////////////////
+    // Rect Shape /////////////////////////////////////////////////////////////////
     Rect.prototype = new Shape();
     Rect.prototype.constructor = Rect;
     Rect.prototype.parent = Shape.prototype;
@@ -201,7 +132,7 @@ define(function () {
         return 'Rect[x=' + this.rx + ',y=' + this.ry + ',w=' + this.rw + ',h=' + this.rh + ']';
     }
 
-// Polygon Shape //////////////////////////////////////////////////////////////
+    // Polygon Shape //////////////////////////////////////////////////////////////
     Polygon.prototype = new Shape();
     Polygon.prototype.constructor = Polygon;
     Polygon.prototype.parent = Shape.prototype;
@@ -251,4 +182,8 @@ define(function () {
         return 'Polygon[pointCount=' + this.segments.length + ']';
     }
 
+    return {
+        Polygon: Polygon,
+        Rect: Rect
+    }
 });

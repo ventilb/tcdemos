@@ -149,27 +149,27 @@ textarea {
     border-bottom: 1px solid #cccccc;
 }
 
-#color_chooser,
-#stroke_chooser {
+.sketch_pad .color_chooser,
+.sketch_pad .stroke_chooser {
     width: 50px;
     padding: 0 0 4px 0;
     margin: 0;
     list-style-type: none;
 }
 
-#color_chooser .color_chooser_item,
-#stroke_chooser .stroke_chooser_item {
+.sketch_pad .color_chooser .color_chooser_item,
+.sketch_pad .stroke_chooser .stroke_chooser_item {
     height: 20px;
     line-height: 20px;
     position: relative;
     margin-bottom: 1px;
 }
 
-#stroke_chooser .stroke_chooser_item {
+.sketch_pad .stroke_chooser .stroke_chooser_item {
     border: 1px solid #eeeeee;
 }
 
-#stroke_chooser .stroke_chooser_item hr {
+.sketch_pad .stroke_chooser .stroke_chooser_item hr {
     background-color: #000000;
     border: none;
     color: #000000;

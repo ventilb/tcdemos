@@ -22,9 +22,35 @@
  * @since 10.11.12 - 16:59
  */
 
-define(['jquery', 'core', 'paint'], function ($, core) {
+define(['jquery', 'core', 'sketchpad/paint', 'sketchpad/shapes'], function ($, core, Paint, Shapes) {
+    function buildImageFrame(/* Paint */ paint, /* Rect */ topLeftRect, /* Rect */ bottomRightRect) {
+        $.ajax({
+            url: core.baseUrl('/photo/getimageframe.json'),
+            type: 'GET',
+            contentType: 'application/json',
+            success: function (data) {
+                topLeftRect.moveTo(data.px1, data.py1);
+                bottomRightRect.moveTo(data.px2, data.py2);
 
-    $(document).ready(function () {
+                var rect3 = new Shapes.Rect(topLeftRect.cx, topLeftRect.cy, bottomRightRect.cx - topLeftRect.cx, bottomRightRect.cy - topLeftRect.cy);
+                rect3.pickable = false;
+
+                topLeftRect.moved = function () {
+                    rect3.moveTopLeftTo(this.cx, this.cy);
+                }
+                bottomRightRect.moved = function () {
+                    rect3.moveBottomRightTo(this.cx, this.cy);
+                }
+
+                paint.addShape(rect3);
+                paint.addShape(topLeftRect);
+                paint.addShape(bottomRightRect);
+            }
+        });
+
+    }
+
+    return function () {
         var element = $('#photo_editor canvas');
         var offset = element.offset();
 
@@ -35,8 +61,8 @@ define(['jquery', 'core', 'paint'], function ($, core) {
             var paint = new Paint(photoContext, photoCanvas.width, photoCanvas.height);
             paint.clearPaintOnDraw = true;
 
-            var topLeftRect = new Rect(0, 0, 20, 20);
-            var bottomRightRect = new Rect(0, 0, 20, 20);
+            var topLeftRect = new Shapes.Rect(0, 0, 20, 20);
+            var bottomRightRect = new Shapes.Rect(0, 0, 20, 20);
 
             buildImageFrame(paint, topLeftRect, bottomRightRect);
 
@@ -87,7 +113,7 @@ define(['jquery', 'core', 'paint'], function ($, core) {
                 if (dragShape != null) {
                     switch (dragShape.getName()) {
                         case 'Rect':
-                            jQuery.ajax({
+                            $.ajax({
                                 url: core.baseUrl('/photo/setimageframe.json'),
                                 type: 'POST',
                                 contentType: 'application/json',
@@ -107,33 +133,6 @@ define(['jquery', 'core', 'paint'], function ($, core) {
             });
 
         }
-    });
-
-    function buildImageFrame(/* Paint */ paint, /* Rect */ topLeftRect, /* Rect */ bottomRightRect) {
-        jQuery.ajax({
-            url: core.baseUrl('/photo/getimageframe.json'),
-            type: 'GET',
-            contentType: 'application/json',
-            success: function (data) {
-                topLeftRect.moveTo(data.px1, data.py1);
-                bottomRightRect.moveTo(data.px2, data.py2);
-
-                var rect3 = new Rect(topLeftRect.cx, topLeftRect.cy, bottomRightRect.cx - topLeftRect.cx, bottomRightRect.cy - topLeftRect.cy);
-                rect3.pickable = false;
-
-                topLeftRect.moved = function () {
-                    rect3.moveTopLeftTo(this.cx, this.cy);
-                }
-                bottomRightRect.moved = function () {
-                    rect3.moveBottomRightTo(this.cx, this.cy);
-                }
-
-                paint.addShape(rect3);
-                paint.addShape(topLeftRect);
-                paint.addShape(bottomRightRect);
-            }
-        });
-
     }
 
 });

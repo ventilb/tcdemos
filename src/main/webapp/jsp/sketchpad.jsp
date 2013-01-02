@@ -25,18 +25,20 @@
 </div>
 <div id="content">
     <script type="text/javascript">
-        require(['sketch-pad'], function() {
-
+        require(['jquery', 'sketchpad/sketch-pad'], function($, SketchPad) {
+            $(document).ready(function() {
+                var sketchPad = new SketchPad('#sketch_pad');
+            });
         });
     </script>
 
     <div id="sketch_pad" class="sketch_pad">
         <canvas width="1000" height="700"></canvas>
         <div id="right_margin_toolbar">
-            <ul id="color_chooser">
+            <ul class="color_chooser">
 
             </ul>
-            <ul id="stroke_chooser">
+            <ul class="stroke_chooser">
 
             </ul>
         </div>

@@ -21,8 +21,8 @@
 
 <div id="content">
     <script type="text/javascript">
-        require(['photo'], function() {
-
+        require(['photo'], function(Photo) {
+            var photo = new Photo();
         });
     </script>
     <div id="photo_editor" class="photo_editor">
