@@ -64,6 +64,10 @@ public abstract class AbstractHbmDomainModelDaoImpl<M extends AbstractModel> ext
         return (Collection<M>) crit.list();
     }
 
+    public void refresh(M domainModel) {
+        getCurrentSession().refresh(domainModel);
+    }
+
     public Criteria createCriteria() {
         return getCurrentSession().createCriteria(this.domainModelClass);
     }

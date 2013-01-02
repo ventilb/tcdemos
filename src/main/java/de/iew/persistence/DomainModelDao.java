@@ -50,6 +50,20 @@ public interface DomainModelDao<M extends AbstractModel> {
     public void remove(M domainModel);
 
     /**
+     * Läd den Zustand des angegebenen Domainmodells neu aus dem Backend.
+     * <p>
+     * Kann verwendet werden, wenn sich der Zustand innerhalb einer Hibernate
+     * Sitzung ändert ohne das Hibernate davon erfährt. Zum Beispiel wenn
+     * zu dem Objekt ein Trigger gefeuert hat. Kann auch nützlich sein um
+     * bidirektionale Assoziationen zu aktualisieren, nachdem nur eine Seite
+     * der Assoziation, aus Performancegründen, konfiguriert wurde.
+     * </p>
+     *
+     * @param domainModel Das zu aktualisierende Domainmodell.
+     */
+    public void refresh(M domainModel);
+
+    /**
      * Liefert das Domainmodell mit der angegebenen Id.
      *
      * @param id Die Id des Domainmodells.

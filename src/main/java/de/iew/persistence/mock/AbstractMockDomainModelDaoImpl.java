@@ -72,6 +72,9 @@ public abstract class AbstractMockDomainModelDaoImpl<M extends AbstractModel> im
         return this.models.values();
     }
 
+    public void refresh(M domainModel) {
+    }
+
     protected long newId() {
         return ++this.lastIdUsed;
     }
