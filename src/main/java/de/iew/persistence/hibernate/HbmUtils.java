@@ -16,6 +16,7 @@
 
 package de.iew.persistence.hibernate;
 
+import de.iew.domain.AbstractModel;
 import de.iew.domain.DataSource;
 import org.hibernate.Hibernate;
 import org.hibernate.proxy.HibernateProxy;
@@ -36,15 +37,11 @@ import org.hibernate.proxy.HibernateProxy;
 public class HbmUtils {
 
     /**
-     * Prüft für die angegebene DataSource ob es ein {@link HibernateProxy}
-     * ist und liefert gegebenenfalls das reale DataSource Objekt zurück.
+     * Prüft für das angegebene Modell ob es ein {@link HibernateProxy}
+     * ist und liefert gegebenenfalls das reale Modell Objekt zurück.
      * <p>
-     * Wenn die angegebene DataSource kein {@link HibernateProxy} ist
+     * Wenn das angegebene Modell kein {@link HibernateProxy} ist
      * dann wird das Objekt unverändert zurückgegeben.
-     * </p>
-     * <p>
-     * Abhängig von der DataSource Hierarchie wird die Subklasse der
-     * DataSource zurückgegeben.
      * </p>
      * <pre>
      * DataSource simpleTextDataProxy = someNode.getDataSource();
@@ -52,16 +49,16 @@ public class HbmUtils {
      * assertTrue(realSimpleTextData instanceof SimpleTextData);
      * </pre>
      *
-     * @param dataSource Die umzuwandelnde DataSource.
-     * @return Die umgewandelte DataSource.
+     * @param model Das umzuwandelnde Modell.
+     * @return Das umgewandelte Modell.
      */
-    public static DataSource fromProxy(DataSource dataSource) {
-        if (dataSource instanceof HibernateProxy) {
-            HibernateProxy hibernateProxy = (HibernateProxy) dataSource;
-            dataSource = (DataSource) hibernateProxy.getHibernateLazyInitializer().getImplementation();
+    public static AbstractModel fromProxy(AbstractModel model) {
+        if (model instanceof HibernateProxy) {
+            HibernateProxy hibernateProxy = (HibernateProxy) model;
+            model = (AbstractModel) hibernateProxy.getHibernateLazyInitializer().getImplementation();
         }
 
-        return dataSource;
+        return model;
     }
 
     public static Class determineRealClass(DataSource dataSource) {
