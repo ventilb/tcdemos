@@ -45,7 +45,11 @@ public class UserDetailsServiceImpl implements UserDetailsService, org.springfra
     private String administrativeAuthoritySystemName = "ROLE_ADMIN";
 
     public Account loadUserByLoginName(String loginName) throws ModelNotFoundException {
-        Account account = getAccountById(1);
+        Account account = this.accountDao.findAccountByUsername(loginName);
+
+        if (account == null) {
+            throw new ModelNotFoundException("The requested account " + loginName + " was not found.");
+        }
 
         return account;
     }

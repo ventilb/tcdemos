@@ -18,6 +18,8 @@ package de.iew.persistence.hibernate;
 
 import de.iew.domain.principals.Account;
 import de.iew.persistence.AccountDao;
+import org.hibernate.Criteria;
+import org.hibernate.criterion.Restrictions;
 import org.springframework.stereotype.Repository;
 
 /**
@@ -28,4 +30,9 @@ import org.springframework.stereotype.Repository;
  */
 @Repository(value = "accountDao")
 public class HbmAccountDaoImpl extends AbstractHbmDomainModelDaoImpl<Account> implements AccountDao {
+    public Account findAccountByUsername(String username) {
+        Criteria criteria = createCriteria();
+        criteria.add(Restrictions.eq("username", username));
+        return (Account) criteria.uniqueResult();
+    }
 }

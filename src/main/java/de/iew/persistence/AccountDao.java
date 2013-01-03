@@ -26,4 +26,13 @@ import de.iew.domain.principals.Account;
  * @since 01.12.12 - 16:10
  */
 public interface AccountDao extends DomainModelDao<Account> {
+
+    /**
+     * Liefert den Account mit dem angegebenen Benutzernamen.
+     *
+     * @param username Der Benutzername.
+     * @return Der Account zu dem Benutzernamen oder NULL wenn kein solcher
+     *         Account existiert.
+     */
+    public Account findAccountByUsername(String username);
 }
