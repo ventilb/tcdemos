@@ -86,9 +86,9 @@
             <version>3.1.2.RELEASE</version>
         </dependency>
         <dependency>
-        	<groupId>org.springframework.security</groupId>
-        	<artifactId>spring-security-core</artifactId>
-        	<version>3.1.2.RELEASE</version>
+            <groupId>org.springframework.security</groupId>
+            <artifactId>spring-security-core</artifactId>
+            <version>3.1.2.RELEASE</version>
         </dependency>
         <dependency>
             <!-- Damit wir den security: namespace in den XML-Dateien haben -->
@@ -237,6 +237,24 @@
             <groupId>commons-beanutils</groupId>
             <artifactId>commons-beanutils</artifactId>
             <version>1.8.3</version>
+        </dependency>
+        <!--
+        Für Formular Validierung. API und Implementierung von JSR-303
+
+        Lizenz: Open Source laut JSR-303 Webseite
+        -->
+        <dependency>
+            <groupId>javax.validation</groupId>
+            <artifactId>validation-api</artifactId>
+            <version>1.0.0.GA</version>
+        </dependency>
+        <!--
+        Lizenz: Apache 2.0 (http://www.hibernate.org/subprojects/validator.html)
+        -->
+        <dependency>
+            <groupId>org.hibernate</groupId>
+            <artifactId>hibernate-validator</artifactId>
+            <version>4.3.0.Final</version>
         </dependency>
     </dependencies>
     <build>
