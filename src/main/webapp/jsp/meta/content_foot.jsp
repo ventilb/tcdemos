@@ -2,7 +2,7 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="iew" uri="/WEB-INF/taglibs/iew.tld" %>
 <%--
-  ~ Copyright 2012 Manuel Schulze <manuel_schulze@i-entwicklung.de>
+  ~ Copyright 2012-2013 Manuel Schulze <manuel_schulze@i-entwicklung.de>
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -17,14 +17,8 @@
   ~ limitations under the License.
   --%>
 
-<head>
-    <title>${pageTitle} // i-entwicklung Tomcat Demos</title>
-    <link href="${pageContext.request.contextPath}/static/css/page.css" rel="stylesheet" type="text/css"/>
-    <link href="${pageContext.request.contextPath}/static/css/forms.css" rel="stylesheet" type="text/css"/>
-    <iew:loadIsc/>
-    <iew:requireJS baseUrl="static/js" src="static/js/require-jquery.js">
-        <iew:requireJS_Package name="nls" location="nls" main="nls"/>
-        <iew:requireJS_Package name="core" main="jsconfig"/>
-        <iew:requireJS_I18nConfig autodetect="true"/>
-    </iew:requireJS>
-</head>
+<div id="content_foot">
+    <div class="inner">
+        &copy; 2012-2013 by Manuel Schulze &#8210; <a href="mailto:manuel_schulze@i-entwicklung.de">manuel_schulze@i-entwicklung.de</a>
+    </div>
+</div>

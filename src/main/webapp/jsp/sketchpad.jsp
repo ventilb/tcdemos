@@ -1,4 +1,6 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%@ taglib prefix="sec" uri="http://www.springframework.org/security/tags" %>
+<%@ taglib prefix="spring" uri="http://www.springframework.org/tags" %>
 <%--
   ~ Copyright 2012 Manuel Schulze <manuel_schulze@i-entwicklung.de>
   ~
@@ -16,13 +18,11 @@
   --%>
 
 <html>
+<spring:message var="pageTitle" code="page.sketchpad.title"/>
 <%@ include file="meta/head.jsp" %>
 <body>
-<div id="content_head">
-    <div class="inner">
-        SketchPad Demo
-    </div>
-</div>
+<%@ include file="meta/content_top.jsp" %>
+<%@ include file="meta/content_head.jsp" %>
 <div id="content">
     <script type="text/javascript">
         require(['jquery', 'sketchpad/sketch-pad'], function($, SketchPad) {
@@ -44,10 +44,6 @@
         </div>
     </div>
 </div>
-<div id="content_foot">
-    <div class="inner">
-        &copy; 2012 by Manuel Schulze &#8210; <a href="mailto:manuel_schulze@i-entwicklung.de">manuel_schulze@i-entwicklung.de</a>
-    </div>
-</div>
+<%@ include file="meta/content_foot.jsp" %>
 </body>
 </html>

@@ -1,8 +1,9 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="iew" uri="/WEB-INF/taglibs/iew.tld" %>
+<%@ taglib prefix="sec" uri="http://www.springframework.org/security/tags" %>
 <%--
-  ~ Copyright 2012 Manuel Schulze <manuel_schulze@i-entwicklung.de>
+  ~ Copyright 2012-2013 Manuel Schulze <manuel_schulze@i-entwicklung.de>
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -17,14 +18,16 @@
   ~ limitations under the License.
   --%>
 
-<head>
-    <title>${pageTitle} // i-entwicklung Tomcat Demos</title>
-    <link href="${pageContext.request.contextPath}/static/css/page.css" rel="stylesheet" type="text/css"/>
-    <link href="${pageContext.request.contextPath}/static/css/forms.css" rel="stylesheet" type="text/css"/>
-    <iew:loadIsc/>
-    <iew:requireJS baseUrl="static/js" src="static/js/require-jquery.js">
-        <iew:requireJS_Package name="nls" location="nls" main="nls"/>
-        <iew:requireJS_Package name="core" main="jsconfig"/>
-        <iew:requireJS_I18nConfig autodetect="true"/>
-    </iew:requireJS>
-</head>
+<c:set var="baseUrl" value="${pageContext.request.contextPath}"/>
+<div id="content_top">
+    <div class="inner">
+        <sec:authorize access="isAnonymous()">
+            <a href="${baseUrl}/identity/login.html">Login</a>
+        </sec:authorize>
+        <sec:authorize access="isAuthenticated()">
+            <sec:authentication var="authenticatedUsername" property="principal.username"/>
+            <spring:message code="welcome.username.message" arguments="${authenticatedUsername}"/>
+            <a href="${baseUrl}/identity/logout.html">Logout</a>
+        </sec:authorize>
+    </div>
+</div>

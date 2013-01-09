@@ -17,13 +17,11 @@
   --%>
 
 <html>
+<spring:message var="pageTitle" code="page.treedemo.title"/>
 <%@ include file="meta/head.jsp" %>
 <body>
-<div id="content_head">
-    <div class="inner">
-        <spring:message code="treedemo.page.title"/>
-    </div>
-</div>
+<%@ include file="meta/content_top.jsp" %>
+<%@ include file="meta/content_head.jsp" %>
 <div id="content">
     <script type="text/javascript">
         requirejs(['i18n!nls/messages', 'core', 'modules/TreeDemoContextMenu', 'modules/IewTreeGrid', 'modules/IewTreeGridRestDataSource', 'modules/SimpleTextItemEditorDialog'], function (msg, core) {
@@ -133,10 +131,6 @@
         });
     </script>
 </div>
-<div id="content_foot">
-    <div class="inner">
-        &copy; 2012 by Manuel Schulze &#8210; <a href="mailto:manuel_schulze@i-entwicklung.de">manuel_schulze@i-entwicklung.de</a>
-    </div>
-</div>
+<%@ include file="meta/content_foot.jsp" %>
 </body>
 </html>
