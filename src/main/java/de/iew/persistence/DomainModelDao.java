@@ -23,6 +23,41 @@ import java.util.Collection;
 /**
  * Beschreibt eine allgemeine Schnittstelle für den Zugriff auf die
  * Domainmodelle.
+ * <p>
+ * Wir modellieren explizit DAOs für Domainmodelle. Diese DAOs bieten Methoden
+ * für die Verwaltung eines konkreten Domainmodells. In den meisten Fällen sind
+ * es CRUD-Methoden. Zusätzliche Methoden, die sich auf das verwaltete
+ * Domainmodell beziehen, gehören ebenfalls in diese DAOs.
+ * </p>
+ * <p>
+ * Oft findet man den Fall, dass eine DAO-Methode in mehreren Domainmodell-DAOs
+ * implementiert werden könnte. Das führt zu undurchsichtigem Code, da die
+ * Wahl des DAOs dann der Willkür des Entwicklers unterliegt. In solchen Fällen
+ * werden keine Domainmodell-DAOs implementiert sondern darauf aufsetzende
+ * "Operation"-DAOs (Siehe als Beispiel {@link TreeOperationDao}.
+ * </p>
+ * <pre>
+ * +-----------------------------------+
+ * |         Service-Schicht           |
+ * +-----------------------------------+
+ *                   ^
+ *                   |
+ *                   v
+ * +-----------------------------------+
+ * | Operation-DAO mit tollen Methoden |
+ * +-----------------------------------+
+ *        |          |         |
+ *        v          v         v
+ *   +--------+ +--------+ +--------+
+ *   | DM-Dao | | DM-Dao | | DM-Dao |
+ *   +--------+ +--------+ +--------+
+ *        ^          ^         ^
+ *        |          |         |
+ *        v          v         v
+ * +-----------------------------------+
+ * |             Datenbank             |
+ * +-----------------------------------+
+ * </pre>
  *
  * @author Manuel Schulze <manuel_schulze@i-entwicklung.de>
  * @since 17.11.12 - 10:09
