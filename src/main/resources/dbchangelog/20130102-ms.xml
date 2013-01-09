@@ -1,0 +1,507 @@
+<!--
+  ~ Copyright 2012-2013 Manuel Schulze <manuel_schulze@i-entwicklung.de>
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~     http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+    http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-2.0.xsd">
+
+    <!--
+    Verwaltet die SketchPads
+    -->
+    <changeSet id="37-ms" author="Manuel Schulze">
+        <createTable tableName="sketch_sketch_pad">
+            <column name="id" type="bigint" autoIncrement="false">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="created" type="DATETIME">
+                <constraints nullable="false"/>
+            </column>
+            <column name="state" type="varchar(30)" defaultValue="INACTIVE">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <modifySql dbms="mysql">
+            <!--
+            http://www.liquibase.org/manual/modify_sql
+            -->
+            <append value=" engine innodb"/>
+        </modifySql>
+    </changeSet>
+
+    <!--
+    Verwaltet die verfügbaren Farben
+    -->
+    <changeSet id="38-ms" author="Manuel Schulze">
+        <createTable tableName="sketch_color">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="colorType" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="ordinalNumber" type="int">
+                <constraints nullable="false"/>
+            </column>
+            <column name="r" type="int">
+                <constraints nullable="false"/>
+            </column>
+            <column name="g" type="int">
+                <constraints nullable="false"/>
+            </column>
+            <column name="b" type="int">
+                <constraints nullable="false"/>
+            </column>
+            <column name="a" type="double">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <modifySql dbms="mysql">
+            <!--
+            http://www.liquibase.org/manual/modify_sql
+            -->
+            <append value=" engine innodb"/>
+        </modifySql>
+    </changeSet>
+
+    <changeSet id="39-ms" author="Manuel Schulze">
+        <createTable tableName="sketch_stroke">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="ordinalNumber" type="int">
+                <constraints nullable="false"/>
+            </column>
+            <column name="strokeWidth" type="double">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <modifySql dbms="mysql">
+            <!--
+            http://www.liquibase.org/manual/modify_sql
+            -->
+            <append value=" engine innodb"/>
+        </modifySql>
+    </changeSet>
+
+    <changeSet id="40-ms" author="Manuel Schulze">
+        <createTable tableName="sketch_sketch_pad_color">
+            <column name="sketch_pad_id" type="bigint">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="color_id" type="bigint">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+        </createTable>
+        <modifySql dbms="mysql">
+            <!--
+            http://www.liquibase.org/manual/modify_sql
+            -->
+            <append value=" engine innodb"/>
+        </modifySql>
+    </changeSet>
+
+    <changeSet id="41-ms" author="Manuel Schulze">
+        <addForeignKeyConstraint baseTableName="sketch_sketch_pad" baseColumnNames="id"
+                                 constraintName="fk_sketch_sketch_pad_data_source"
+                                 referencedTableName="data_source"
+                                 referencedColumnNames="id" onUpdate="RESTRICT" onDelete="RESTRICT"/>
+        <addForeignKeyConstraint baseTableName="sketch_sketch_pad_color" baseColumnNames="sketch_pad_id"
+                                 constraintName="fk_sketch_sketch_pad_color_sketch_sketch_pad"
+                                 referencedTableName="sketch_sketch_pad"
+                                 referencedColumnNames="id" onDelete="RESTRICT" onUpdate="RESTRICT"/>
+        <addForeignKeyConstraint baseTableName="sketch_sketch_pad_color" baseColumnNames="color_id"
+                                 constraintName="fk_sketch_sketch_pad_color_sketch_color"
+                                 referencedTableName="sketch_color"
+                                 referencedColumnNames="id" onDelete="RESTRICT" onUpdate="RESTRICT"/>
+    </changeSet>
+
+    <changeSet id="42-ms" author="Manuel Schulze">
+        <createTable tableName="sketch_sketch_pad_stroke">
+            <column name="sketch_pad_id" type="bigint">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="stroke_id" type="bigint">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+        </createTable>
+        <modifySql dbms="mysql">
+            <!--
+            http://www.liquibase.org/manual/modify_sql
+            -->
+            <append value=" engine innodb"/>
+        </modifySql>
+    </changeSet>
+
+    <changeSet id="43-ms" author="Manuel Schulze">
+        <addForeignKeyConstraint baseTableName="sketch_sketch_pad_stroke" baseColumnNames="sketch_pad_id"
+                                 constraintName="fk_sketch_sketch_pad_stroke_sketch_pad"
+                                 referencedTableName="sketch_sketch_pad"
+                                 referencedColumnNames="id" onDelete="RESTRICT" onUpdate="RESTRICT"/>
+        <addForeignKeyConstraint baseTableName="sketch_sketch_pad_stroke" baseColumnNames="stroke_id"
+                                 constraintName="fk_sketch_sketch_pad_stroke_sketch_stroke"
+                                 referencedTableName="sketch_stroke"
+                                 referencedColumnNames="id" onDelete="RESTRICT" onUpdate="RESTRICT"/>
+    </changeSet>
+
+    <changeSet id="44-ms" author="Manuel Schulze">
+        <sql>
+            INSERT INTO acl_class VALUES(NULL, 'de.iew.domain.sketchpad.SketchPad');
+            INSERT INTO acl_class VALUES(NULL, 'de.iew.domain.sketchpad.Stroke');
+            INSERT INTO acl_class VALUES(NULL, 'de.iew.domain.sketchpad.RgbColor');
+            INSERT INTO acl_class VALUES(NULL, 'de.iew.domain.sketchpad.RgbaColor');
+            INSERT INTO acl_sid VALUES(NULL, false, 'ROLE_SKETCHPAD_ADMIN');
+            INSERT INTO acl_sid VALUES(NULL, false, 'ROLE_SKETCHPAD_USER');
+            INSERT INTO acl_sid VALUES(NULL, false, 'ROLE_SKETCHPAD_VISITOR');
+        </sql>
+    </changeSet>
+
+    <changeSet id="45-ms" author="Manuel Schulze">
+        <sql>
+            SET @ACL_RGB_COLOR_CLASS_ID=(SELECT id FROM acl_class WHERE class='de.iew.domain.sketchpad.RgbColor');
+            SET @ACL_SKETCH_PAD_ADMIN=(SELECT id FROM acl_sid WHERE sid='ROLE_SKETCHPAD_ADMIN');
+            SET @ACL_SKETCH_PAD_USER=(SELECT id FROM acl_sid WHERE sid='ROLE_SKETCHPAD_USER');
+            SET @ACL_SKETCH_PAD_VISITOR=(SELECT id FROM acl_sid WHERE sid='ROLE_SKETCHPAD_VISITOR');
+
+            /* Red */
+            INSERT INTO sketch_color VALUES(NULL, 'de.iew.domain.sketchpad.RgbColor', 0, 255, 0, 0, 0);
+            SET @COLOR_ID=(LAST_INSERT_ID());
+
+            INSERT INTO acl_object_identity VALUES(NULL, @ACL_RGB_COLOR_CLASS_ID, @COLOR_ID, NULL,
+            @ACL_SKETCH_PAD_ADMIN, false);
+            SET @ACL_OBJECT_ID=(LAST_INSERT_ID());
+
+            INSERT INTO acl_entry VALUES(NULL, @ACL_OBJECT_ID, 0, @ACL_SKETCH_PAD_ADMIN, 1, true, false, false);
+            INSERT INTO acl_entry VALUES(NULL, @ACL_OBJECT_ID, 1, @ACL_SKETCH_PAD_ADMIN, 2, true, false, false);
+            INSERT INTO acl_entry VALUES(NULL, @ACL_OBJECT_ID, 2, @ACL_SKETCH_PAD_ADMIN, 4, true, false, false);
+            INSERT INTO acl_entry VALUES(NULL, @ACL_OBJECT_ID, 3, @ACL_SKETCH_PAD_ADMIN, 8, true, false, false);
+            INSERT INTO acl_entry VALUES(NULL, @ACL_OBJECT_ID, 4, @ACL_SKETCH_PAD_USER, 1, true, false, false);
+            INSERT INTO acl_entry VALUES(NULL, @ACL_OBJECT_ID, 5, @ACL_SKETCH_PAD_VISITOR, 1, true, false, false);
+
+            /* Green */
+            INSERT INTO sketch_color VALUES(NULL, 'de.iew.domain.sketchpad.RgbColor', 1, 0, 255, 0, 0);
+            SET @COLOR_ID=(LAST_INSERT_ID());
+
+            INSERT INTO acl_object_identity VALUES(NULL, @ACL_RGB_COLOR_CLASS_ID, @COLOR_ID, NULL,
+            @ACL_SKETCH_PAD_ADMIN, false);
+            SET @ACL_OBJECT_ID=(LAST_INSERT_ID());
+
+            INSERT INTO acl_entry VALUES(NULL, @ACL_OBJECT_ID, 0, @ACL_SKETCH_PAD_ADMIN, 1, true, false, false);
+            INSERT INTO acl_entry VALUES(NULL, @ACL_OBJECT_ID, 1, @ACL_SKETCH_PAD_ADMIN, 2, true, false, false);
+            INSERT INTO acl_entry VALUES(NULL, @ACL_OBJECT_ID, 2, @ACL_SKETCH_PAD_ADMIN, 4, true, false, false);
+            INSERT INTO acl_entry VALUES(NULL, @ACL_OBJECT_ID, 3, @ACL_SKETCH_PAD_ADMIN, 8, true, false, false);
+            INSERT INTO acl_entry VALUES(NULL, @ACL_OBJECT_ID, 4, @ACL_SKETCH_PAD_USER, 1, true, false, false);
+            INSERT INTO acl_entry VALUES(NULL, @ACL_OBJECT_ID, 5, @ACL_SKETCH_PAD_VISITOR, 1, true, false, false);
+
+            /* Blue */
+            INSERT INTO sketch_color VALUES(NULL, 'de.iew.domain.sketchpad.RgbColor', 2, 0, 0, 255, 0);
+            SET @COLOR_ID=(LAST_INSERT_ID());
+
+            INSERT INTO acl_object_identity VALUES(NULL, @ACL_RGB_COLOR_CLASS_ID, @COLOR_ID, NULL,
+            @ACL_SKETCH_PAD_ADMIN, false);
+            SET @ACL_OBJECT_ID=(LAST_INSERT_ID());
+
+            INSERT INTO acl_entry VALUES(NULL, @ACL_OBJECT_ID, 0, @ACL_SKETCH_PAD_ADMIN, 1, true, false, false);
+            INSERT INTO acl_entry VALUES(NULL, @ACL_OBJECT_ID, 1, @ACL_SKETCH_PAD_ADMIN, 2, true, false, false);
+            INSERT INTO acl_entry VALUES(NULL, @ACL_OBJECT_ID, 2, @ACL_SKETCH_PAD_ADMIN, 4, true, false, false);
+            INSERT INTO acl_entry VALUES(NULL, @ACL_OBJECT_ID, 3, @ACL_SKETCH_PAD_ADMIN, 8, true, false, false);
+            INSERT INTO acl_entry VALUES(NULL, @ACL_OBJECT_ID, 4, @ACL_SKETCH_PAD_USER, 1, true, false, false);
+            INSERT INTO acl_entry VALUES(NULL, @ACL_OBJECT_ID, 5, @ACL_SKETCH_PAD_VISITOR, 1, true, false, false);
+
+            /* Black */
+            INSERT INTO sketch_color VALUES(NULL, 'de.iew.domain.sketchpad.RgbColor', 3, 0, 0, 0, 0);
+            SET @COLOR_ID=(LAST_INSERT_ID());
+
+            INSERT INTO acl_object_identity VALUES(NULL, @ACL_RGB_COLOR_CLASS_ID, @COLOR_ID, NULL,
+            @ACL_SKETCH_PAD_ADMIN, false);
+            SET @ACL_OBJECT_ID=(LAST_INSERT_ID());
+
+            INSERT INTO acl_entry VALUES(NULL, @ACL_OBJECT_ID, 0, @ACL_SKETCH_PAD_ADMIN, 1, true, false, false);
+            INSERT INTO acl_entry VALUES(NULL, @ACL_OBJECT_ID, 1, @ACL_SKETCH_PAD_ADMIN, 2, true, false, false);
+            INSERT INTO acl_entry VALUES(NULL, @ACL_OBJECT_ID, 2, @ACL_SKETCH_PAD_ADMIN, 4, true, false, false);
+            INSERT INTO acl_entry VALUES(NULL, @ACL_OBJECT_ID, 3, @ACL_SKETCH_PAD_ADMIN, 8, true, false, false);
+            INSERT INTO acl_entry VALUES(NULL, @ACL_OBJECT_ID, 4, @ACL_SKETCH_PAD_USER, 1, true, false, false);
+            INSERT INTO acl_entry VALUES(NULL, @ACL_OBJECT_ID, 5, @ACL_SKETCH_PAD_VISITOR, 1, true, false, false);
+
+            /* White */
+            INSERT INTO sketch_color VALUES(NULL, 'de.iew.domain.sketchpad.RgbColor', 4, 255, 255, 255, 0);
+            SET @COLOR_ID=(LAST_INSERT_ID());
+
+            INSERT INTO acl_object_identity VALUES(NULL, @ACL_RGB_COLOR_CLASS_ID, @COLOR_ID, NULL,
+            @ACL_SKETCH_PAD_ADMIN, false);
+            SET @ACL_OBJECT_ID=(LAST_INSERT_ID());
+
+            INSERT INTO acl_entry VALUES(NULL, @ACL_OBJECT_ID, 0, @ACL_SKETCH_PAD_ADMIN, 1, true, false, false);
+            INSERT INTO acl_entry VALUES(NULL, @ACL_OBJECT_ID, 1, @ACL_SKETCH_PAD_ADMIN, 2, true, false, false);
+            INSERT INTO acl_entry VALUES(NULL, @ACL_OBJECT_ID, 2, @ACL_SKETCH_PAD_ADMIN, 4, true, false, false);
+            INSERT INTO acl_entry VALUES(NULL, @ACL_OBJECT_ID, 3, @ACL_SKETCH_PAD_ADMIN, 8, true, false, false);
+            INSERT INTO acl_entry VALUES(NULL, @ACL_OBJECT_ID, 4, @ACL_SKETCH_PAD_USER, 1, true, false, false);
+            INSERT INTO acl_entry VALUES(NULL, @ACL_OBJECT_ID, 5, @ACL_SKETCH_PAD_VISITOR, 1, true, false, false);
+        </sql>
+    </changeSet>
+
+    <changeSet id="46-ms" author="Manuel Schulze">
+        <sql>
+            SET @ACL_CLASS_ID=(SELECT id FROM acl_class WHERE class='de.iew.domain.sketchpad.Stroke');
+            SET @ACL_SKETCH_PAD_ADMIN=(SELECT id FROM acl_sid WHERE sid='ROLE_SKETCHPAD_ADMIN');
+            SET @ACL_SKETCH_PAD_USER=(SELECT id FROM acl_sid WHERE sid='ROLE_SKETCHPAD_USER');
+            SET @ACL_SKETCH_PAD_VISITOR=(SELECT id FROM acl_sid WHERE sid='ROLE_SKETCHPAD_VISITOR');
+
+            /* 1pt Strich */
+            INSERT INTO sketch_stroke VALUES(NULL, 0, 1);
+            SET @DOMAIN_MODEL_ID=(LAST_INSERT_ID());
+
+            INSERT INTO acl_object_identity VALUES(NULL, @ACL_CLASS_ID, @DOMAIN_MODEL_ID, NULL,
+            @ACL_SKETCH_PAD_ADMIN, false);
+            SET @ACL_OBJECT_ID=(LAST_INSERT_ID());
+
+            INSERT INTO acl_entry VALUES(NULL, @ACL_OBJECT_ID, 0, @ACL_SKETCH_PAD_ADMIN, 1, true, false, false);
+            INSERT INTO acl_entry VALUES(NULL, @ACL_OBJECT_ID, 1, @ACL_SKETCH_PAD_ADMIN, 2, true, false, false);
+            INSERT INTO acl_entry VALUES(NULL, @ACL_OBJECT_ID, 2, @ACL_SKETCH_PAD_ADMIN, 4, true, false, false);
+            INSERT INTO acl_entry VALUES(NULL, @ACL_OBJECT_ID, 3, @ACL_SKETCH_PAD_ADMIN, 8, true, false, false);
+            INSERT INTO acl_entry VALUES(NULL, @ACL_OBJECT_ID, 4, @ACL_SKETCH_PAD_USER, 1, true, false, false);
+            INSERT INTO acl_entry VALUES(NULL, @ACL_OBJECT_ID, 5, @ACL_SKETCH_PAD_VISITOR, 1, true, false, false);
+
+            /* 2pt Strich */
+            INSERT INTO sketch_stroke VALUES(NULL, 1, 2);
+            SET @DOMAIN_MODEL_ID=(LAST_INSERT_ID());
+
+            INSERT INTO acl_object_identity VALUES(NULL, @ACL_CLASS_ID, @DOMAIN_MODEL_ID, NULL,
+            @ACL_SKETCH_PAD_ADMIN, false);
+            SET @ACL_OBJECT_ID=(LAST_INSERT_ID());
+
+            INSERT INTO acl_entry VALUES(NULL, @ACL_OBJECT_ID, 0, @ACL_SKETCH_PAD_ADMIN, 1, true, false, false);
+            INSERT INTO acl_entry VALUES(NULL, @ACL_OBJECT_ID, 1, @ACL_SKETCH_PAD_ADMIN, 2, true, false, false);
+            INSERT INTO acl_entry VALUES(NULL, @ACL_OBJECT_ID, 2, @ACL_SKETCH_PAD_ADMIN, 4, true, false, false);
+            INSERT INTO acl_entry VALUES(NULL, @ACL_OBJECT_ID, 3, @ACL_SKETCH_PAD_ADMIN, 8, true, false, false);
+            INSERT INTO acl_entry VALUES(NULL, @ACL_OBJECT_ID, 4, @ACL_SKETCH_PAD_USER, 1, true, false, false);
+            INSERT INTO acl_entry VALUES(NULL, @ACL_OBJECT_ID, 5, @ACL_SKETCH_PAD_VISITOR, 1, true, false, false);
+
+            /* 3pt Strich */
+            INSERT INTO sketch_stroke VALUES(NULL, 2, 3);
+            SET @DOMAIN_MODEL_ID=(LAST_INSERT_ID());
+
+            INSERT INTO acl_object_identity VALUES(NULL, @ACL_CLASS_ID, @DOMAIN_MODEL_ID, NULL,
+            @ACL_SKETCH_PAD_ADMIN, false);
+            SET @ACL_OBJECT_ID=(LAST_INSERT_ID());
+
+            INSERT INTO acl_entry VALUES(NULL, @ACL_OBJECT_ID, 0, @ACL_SKETCH_PAD_ADMIN, 1, true, false, false);
+            INSERT INTO acl_entry VALUES(NULL, @ACL_OBJECT_ID, 1, @ACL_SKETCH_PAD_ADMIN, 2, true, false, false);
+            INSERT INTO acl_entry VALUES(NULL, @ACL_OBJECT_ID, 2, @ACL_SKETCH_PAD_ADMIN, 4, true, false, false);
+            INSERT INTO acl_entry VALUES(NULL, @ACL_OBJECT_ID, 3, @ACL_SKETCH_PAD_ADMIN, 8, true, false, false);
+            INSERT INTO acl_entry VALUES(NULL, @ACL_OBJECT_ID, 4, @ACL_SKETCH_PAD_USER, 1, true, false, false);
+            INSERT INTO acl_entry VALUES(NULL, @ACL_OBJECT_ID, 5, @ACL_SKETCH_PAD_VISITOR, 1, true, false, false);
+
+            /* 4pt Strich */
+            INSERT INTO sketch_stroke VALUES(NULL, 3, 4);
+            SET @DOMAIN_MODEL_ID=(LAST_INSERT_ID());
+
+            INSERT INTO acl_object_identity VALUES(NULL, @ACL_CLASS_ID, @DOMAIN_MODEL_ID, NULL,
+            @ACL_SKETCH_PAD_ADMIN, false);
+            SET @ACL_OBJECT_ID=(LAST_INSERT_ID());
+
+            INSERT INTO acl_entry VALUES(NULL, @ACL_OBJECT_ID, 0, @ACL_SKETCH_PAD_ADMIN, 1, true, false, false);
+            INSERT INTO acl_entry VALUES(NULL, @ACL_OBJECT_ID, 1, @ACL_SKETCH_PAD_ADMIN, 2, true, false, false);
+            INSERT INTO acl_entry VALUES(NULL, @ACL_OBJECT_ID, 2, @ACL_SKETCH_PAD_ADMIN, 4, true, false, false);
+            INSERT INTO acl_entry VALUES(NULL, @ACL_OBJECT_ID, 3, @ACL_SKETCH_PAD_ADMIN, 8, true, false, false);
+            INSERT INTO acl_entry VALUES(NULL, @ACL_OBJECT_ID, 4, @ACL_SKETCH_PAD_USER, 1, true, false, false);
+            INSERT INTO acl_entry VALUES(NULL, @ACL_OBJECT_ID, 5, @ACL_SKETCH_PAD_VISITOR, 1, true, false, false);
+
+            /* 10pt Strich */
+            INSERT INTO sketch_stroke VALUES(NULL, 4, 10);
+            SET @DOMAIN_MODEL_ID=(LAST_INSERT_ID());
+
+            INSERT INTO acl_object_identity VALUES(NULL, @ACL_CLASS_ID, @DOMAIN_MODEL_ID, NULL,
+            @ACL_SKETCH_PAD_ADMIN, false);
+            SET @ACL_OBJECT_ID=(LAST_INSERT_ID());
+
+            INSERT INTO acl_entry VALUES(NULL, @ACL_OBJECT_ID, 0, @ACL_SKETCH_PAD_ADMIN, 1, true, false, false);
+            INSERT INTO acl_entry VALUES(NULL, @ACL_OBJECT_ID, 1, @ACL_SKETCH_PAD_ADMIN, 2, true, false, false);
+            INSERT INTO acl_entry VALUES(NULL, @ACL_OBJECT_ID, 2, @ACL_SKETCH_PAD_ADMIN, 4, true, false, false);
+            INSERT INTO acl_entry VALUES(NULL, @ACL_OBJECT_ID, 3, @ACL_SKETCH_PAD_ADMIN, 8, true, false, false);
+            INSERT INTO acl_entry VALUES(NULL, @ACL_OBJECT_ID, 4, @ACL_SKETCH_PAD_USER, 1, true, false, false);
+            INSERT INTO acl_entry VALUES(NULL, @ACL_OBJECT_ID, 5, @ACL_SKETCH_PAD_VISITOR, 1, true, false, false);
+        </sql>
+    </changeSet>
+
+    <changeSet id="47-ms" author="Manuel Schulze">
+        <sql>
+            INSERT INTO data_source VALUES(NULL);
+            SET @DATA_SOURCE_ID=(LAST_INSERT_ID());
+
+            SET @SKETCH_PAD_TIMESTAMP='2013-01-02 15:49:01';
+            INSERT INTO sketch_sketch_pad VALUES(@DATA_SOURCE_ID, @SKETCH_PAD_TIMESTAMP, 'ACTIVE');
+            SET @DOMAIN_MODEL_ID=(LAST_INSERT_ID());
+
+            INSERT INTO sketch_sketch_pad_color SELECT @DOMAIN_MODEL_ID, id FROM sketch_color;
+            INSERT INTO sketch_sketch_pad_stroke SELECT @DOMAIN_MODEL_ID, id FROM sketch_stroke;
+
+            SET @ACL_CLASS_ID=(SELECT id FROM acl_class WHERE class='de.iew.domain.sketchpad.SketchPad');
+            SET @ACL_SKETCH_PAD_ADMIN=(SELECT id FROM acl_sid WHERE sid='ROLE_SKETCHPAD_ADMIN');
+            SET @ACL_SKETCH_PAD_USER=(SELECT id FROM acl_sid WHERE sid='ROLE_SKETCHPAD_USER');
+            SET @ACL_SKETCH_PAD_VISITOR=(SELECT id FROM acl_sid WHERE sid='ROLE_SKETCHPAD_VISITOR');
+
+            INSERT INTO acl_object_identity VALUES(NULL, @ACL_CLASS_ID, @DOMAIN_MODEL_ID, NULL,
+            @ACL_SKETCH_PAD_ADMIN, false);
+            SET @ACL_OBJECT_ID=(LAST_INSERT_ID());
+
+            INSERT INTO acl_entry VALUES(NULL, @ACL_OBJECT_ID, 0, @ACL_SKETCH_PAD_ADMIN, 1, true, false, false);
+            INSERT INTO acl_entry VALUES(NULL, @ACL_OBJECT_ID, 1, @ACL_SKETCH_PAD_ADMIN, 2, true, false, false);
+            INSERT INTO acl_entry VALUES(NULL, @ACL_OBJECT_ID, 2, @ACL_SKETCH_PAD_ADMIN, 4, true, false, false);
+            INSERT INTO acl_entry VALUES(NULL, @ACL_OBJECT_ID, 3, @ACL_SKETCH_PAD_ADMIN, 8, true, false, false);
+            INSERT INTO acl_entry VALUES(NULL, @ACL_OBJECT_ID, 4, @ACL_SKETCH_PAD_USER, 2, true, false, false);
+            INSERT INTO acl_entry VALUES(NULL, @ACL_OBJECT_ID, 5, @ACL_SKETCH_PAD_USER, 1, true, false, false);
+            INSERT INTO acl_entry VALUES(NULL, @ACL_OBJECT_ID, 6, @ACL_SKETCH_PAD_VISITOR, 1, true, false, false);
+        </sql>
+    </changeSet>
+
+    <changeSet id="48-ms" author="Manuel Schulze">
+        <createTable tableName="sketch_polygon">
+            <column name="id" type="bigint" autoIncrement="false">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="sketch_pad_id" type="bigint">
+                <constraints nullable="false"/>
+            </column>
+            <column name="line_color_id" type="bigint">
+                <constraints nullable="false"/>
+            </column>
+            <column name="stroke_id" type="bigint">
+                <constraints nullable="false"/>
+            </column>
+            <column name="state" type="varchar(30)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <modifySql dbms="mysql">
+            <!--
+            http://www.liquibase.org/manual/modify_sql
+            -->
+            <append value=" engine innodb"/>
+        </modifySql>
+    </changeSet>
+
+    <changeSet id="49-ms" author="Manuel Schulze">
+        <addForeignKeyConstraint baseTableName="sketch_polygon" baseColumnNames="id"
+                                 constraintName="fk_sketch_polygon_data_source"
+                                 referencedTableName="data_source"
+                                 referencedColumnNames="id" onDelete="RESTRICT" onUpdate="RESTRICT"/>
+        <addForeignKeyConstraint baseTableName="sketch_polygon" baseColumnNames="sketch_pad_id"
+                                 constraintName="fk_sketch_polygon_sketch_sketch_pad"
+                                 referencedTableName="sketch_sketch_pad"
+                                 referencedColumnNames="id" onDelete="RESTRICT" onUpdate="RESTRICT"/>
+        <addForeignKeyConstraint baseTableName="sketch_polygon" baseColumnNames="line_color_id"
+                                 constraintName="fk_sketch_polygon_sketch_line_color"
+                                 referencedTableName="sketch_color"
+                                 referencedColumnNames="id" onDelete="RESTRICT" onUpdate="RESTRICT"/>
+        <addForeignKeyConstraint baseTableName="sketch_polygon" baseColumnNames="stroke_id"
+                                 constraintName="fk_sketch_polygon_sketch_stroke"
+                                 referencedTableName="sketch_stroke"
+                                 referencedColumnNames="id" onDelete="RESTRICT" onUpdate="RESTRICT"/>
+    </changeSet>
+
+    <changeSet id="50-ms" author="Manuel Schulze">
+        <createTable tableName="sketch_polygon_segment">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="ordinalNumber" type="int">
+                <constraints nullable="false"/>
+            </column>
+            <column name="x" type="double">
+                <constraints nullable="false"/>
+            </column>
+            <column name="y" type="double">
+                <constraints nullable="false"/>
+            </column>
+            <column name="polygon_id" type="bigint">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <modifySql dbms="mysql">
+            <!--
+            http://www.liquibase.org/manual/modify_sql
+            -->
+            <append value=" engine innodb"/>
+        </modifySql>
+    </changeSet>
+
+    <changeSet id="51-ms" author="Manuel Schulze">
+        <addForeignKeyConstraint baseTableName="sketch_polygon_segment" baseColumnNames="polygon_id"
+                                 constraintName="fk_sketch_polygon_segment_sketch_polygon"
+                                 referencedTableName="sketch_polygon"
+                                 referencedColumnNames="id" onDelete="RESTRICT" onUpdate="RESTRICT"/>
+    </changeSet>
+
+    <changeSet id="52-ms" author="Manuel Schulze">
+        <sql>
+            SET @ACCOUNT_ID=(SELECT id FROM account WHERE username="admin");
+
+            INSERT INTO text_item_collection VALUES(NULL);
+            SET @TEXT_ITEM_COLLECTION__ID=(LAST_INSERT_ID());
+            INSERT INTO text_item VALUES (NULL, "de", "DE", "Sketch Pad Administrator", @TEXT_ITEM_COLLECTION__ID);
+            INSERT INTO data_source VALUES (NULL);
+            SET @DATA_SOURCE_ID=(LAST_INSERT_ID());
+            INSERT INTO authority VALUES(@DATA_SOURCE_ID, "ROLE_SKETCHPAD_ADMIN", @TEXT_ITEM_COLLECTION__ID);
+
+            INSERT INTO account_authority VALUES(@ACCOUNT_ID, @DATA_SOURCE_ID);
+
+            INSERT INTO text_item_collection VALUES(NULL);
+            SET @TEXT_ITEM_COLLECTION__ID=(LAST_INSERT_ID());
+            INSERT INTO text_item VALUES (NULL, "de", "DE", "Sketch Pad Benutzer", @TEXT_ITEM_COLLECTION__ID);
+            INSERT INTO data_source VALUES (NULL);
+            SET @DATA_SOURCE_ID=(LAST_INSERT_ID());
+            INSERT INTO authority VALUES(@DATA_SOURCE_ID, "ROLE_SKETCHPAD_USER", @TEXT_ITEM_COLLECTION__ID);
+
+            INSERT INTO account_authority VALUES(@ACCOUNT_ID, @DATA_SOURCE_ID);
+
+            INSERT INTO text_item_collection VALUES(NULL);
+            SET @TEXT_ITEM_COLLECTION__ID=(LAST_INSERT_ID());
+            INSERT INTO text_item VALUES (NULL, "de", "DE", "Sketch Pad Betrachter", @TEXT_ITEM_COLLECTION__ID);
+            INSERT INTO data_source VALUES (NULL);
+            SET @DATA_SOURCE_ID=(LAST_INSERT_ID());
+            INSERT INTO authority VALUES(@DATA_SOURCE_ID, "ROLE_SKETCHPAD_VISITOR", @TEXT_ITEM_COLLECTION__ID);
+
+            INSERT INTO account_authority VALUES(@ACCOUNT_ID, @DATA_SOURCE_ID);
+        </sql>
+    </changeSet>
+
+    <changeSet id="53-ms" author="Manuel Schulze">
+        <sql>
+            INSERT INTO text_item_collection VALUES(NULL);
+            SET @TEXT_ITEM_COLLECTION__ID=(LAST_INSERT_ID());
+            INSERT INTO text_item VALUES (NULL, "de", "DE", "Benutzer", @TEXT_ITEM_COLLECTION__ID);
+            INSERT INTO data_source VALUES (NULL);
+            SET @DATA_SOURCE_ID=(LAST_INSERT_ID());
+            INSERT INTO authority VALUES(@DATA_SOURCE_ID, "ROLE_USER", @TEXT_ITEM_COLLECTION__ID);
+
+            INSERT INTO account VALUES(NULL, "user1", md5("test"), 0, 1);
+            SET @ACCOUNT_ID=(LAST_INSERT_ID());
+
+            INSERT INTO account_authority SELECT @ACCOUNT_ID, id FROM authority WHERE system_name IN (
+            "ROLE_USER", "ROLE_SKETCHPAD_USER", "ROLE_SKETCHPAD_VISITOR"
+            );
+
+            INSERT INTO account VALUES(NULL, "user2", md5("test"), 0, 1);
+            SET @ACCOUNT_ID=(LAST_INSERT_ID());
+
+            INSERT INTO account_authority SELECT @ACCOUNT_ID, id FROM authority WHERE system_name IN (
+            "ROLE_USER", "ROLE_SKETCHPAD_USER", "ROLE_SKETCHPAD_VISITOR"
+            );
+        </sql>
+    </changeSet>
+</databaseChangeLog>

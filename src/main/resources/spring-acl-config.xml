@@ -97,13 +97,18 @@ We'll rely on the standard AclPermissionEvaluator implementation -->
     <!-- Declare an audit logger-->
     <bean id="auditLogger" class="org.springframework.security.acls.domain.ConsoleAuditLogger"/>
 
-    <!-- http://static.springsource.org/spring-security/site/docs/3.0.x/apidocs/org/springframework/security/access/hierarchicalroles/RoleHierarchyImpl.html -->
+    <!-- http://static.springsource.org/spring-security/site/docs/3.1.x/apidocs/org/springframework/security/access/hierarchicalroles/RoleHierarchyImpl.html -->
     <bean id="roleHierarchy" class="org.springframework.security.access.hierarchicalroles.RoleHierarchyImpl">
         <property name="hierarchy">
             <value>
                 ROLE_ADMIN > ROLE_USER
                 ROLE_USER > ROLE_VISITOR
+                ROLE_ADMIN > ROLE_SKETCHPAD_ADMIN
+                ROLE_SKETCHPAD_ADMIN > ROLE_SKETCHPAD_USER
+                ROLE_SKETCHPAD_USER > ROLE_SKETCHPAD_VISITOR
             </value>
         </property>
     </bean>
+
+    <bean id="permissionFactory" class="org.springframework.security.acls.domain.DefaultPermissionFactory"/>
 </beans>

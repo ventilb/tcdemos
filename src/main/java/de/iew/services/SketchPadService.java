@@ -16,7 +16,14 @@
 
 package de.iew.services;
 
-import de.iew.domain.sketchpad.*;
+import de.iew.domain.ModelNotFoundException;
+import de.iew.domain.sketchpad.Polygon;
+import de.iew.domain.sketchpad.RgbColor;
+import de.iew.domain.sketchpad.SketchPad;
+import de.iew.domain.sketchpad.Stroke;
+import org.springframework.security.core.Authentication;
+
+import java.util.List;
 
 /**
  * Beschreibt die Schnittstelle für den Sketchpad-Dienst.
@@ -26,29 +33,22 @@ import de.iew.domain.sketchpad.*;
  */
 public interface SketchPadService {
 
-    public Polygons listAllPolygons();
+    public SketchPad getActiveSketchPad() throws ModelNotFoundException;
 
-    public Polygon createPolygon(String sessionId, double x, double y, long lineColorId, long strokeId);
+    public List<Polygon> listAllPolygons(long sketchPadId);
 
-    public boolean extendPolygon(String sessionId, long polygonId, double x, double y);
+    public Polygon createPolygon(Authentication sketchPadUser, long sketchPadId, double x, double y, long lineColorId, long strokeId) throws ModelNotFoundException;
 
-    public boolean closePolygon(String sessionId, long polygonId, double x, double y);
+    public boolean extendPolygon(Authentication sketchPadUser, long polygonId, double x, double y) throws ModelNotFoundException;
 
-    public Colors listAllColors();
+    public boolean closePolygon(Authentication sketchPadUser, long polygonId, double x, double y) throws ModelNotFoundException;
 
-    public RgbColor chooseColor(String sessionId, long colorId);
+    public List<RgbColor> listAllColors(long sketchPadId);
 
-    public Strokes listAllStrokes();
+    public RgbColor chooseColor(Authentication sketchPadUser, long sketchPadId, long colorId) throws ModelNotFoundException;
 
-    public Stroke chooseStroke(String sessionId, long strokeId);
+    public List<Stroke> listAllStrokes(long sketchPadId);
 
-    /**
-     * Liefert das Polygon mit der angegebenen Id.
-     *
-     * @param polygonId Die Id des Polygons.
-     * @return Das Polygon.
-     * @throws java.util.NoSuchElementException
-     *          Wenn das angeforderte Polygon nicht vorhanden ist.
-     */
-    public Polygon getPolygonById(long polygonId);
+    public Stroke chooseStroke(Authentication sketchPadUser, long sketchPadId, long strokeId) throws ModelNotFoundException;
+
 }

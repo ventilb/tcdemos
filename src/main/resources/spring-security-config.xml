@@ -18,18 +18,85 @@
 <beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xmlns:security="http://www.springframework.org/schema/security"
+       xmlns:util="http://www.springframework.org/schema/util"
        xsi:schemaLocation="http://www.springframework.org/schema/beans
   http://www.springframework.org/schema/beans/spring-beans-3.1.xsd
   http://www.springframework.org/schema/security
-  http://www.springframework.org/schema/security/spring-security-3.1.xsd">
+  http://www.springframework.org/schema/security/spring-security-3.1.xsd http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd">
+
+    <!--
+    Damit wir die Urls nicht immer wiederholen müssen.
+    -->
+    <util:properties id="defaultUrls">
+        <prop key="login">/identity/login.html</prop>
+        <prop key="logout">/identity/logout.html</prop>
+        <prop key="loginerror">/identity/loginerror.html</prop>
+    </util:properties>
 
     <!--
     Hier konfigurieren wir die zu schützenden URLs und Webressourcen.
     -->
-    <security:http auto-config="true" use-expressions="true" access-denied-page="">
+    <security:http auto-config="false" use-expressions="true" access-denied-page=""
+                   entry-point-ref="loginUrlAuthenticationEntryPoint">
+        <security:intercept-url pattern="/jsconfig.js" access="permitAll"/>
+        <security:intercept-url pattern="/nls/**" access="permitAll"/>
+        <security:intercept-url pattern="/static/**" access="permitAll"/>
+        <security:intercept-url pattern="/" access="permitAll"/>
+        <security:intercept-url pattern="#{defaultUrls.login}" access="isAnonymous()"/>
+        <security:intercept-url pattern="#{defaultUrls.logout}" access="isAuthenticated()"/>
+        <security:intercept-url pattern="/sketchpad.html" access="hasRole('ROLE_SKETCHPAD_VISITOR')"/>
+        <security:intercept-url pattern="/sketchpad/listpolygons.json" access="hasRole('ROLE_SKETCHPAD_VISITOR')"/>
+        <security:intercept-url pattern="/sketchpad/newpolygon.json" access="hasRole('ROLE_SKETCHPAD_USER')"/>
+        <security:intercept-url pattern="/sketchpad/addsegment.json" access="hasRole('ROLE_SKETCHPAD_USER')"/>
+        <security:intercept-url pattern="/sketchpad/closepolygon.json" access="hasRole('ROLE_SKETCHPAD_USER')"/>
+        <security:intercept-url pattern="/sketchpad/listcolors.json" access="hasRole('ROLE_SKETCHPAD_VISITOR')"/>
+        <security:intercept-url pattern="/sketchpad/choosecolor.json" access="hasRole('ROLE_SKETCHPAD_USER')"/>
+        <security:intercept-url pattern="/sketchpad/liststrokes.json" access="hasRole('ROLE_SKETCHPAD_VISITOR')"/>
+        <security:intercept-url pattern="/sketchpad/choosestroke.json" access="hasRole('ROLE_SKETCHPAD_USER')"/>
         <security:intercept-url pattern="/treedemo.html" access="hasRole('ROLE_ADMIN')"/>
-        <security:intercept-url pattern="*" access="hasRole('ROLE_USER')"/>
+        <security:intercept-url pattern="/tree/**" access="hasRole('ROLE_ADMIN')"/>
+        <security:intercept-url pattern="/list/**" access="hasRole('ROLE_ADMIN')"/>
+        <security:intercept-url pattern="/**" access="isFullyAuthenticated()"/>
+        <!--
+        Wir verwenden unsere eigene Implementierung des FORM_LOGIN_FILTER.
+
+        <security:form-login login-page="/identity/login.html" always-use-default-target="false" username-parameter="username" password-parameter="password"/>
+        -->
+        <security:custom-filter ref="formAuthenticationFilter" position="FORM_LOGIN_FILTER"/>
+        <security:anonymous enabled="true" granted-authority="ROLE_SKETCHPAD_VISITOR"/>
+        <security:logout invalidate-session="true" logout-url="#{defaultUrls.logout}"
+                         logout-success-url="/sketchpad.html"/>
     </security:http>
+
+    <!--
+    Da wir unseren eigenen FORM_LOGIN_FILTER verwenden dürfen wir nicht mehr
+    security:http automatisch konfigurieren lassen. Daher müssen die Beans
+    eigens erstellt werden.
+    -->
+    <bean id="loginUrlAuthenticationEntryPoint"
+          class="org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint">
+        <property name="loginFormUrl" value="#{defaultUrls.login}"/>
+    </bean>
+
+    <bean id="formAuthenticationFilter" class="de.iew.web.utils.ValidatingFormAuthenticationFilter">
+        <property name="authenticationManager" ref="authenticationManager"/>
+        <property name="filterProcessesUrl" value="#{defaultUrls.login}"/>
+        <property name="authenticationSuccessHandler" ref="authenticationSuccessHandler"/>
+        <property name="authenticationFailureHandler" ref="authenticationFailureHandler"/>
+    </bean>
+
+    <bean id="authenticationSuccessHandler"
+          class="org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler">
+        <property name="defaultTargetUrl" value="/sketchpad.html"/>
+        <property name="alwaysUseDefaultTargetUrl" value="true"/>
+        <property name="useReferer" value="true"/>
+    </bean>
+
+    <bean id="authenticationFailureHandler"
+          class="org.springframework.security.web.authentication.SimpleUrlAuthenticationFailureHandler">
+        <property name="defaultFailureUrl" value="#{defaultUrls.loginerror}"/>
+        <property name="useForward" value="true"/>
+    </bean>
 
     <!--
     Der globale Spring AuthenticationManager.
@@ -47,9 +114,11 @@
 
     <!--
     Wir verwenden für den Anfang MD5. Später stellen wir dann auf stärkeres
-    Hashing und Salzen um.
+    Hashing, Salzen und Mehrfachiterationen um.
 
-    TODO: Auf stärkeres Hashing und Salz umstellen
+    see http://www.heise.de/security/artikel/Passwoerter-unknackbar-speichern-1253931.html
+
+    TODO: Auf stärkeres Hashing und Salz umstellen. PHP-Code portieren oder Spring Recherche
     -->
     <bean class="org.springframework.security.authentication.encoding.Md5PasswordEncoder" id="passwordEncoder"/>
 </beans>

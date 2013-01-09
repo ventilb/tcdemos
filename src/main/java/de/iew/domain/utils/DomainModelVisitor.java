@@ -14,19 +14,17 @@
  * limitations under the License.
  */
 
-package de.iew.services.tree;
-
-import de.iew.domain.Node;
+package de.iew.domain.utils;
 
 import java.util.Collection;
 
 /**
- * Beschreibt eine Schnittstelle, die beim Iterieren über
- * {@link Node}-Domainmodelle Operationen auf den besuchten
- * Knoten ermöglicht.
+ * Beschreibt eine Schnittstelle, die beim Iterieren über Domainmodelle
+ * Operationen auf den besuchten Modellen ermöglicht.
  * <p>
- * Zum Beispiel lässt sich mit dieser Schnittstelle eine Rechteprüfung auf
- * Knoten implementieren.
+ * Zum Beispiel lässt sich mit dieser Schnittstelle eine Rechteprüfung der
+ * Modelle implementieren oder das Domainmodell von einer Darstellung in
+ * eine Andere überführen.
  * </p>
  * <p>
  * Dieses Interface ist inspiriert durch Hibernates {@link org.hibernate.transform.ResultTransformer}
@@ -36,24 +34,22 @@ import java.util.Collection;
  * @author Manuel Schulze <manuel_schulze@i-entwicklung.de>
  * @since 30.11.12 - 19:39
  */
-public interface NodeVisitor<M> {
+public interface DomainModelVisitor<IN, OUT> {
 
     /**
-     * Wird aufgerufen wenn der angegebene Knoten besucht wird.
+     * Wird aufgerufen wenn das angegebene Domainmodell besucht wird.
      *
-     * @param node Der besuchte Knoten.
+     * @param domainModel Das besuchte Domainmodell.
      * @return Das Ergebnis des Besuchs (Implementierungsabhängig).
      */
-    M visitNode(Node node);
+    OUT visit(IN domainModel);
 
     /**
-     * Wird aufgerufen wenn die angegebene Knoten-Sammlung als Ganzes besucht
+     * Wird aufgerufen wenn die angegebene Domainmodell-Sammlung als Ganzes besucht
      * werden soll.
      *
-     *
-     *
-     * @param nodes Die besuchte Knoten-Sammlung.
+     * @param domainModels Die besuchte Domainmodell-Sammlung.
      * @return Das Ergebnis des Besuchs (Implementierungsabhängig).
      */
-    Collection<M> visitNodeCollection(Collection<Node> nodes);
+    Collection<OUT> visitCollection(Collection<IN> domainModels);
 }

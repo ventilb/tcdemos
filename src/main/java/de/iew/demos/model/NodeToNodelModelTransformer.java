@@ -18,10 +18,11 @@ package de.iew.demos.model;
 
 import de.iew.domain.DataSource;
 import de.iew.domain.Node;
+import de.iew.domain.utils.AbstractDomainModelVisitor;
+import de.iew.domain.utils.DomainModelVisitor;
 import de.iew.framework.utils.DSAnnotationsIntrospector;
 import de.iew.framework.utils.StringResolver;
 import de.iew.persistence.hibernate.HbmUtils;
-import de.iew.services.tree.NodeVisitor;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -30,7 +31,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 /**
- * Implementiert die {@link NodeVisitor}-Schnittstelle zum Umwandeln der
+ * Implementiert die {@link de.iew.domain.utils.DomainModelVisitor}-Schnittstelle zum Umwandeln der
  * {@link Node}-Domainmodelle in {@link NodeModel}-DTOs.
  * <p>
  * Ziel dieses Umwandlers ist, bereits während des Ladens von Knoten, die
@@ -41,7 +42,7 @@ import java.util.Collection;
  * @author Manuel Schulze <manuel_schulze@i-entwicklung.de>
  * @since 30.11.12 - 15:04
  */
-public class NodeToNodelModelTransformer implements NodeVisitor<NodeModel> {
+public class NodeToNodelModelTransformer extends AbstractDomainModelVisitor<Node, NodeModel> {
 
     private static final Log log = LogFactory.getLog(NodeToNodelModelTransformer.class);
 
@@ -53,26 +54,26 @@ public class NodeToNodelModelTransformer implements NodeVisitor<NodeModel> {
      * Wandelt den angegebenen Knoten in ein {@link NodeModel}-DTO um.
      * </p>
      *
-     * @param node Der besuchte Knoten.
+     * @param domainModel Der besuchte Knoten.
      * @return Das {@link NodeModel}-DTO.
      */
-    public NodeModel visitNode(Node node) {
-        DataSource dataSource = node.getDataSource();
+    public NodeModel visit(Node domainModel) {
+        DataSource dataSource = domainModel.getDataSource();
 
         NodeModel nodeModel = new NodeModel();
-        nodeModel.setId(node.getId());
+        nodeModel.setId(domainModel.getId());
         nodeModel.setTitle(determineTitle(dataSource));
-        nodeModel.setTreeId(node.getTree().getId());
+        nodeModel.setTreeId(domainModel.getTree().getId());
 
-        nodeModel.setOrdinalNumber(node.getOrdinalNumber());
-        nodeModel.setNestedSetLeft(node.getNestedSetLeft());
-        nodeModel.setNestedSetRight(node.getNestedSetRight());
+        nodeModel.setOrdinalNumber(domainModel.getOrdinalNumber());
+        nodeModel.setNestedSetLeft(domainModel.getNestedSetLeft());
+        nodeModel.setNestedSetRight(domainModel.getNestedSetRight());
 
         if (dataSource != null) {
             nodeModel.setDataSourceClassname(HbmUtils.determineRealClassname(dataSource));
         }
 
-        Node parent = node.getParent();
+        Node parent = domainModel.getParent();
         if (parent != null) {
             nodeModel.setParentId(parent.getId());
         }
@@ -80,20 +81,10 @@ public class NodeToNodelModelTransformer implements NodeVisitor<NodeModel> {
         return nodeModel;
     }
 
-    public Collection<NodeModel> visitNodeCollection(Collection<Node> nodes) {
-        Collection<NodeModel> nodeModels = new ArrayList<NodeModel>();
-
-        for (Node node : nodes) {
-            nodeModels.add(visitNode(node));
-        }
-
-        return nodeModels;
-    }
-
     public String determineTitle(DataSource dataSource) {
         String title = "-No data source-";
         try {
-            dataSource = HbmUtils.fromProxy(dataSource);
+            dataSource = (DataSource) HbmUtils.fromProxy(dataSource);
 
             Method m = DSAnnotationsIntrospector.determineTitlePropertyMethod(dataSource);
             if (m != null) {

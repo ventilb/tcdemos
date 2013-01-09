@@ -16,11 +16,10 @@
 
 package de.iew.demos.controllers;
 
-import de.iew.demos.model.NodeModel;
 import de.iew.demos.model.NodeToNodelModelTransformer;
 import de.iew.domain.Node;
+import de.iew.domain.utils.DomainModelVisitor;
 import de.iew.framework.utils.LocaleStringResolver;
-import de.iew.services.tree.NodeVisitor;
 import de.iew.services.TreeService;
 import de.iew.web.isc.DSResponseObject;
 import de.iew.web.isc.DSResponseCollection;
@@ -68,20 +67,20 @@ public class DemoListController {
     }
 
     public Model fetchNode(HttpServletRequest request, long treeId, long nodeId) throws Exception {
-        NodeVisitor nodeVisitor = getNodeTransformer(request);
+        DomainModelVisitor domainModelVisitor = getNodeTransformer(request);
         Node node = this.treeService.getNodeByTreeAndId(treeId, nodeId);
 
-        return new DSResponseObject(nodeVisitor.visitNode(node));
+        return new DSResponseObject(domainModelVisitor.visit(node));
     }
 
     public Model fetchNodes(HttpServletRequest request, long treeId) throws Exception {
-        NodeVisitor nodeVisitor = getNodeTransformer(request);
+        DomainModelVisitor domainModelVisitor = getNodeTransformer(request);
         Collection<Node> allNodes = this.treeService.getAllNodes(treeId);
 
-        return new DSResponseCollection(nodeVisitor.visitNodeCollection(allNodes));
+        return new DSResponseCollection(domainModelVisitor.visitCollection(allNodes));
     }
 
-    public NodeVisitor getNodeTransformer(HttpServletRequest request) {
+    public DomainModelVisitor getNodeTransformer(HttpServletRequest request) {
         LocaleStringResolver localeStringResolver = new LocaleStringResolver();
         localeStringResolver.setLocale(request.getLocale());
 

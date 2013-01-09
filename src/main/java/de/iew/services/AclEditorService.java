@@ -19,6 +19,7 @@ package de.iew.services;
 import de.iew.domain.DomainModel;
 import org.springframework.security.acls.model.AlreadyExistsException;
 import org.springframework.security.acls.model.MutableAcl;
+import org.springframework.security.acls.model.NotFoundException;
 import org.springframework.security.acls.model.Permission;
 
 /**
@@ -37,6 +38,46 @@ import org.springframework.security.acls.model.Permission;
 public interface AclEditorService {
 
     /**
+     * Erstellt eine ACL zur Demonstration der ACL Fähigkeiten von Spring wenn
+     * der Nutzer in der Rolle ROLE_SKETCHPAD_ADMIN ist.
+     * <pre>
+     *         | SKETCHPAD_ADMIN | SKETCHPAD_USER | SKETCHPAD_VISITOR | Eigentümer
+     * --------+-----------------+----------------+-------------------+-----------
+     *   READ  |        x        |        x       |         x         |     x
+     * --------+-----------------+----------------+-------------------+-----------
+     *  WRITE  |        x        |                |                   |     x
+     * --------+-----------------+----------------+-------------------+-----------
+     *  CREATE |        x        |                |                   |
+     * --------+-----------------+----------------+-------------------+-----------
+     *  DELETE |        x        |                |                   |
+     * --------+-----------------+----------------+-------------------+-----------
+     * </pre>
+     *
+     * @param polygonId Die Id des Polygons.
+     */
+    public void setupDemoSketchPadPolygonPermissionsIfSketchPadAdmin(long polygonId);
+
+    /**
+     * Erstellt eine ACL zur Demonstration der ACL Fähigkeiten von Spring wenn
+     * der Nutzer in der Rolle ROLE_SKETCHPAD_USER ist.
+     * <pre>
+     *         | SKETCHPAD_ADMIN | SKETCHPAD_USER | SKETCHPAD_VISITOR | Eigentümer
+     * --------+-----------------+----------------+-------------------+-----------
+     *   READ  |        x        |                |                   |     x
+     * --------+-----------------+----------------+-------------------+-----------
+     *  WRITE  |        x        |                |                   |     x
+     * --------+-----------------+----------------+-------------------+-----------
+     *  CREATE |        x        |                |                   |
+     * --------+-----------------+----------------+-------------------+-----------
+     *  DELETE |        x        |                |                   |
+     * --------+-----------------+----------------+-------------------+-----------
+     * </pre>
+     *
+     * @param polygonId Die Id des Polygons.
+     */
+    public void setupDemoSketchPadPolygonPermissionsIfSketchPadUser(long polygonId);
+
+    /**
      * Erstellt eine neue ACL für das angegebene Domainmodell.
      *
      * @param domainModelClass Die Klasse des Domainmodells.
@@ -47,13 +88,86 @@ public interface AclEditorService {
     public MutableAcl createAcl(Class<? extends DomainModel> domainModelClass, long domainModelId) throws AlreadyExistsException;
 
     /**
+     * Liefert die vorhandene ACL für das angegebene Domainmodell.
+     *
+     * @param domainModelClass Die Klasse des Domainmodells.
+     * @param domainModelId    Die Id des Domainmodells.
+     * @return Die ACL zum Domainmodell
+     * @throws NotFoundException Wenn das Domainmodell keine ACL hat.
+     */
+    public MutableAcl findAcl(Class<? extends DomainModel> domainModelClass, long domainModelId) throws NotFoundException;
+
+    /**
+     * Liefert die vorhandene ACL für das angegebene Domainmodell und erstellt
+     * falls nicht vorhanden eine neue ACL für das Domainmodell.
+     *
+     * @param domainModelClass Die Klasse des Domainmodells.
+     * @param domainModelId    Die Id des Domainmodells.
+     * @return Die ACL zum Domainmodell.
+     */
+    public MutableAcl findOrCreateAcl(Class<? extends DomainModel> domainModelClass, long domainModelId);
+
+    /**
+     * Erstellt eine Vater-Kind-Beziehung zwischen <code>parentAcl</code> und
+     * <code>childAcl</code> und konfiguriert die ACLs so, dass auch die
+     * Regeln vom Vater an das Kind vererbt werden.
+     *
+     * @param childAcl  Die Kind ACL. Erbt die Regeln vom Vater.
+     * @param parentAcl Die Vater ACL. Reicht die Regeln an das Kind weiter.
+     */
+    public void inheritAclPermissionsFrom(MutableAcl childAcl, MutableAcl parentAcl);
+
+    /**
+     * Konfiguriert das angegebene Zugriffsrecht für die angegebene
+     * Gruppen-Identität in der angegebenen ACL.
+     * <p>
+     * Das Zugriffsrecht wird an das Ende vorhandener Zurgiffsrechte angehängt.
+     * </p>
+     *
+     * @param acl        Die ACL.
+     * @param permission Das Zugriffsrecht.
+     * @param authority  Die Gruppen-Identität.
+     */
+    public void grantAuthorityPermission(MutableAcl acl, Permission permission, Object authority);
+
+    /**
+     * Konfiguriert die angegebenen Zugriffsrechte für die angegebene
+     * Gruppen-Identität in der angegebenen ACL.
+     * <p>
+     * Die Zugriffsrechte werden in der angegebenen Reihenfolge an die ACL
+     * gehängt.
+     * </p>
+     *
+     * @param acl         Die ACL.
+     * @param permissions Liste der Zugriffsrechte.
+     * @param authority   Die Gruppen-Identität.
+     */
+    public void grantAuthorityPermissions(MutableAcl acl, Permission[] permissions, Object authority);
+
+    /**
      * Konfiguriert das angegebene Zugriffsrecht für die angegebene Identität
-     * in der angegebenen ACL. Das Zugriffsrecht wird an das Ende vorhandener
-     * Zurgiffsrechte angehängt.
+     * in der angegebenen ACL.
+     * <p>
+     * Das Zugriffsrecht wird an das Ende vorhandener Zurgiffsrechte angehängt.
+     * </p>
      *
      * @param acl              Die ACL.
      * @param permission       Das Zugriffsrecht.
      * @param securityIdentity Die Identität.
      */
-    public void grantPermission(MutableAcl acl, Permission permission, Object securityIdentity);
+    public void grantPrincipalPermission(MutableAcl acl, Permission permission, Object securityIdentity);
+
+    /**
+     * Konfiguriert die angegebenen Zugriffsrechte für die angegebene Identität
+     * in der angegebenen ACL.
+     * <p>
+     * Die Zugriffsrechte werden in der angegebenen Reihenfolge an die ACL
+     * gehängt.
+     * </p>
+     *
+     * @param acl              Die ACL.
+     * @param permissions      Liste der Zugriffsrechte.
+     * @param securityIdentity Die Identität.
+     */
+    public void grantPrincipalPermissions(MutableAcl acl, Permission[] permissions, Object securityIdentity);
 }

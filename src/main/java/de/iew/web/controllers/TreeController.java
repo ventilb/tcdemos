@@ -21,9 +21,9 @@ import de.iew.demos.model.NodeToNodelModelTransformer;
 import de.iew.domain.DataSource;
 import de.iew.domain.Node;
 import de.iew.domain.principals.Authority;
+import de.iew.domain.utils.DomainModelVisitor;
 import de.iew.framework.utils.LocaleStringResolver;
 import de.iew.services.*;
-import de.iew.services.tree.NodeVisitor;
 import de.iew.domain.ModelNotFoundException;
 import de.iew.web.isc.DSResponseCollection;
 import de.iew.web.isc.DSResponseObject;
@@ -70,15 +70,15 @@ public class TreeController {
         if (log.isDebugEnabled()) {
             log.debug("Lade Knoten mit Vater " + parentId + " aus Baum " + treeId + ".");
         }
-        NodeVisitor<NodeModel> nodeVisitor = getNodeTransformer(request);
+        DomainModelVisitor<Node, NodeModel> domainModelVisitor = getNodeTransformer(request);
         Collection<NodeModel> nodes;
 
         if (parentId == null) {
             Node rootNode = this.treeService.getTreeRootNode(treeId);
             nodes = new HashSet<NodeModel>();
-            nodes.add(nodeVisitor.visitNode(rootNode));
+            nodes.add(domainModelVisitor.visit(rootNode));
         } else {
-            nodes = nodeVisitor.visitNodeCollection(this.treeService.getDirectChildNodes(treeId, parentId));
+            nodes = domainModelVisitor.visitCollection(this.treeService.getDirectChildNodes(treeId, parentId));
         }
 
         return new DSResponseCollection(nodes);
@@ -99,7 +99,7 @@ public class TreeController {
         DataSourceService dataSourceService = this.dataSourceServiceFactory.lookupDataSourceService(nodeModel.getDataSourceClassname());
         DataSource dataSource = dataSourceService.createPersistedDefaultDataSource(nodeModel);
 
-        NodeVisitor nodeVisitor = getNodeTransformer(request);
+        DomainModelVisitor domainModelVisitor = getNodeTransformer(request);
 
         Node newNode;
         if (relatedNodeId == null) {
@@ -126,12 +126,12 @@ public class TreeController {
         Permission admPermission = BasePermission.ADMINISTRATION;
 
         acl = this.aclEditorService.createAcl(dataSource.getClass(), dataSource.getId());
-        this.aclEditorService.grantPermission(acl, admPermission, administration);
+        this.aclEditorService.grantAuthorityPermission(acl, admPermission, administration);
 
         acl = this.aclEditorService.createAcl(newNode.getClass(), newNode.getId());
-        this.aclEditorService.grantPermission(acl, admPermission, administration);
+        this.aclEditorService.grantAuthorityPermission(acl, admPermission, administration);
 
-        return new DSResponseObject(nodeVisitor.visitNode(newNode));
+        return new DSResponseObject(domainModelVisitor.visit(newNode));
     }
 
     @RequestMapping(value = "/delete")
@@ -155,7 +155,7 @@ public class TreeController {
         return new DSResponseObject(nodeModel);
     }
 
-    public NodeVisitor<NodeModel> getNodeTransformer(HttpServletRequest request) {
+    public DomainModelVisitor<Node, NodeModel> getNodeTransformer(HttpServletRequest request) {
         LocaleStringResolver localeStringResolver = new LocaleStringResolver();
         localeStringResolver.setLocale(request.getLocale());
 

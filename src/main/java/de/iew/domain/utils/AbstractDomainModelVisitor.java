@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 Manuel Schulze <manuel_schulze@i-entwicklung.de>
+ * Copyright 2012-2013 Manuel Schulze <manuel_schulze@i-entwicklung.de>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,27 +14,31 @@
  * limitations under the License.
  */
 
-package de.iew.domain.sketchpad;
+package de.iew.domain.utils;
 
 import java.util.ArrayList;
 import java.util.Collection;
 
 /**
- * Implementiert das Domainmodell für die Verwaltung einer Polygon-Liste.
+ * Abstrakte Implementierung der {@link DomainModelVisitor}-Schnittstelle.
+ * <p>
+ * Stellt eine Standardimplementierung für {@link #visitCollection(java.util.Collection)}
+ * bereit.
+ * </p>
  *
  * @author Manuel Schulze <manuel_schulze@i-entwicklung.de>
- * @see <a href="http://stackoverflow.com/questions/10864049/map-json-array-of-objects-to-requestbody-listt-using-jackson">JSON-Array in Liste serialisieren</a>
- * @since 11.11.12 - 10:30
+ * @since 03.01.13 - 02:31
  */
-public class Polygons extends ArrayList<Polygon> {
-    public Polygons(int initialCapacity) {
-        super(initialCapacity);
+public abstract class AbstractDomainModelVisitor<IN, OUT> implements DomainModelVisitor<IN, OUT> {
+
+    public Collection<OUT> visitCollection(Collection<IN> domainModels) {
+        Collection<OUT> out = new ArrayList<OUT>(domainModels.size());
+
+        for (IN in : domainModels) {
+            out.add(visit(in));
+        }
+
+        return out;
     }
 
-    public Polygons() {
-    }
-
-    public Polygons(Collection<? extends Polygon> c) {
-        super(c);
-    }
 }

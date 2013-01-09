@@ -14,28 +14,29 @@
  * limitations under the License.
  */
 
-package de.iew.domain.sketchpad;
+package de.iew.domain.utils;
 
-import java.util.ArrayList;
+import de.iew.domain.DomainModel;
+import de.iew.domain.Node;
+
 import java.util.Collection;
 
 /**
- * Implementiert das Domainmodell für die Verwaltung einer Liste von
- * Strich-Einstellungen ({@link Stroke}-Modellen).
+ * Implementiert einen {@link DomainModelVisitor}, der die Eingabe unverändert
+ * zurückgibt.
  *
  * @author Manuel Schulze <manuel_schulze@i-entwicklung.de>
- * @see <a href="http://stackoverflow.com/questions/10864049/map-json-array-of-objects-to-requestbody-listt-using-jackson">JSON-Array in Liste serialisieren</a>
- * @since 11.11.12 - 17:48
+ * @since 30.11.12 - 19:59
  */
-public class Strokes extends ArrayList<Stroke> {
-    public Strokes(int initialCapacity) {
-        super(initialCapacity);
+public class PassthroughDomainModelVisitor implements DomainModelVisitor<DomainModel, DomainModel> {
+
+    public final static DomainModelVisitor INSTANCE = new PassthroughDomainModelVisitor();
+
+    public DomainModel visit(DomainModel domainModel) {
+        return domainModel;
     }
 
-    public Strokes() {
-    }
-
-    public Strokes(Collection<? extends Stroke> c) {
-        super(c);
+    public Collection<DomainModel> visitCollection(Collection<DomainModel> domainModels) {
+        return domainModels;
     }
 }

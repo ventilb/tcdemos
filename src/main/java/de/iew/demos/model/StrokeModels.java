@@ -14,28 +14,27 @@
  * limitations under the License.
  */
 
-package de.iew.services.tree;
+package de.iew.demos.model;
 
-import de.iew.domain.Node;
-
+import java.util.ArrayList;
 import java.util.Collection;
 
 /**
- * Implementiert einen {@link NodeVisitor}, der die Eingabe unverändert
- * zurückgibt.
+ * Implementiert eine Strichliste.
  *
  * @author Manuel Schulze <manuel_schulze@i-entwicklung.de>
- * @since 30.11.12 - 19:59
+ * @see <a href="http://stackoverflow.com/questions/10864049/map-json-array-of-objects-to-requestbody-listt-using-jackson">JSON-Array in Liste serialisieren</a>
+ * @since 11.11.12 - 17:48
  */
-public class PassthroughNodeVisitor implements NodeVisitor<Node> {
-
-    public final static NodeVisitor INSTANCE = new PassthroughNodeVisitor();
-
-    public Node visitNode(Node node) {
-        return node;
+public class StrokeModels extends ArrayList<StrokeModel> {
+    public StrokeModels(int initialCapacity) {
+        super(initialCapacity);
     }
 
-    public Collection<Node> visitNodeCollection(Collection<Node> nodes) {
-        return nodes;
+    public StrokeModels() {
+    }
+
+    public StrokeModels(Collection<? extends StrokeModel> c) {
+        super(c);
     }
 }

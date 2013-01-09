@@ -16,16 +16,21 @@
 
 package de.iew.demos.controllers;
 
+import de.iew.demos.model.*;
 import de.iew.domain.sketchpad.*;
 import de.iew.services.SketchPadService;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
+import java.util.Collection;
+import java.util.List;
 
 /**
  * Implementiert den Controller für die Funktionen des Sketchpad.
@@ -47,46 +52,40 @@ public class SketchPadController {
 
     @RequestMapping(value = "/listpolygons")
     @ResponseBody
-    public Polygons listPolygonsAction() {
-        return this.sketchPadService.listAllPolygons();
+    public PolygonModels listPolygonsAction() throws Exception {
+        PolygonToPolygonModelTransformer polygonModelTransformer = getPolygonToPolygonModelTransformer();
+
+        SketchPad sketchPad = this.sketchPadService.getActiveSketchPad();
+        List<Polygon> polygons = this.sketchPadService.listAllPolygons(sketchPad.getId());
+
+        Collection<PolygonModel> polygonModels = polygonModelTransformer.visitCollection(polygons);
+        return new PolygonModels(polygonModels);
     }
 
     @RequestMapping(method = RequestMethod.POST, value = "/newpolygon")
     @ResponseBody
     public Long createPolygonAction(
-            HttpServletRequest request,
+            Authentication sketchPadUser,
             @RequestParam double x,
             @RequestParam double y,
             @RequestParam long lineColorId,
-            @RequestParam long strokeId) {
-        String sessionId = request.getSession(true).getId();
+            @RequestParam long strokeId) throws Exception {
+        SketchPad sketchPad = this.sketchPadService.getActiveSketchPad();
 
-        if (log.isDebugEnabled()) {
-            log.debug("Session Id " + sessionId);
-        }
-
-        Polygon polygon = this.sketchPadService.createPolygon(sessionId, x, y, lineColorId, strokeId);
+        Polygon polygon = this.sketchPadService.createPolygon(sketchPadUser, sketchPad.getId(), x, y, lineColorId, strokeId);
         return polygon.getId();
     }
 
     @RequestMapping(method = RequestMethod.POST, value = "/addsegment")
     @ResponseBody
     public Boolean extendPolygonAction(
-            HttpServletRequest request,
+            Authentication sketchPadUser,
             @RequestParam long polygonId,
             @RequestParam double x,
-            @RequestParam double y) {
+            @RequestParam double y) throws Exception {
         boolean webServiceResult = false;
 
-        HttpSession session = request.getSession(false);
-        if (session != null) {
-            String sessionId = session.getId();
-            if (log.isDebugEnabled()) {
-                log.debug("Session Id " + session.getId());
-            }
-
-            webServiceResult = this.sketchPadService.extendPolygon(sessionId, polygonId, x, y);
-        }
+        webServiceResult = this.sketchPadService.extendPolygon(sketchPadUser, polygonId, x, y);
 
         return webServiceResult;
     }
@@ -94,58 +93,75 @@ public class SketchPadController {
     @RequestMapping(method = RequestMethod.POST, value = "/closepolygon")
     @ResponseBody
     public Boolean closePolygonAction(
-            HttpServletRequest request,
+            Authentication sketchPadUser,
             @RequestParam long polygonId,
             @RequestParam double x,
-            @RequestParam double y) {
+            @RequestParam double y) throws Exception {
         boolean webServiceResult = false;
 
-        HttpSession session = request.getSession(false);
-        if (session != null) {
-            String sessionId = session.getId();
-            if (log.isDebugEnabled()) {
-                log.debug("Session Id " + session.getId());
-            }
-
-            webServiceResult = this.sketchPadService.closePolygon(sessionId, polygonId, x, y);
-        }
+        webServiceResult = this.sketchPadService.closePolygon(sketchPadUser, polygonId, x, y);
 
         return webServiceResult;
     }
 
     @RequestMapping(value = "/listcolors")
     @ResponseBody
-    public Colors listColorsAction() {
-        return this.sketchPadService.listAllColors();
+    public ColorModels listColorsAction() throws Exception {
+        ColorToColorModelTransformer colorModelTransformer = getColorModelTransformer();
+
+        SketchPad sketchPad = this.sketchPadService.getActiveSketchPad();
+        return new ColorModels(colorModelTransformer.visitCollection(this.sketchPadService.listAllColors(sketchPad.getId())));
     }
 
     @RequestMapping(method = RequestMethod.POST, value = "/choosecolor")
     @ResponseBody
-    public RgbColor chooseColorAction(
-            HttpServletRequest request,
-            @RequestParam long colorId) {
-        if (log.isDebugEnabled()) {
-            log.debug("Setze Farbe " + colorId);
-        }
-        HttpSession session = request.getSession(true);
-        String sessionId = session.getId();
-        return this.sketchPadService.chooseColor(sessionId, colorId);
+    public RgbColorModel chooseColorAction(
+            Authentication sketchPadUser,
+            @RequestParam long colorId) throws Exception {
+        ColorToColorModelTransformer colorModelTransformer = getColorModelTransformer();
+
+        SketchPad sketchPad = this.sketchPadService.getActiveSketchPad();
+        return colorModelTransformer.visit(this.sketchPadService.chooseColor(sketchPadUser, sketchPad.getId(), colorId));
     }
 
     @RequestMapping(value = "/liststrokes")
     @ResponseBody
-    public Strokes listStrokesAction() {
-        return this.sketchPadService.listAllStrokes();
+    public StrokeModels listStrokesAction() throws Exception {
+        StrokeToStrokeModelTransformer strokeModelTransformer = getStrokeModelTransformer();
+
+        SketchPad sketchPad = this.sketchPadService.getActiveSketchPad();
+        return new StrokeModels(strokeModelTransformer.visitCollection(this.sketchPadService.listAllStrokes(sketchPad.getId())));
     }
 
     @RequestMapping(value = "/choosestroke")
     @ResponseBody
-    public Stroke chooseStrokeAction(
-            HttpServletRequest request,
-            @RequestParam long strokeId) {
-        HttpSession session = request.getSession(true);
-        String sessionId = session.getId();
-        return this.sketchPadService.chooseStroke(sessionId, strokeId);
+    public StrokeModel chooseStrokeAction(
+            Authentication sketchPadUser,
+            @RequestParam long strokeId) throws Exception {
+        StrokeToStrokeModelTransformer strokeModelTransformer = getStrokeModelTransformer();
+
+        SketchPad sketchPad = this.sketchPadService.getActiveSketchPad();
+        return strokeModelTransformer.visit(this.sketchPadService.chooseStroke(sketchPadUser, sketchPad.getId(), strokeId));
+    }
+
+    @ExceptionHandler(Exception.class)
+    public Model onException(Exception e) {
+        if (log.isErrorEnabled()) {
+            log.error("Fehler während der Webservice Verarbeitung", e);
+        }
+        return null;
+    }
+
+    public PolygonToPolygonModelTransformer getPolygonToPolygonModelTransformer() {
+        return new PolygonToPolygonModelTransformer();
+    }
+
+    public StrokeToStrokeModelTransformer getStrokeModelTransformer() {
+        return new StrokeToStrokeModelTransformer();
+    }
+
+    public ColorToColorModelTransformer getColorModelTransformer() {
+        return new ColorToColorModelTransformer();
     }
 
     @Autowired
