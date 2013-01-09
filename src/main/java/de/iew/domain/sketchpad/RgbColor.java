@@ -16,7 +16,13 @@
 
 package de.iew.domain.sketchpad;
 
+import de.iew.domain.AbstractModel;
+import de.iew.domain.Order;
+
+import javax.persistence.*;
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Implementiert das Domainmodell für eine Farbe im RGB-Farbraum.
@@ -24,22 +30,31 @@ import java.io.Serializable;
  * @author Manuel Schulze <manuel_schulze@i-entwicklung.de>
  * @since 11.11.12 - 13:12
  */
-public class RgbColor implements Serializable {
+@Entity
+@Inheritance(strategy = InheritanceType.SINGLE_TABLE)
+@DiscriminatorColumn(name = "colorType", discriminatorType = DiscriminatorType.STRING)
+@DiscriminatorValue(value = "de.iew.domain.sketchpad.RgbColor")
+@Table(name = "sketch_color")
+public class RgbColor extends AbstractModel implements Order, Serializable {
 
-    private Long id;
+    private int ordinalNumber;
 
     private int r;
     private int g;
     private int b;
 
-    public Long getId() {
-        return id;
+    private List<SketchPad> sketchPads = new ArrayList<SketchPad>();
+
+    @Column
+    public int getOrdinalNumber() {
+        return this.ordinalNumber;
     }
 
-    public void setId(Long id) {
-        this.id = id;
+    public void setOrdinalNumber(int ordinalNumber) {
+        this.ordinalNumber = ordinalNumber;
     }
 
+    @Column
     public int getR() {
         return r;
     }
@@ -48,6 +63,7 @@ public class RgbColor implements Serializable {
         this.r = r;
     }
 
+    @Column
     public int getG() {
         return g;
     }
@@ -56,12 +72,23 @@ public class RgbColor implements Serializable {
         this.g = g;
     }
 
+    @Column
     public int getB() {
         return b;
     }
 
     public void setB(int b) {
         this.b = b;
+    }
+
+    // Brauchen wir für einige Hibernate Abfragen
+    @ManyToMany(mappedBy = "colors", fetch = FetchType.LAZY)
+    public List<SketchPad> getSketchPads() {
+        return sketchPads;
+    }
+
+    public void setSketchPads(List<SketchPad> sketchPads) {
+        this.sketchPads = sketchPads;
     }
 
     @Override

@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 Manuel Schulze <manuel_schulze@i-entwicklung.de>
+ * Copyright 2012-2013 Manuel Schulze <manuel_schulze@i-entwicklung.de>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,24 +21,25 @@ import de.iew.domain.Order;
 
 import javax.persistence.*;
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
- * Implementiert das Domainmodell für eine Strich-Einstellung.
+ * Implementiert ein Domainmodell für die Verwaltung eines Segments innerhalb
+ * eines Polygons.
  *
  * @author Manuel Schulze <manuel_schulze@i-entwicklung.de>
- * @since 11.11.12 - 17:44
+ * @since 02.01.13 - 20:43
  */
 @Entity
-@Table(name = "sketch_stroke")
-public class Stroke extends AbstractModel implements Order, Serializable {
+@Table(name = "sketch_polygon_segment")
+public class Segment extends AbstractModel implements Order, Serializable {
 
     private int ordinalNumber;
 
-    private double strokeWidth;
+    private double x;
 
-    private List<SketchPad> sketchPads = new ArrayList<SketchPad>();
+    private double y;
+
+    private Polygon polygon;
 
     @Column
     public int getOrdinalNumber() {
@@ -50,21 +51,30 @@ public class Stroke extends AbstractModel implements Order, Serializable {
     }
 
     @Column
-    public double getStrokeWidth() {
-        return strokeWidth;
+    public double getX() {
+        return x;
     }
 
-    public void setStrokeWidth(double strokeWidth) {
-        this.strokeWidth = strokeWidth;
+    public void setX(double x) {
+        this.x = x;
     }
 
-    // Brauchen wir für einige Hibernate Abfragen
-    @ManyToMany(mappedBy = "strokes", fetch = FetchType.LAZY)
-    public List<SketchPad> getSketchPads() {
-        return sketchPads;
+    @Column
+    public double getY() {
+        return y;
     }
 
-    public void setSketchPads(List<SketchPad> sketchPads) {
-        this.sketchPads = sketchPads;
+    public void setY(double y) {
+        this.y = y;
+    }
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "polygon_id", nullable = false)
+    public Polygon getPolygon() {
+        return polygon;
+    }
+
+    public void setPolygon(Polygon polygon) {
+        this.polygon = polygon;
     }
 }

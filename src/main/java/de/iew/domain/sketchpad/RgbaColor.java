@@ -16,6 +16,8 @@
 
 package de.iew.domain.sketchpad;
 
+import javax.persistence.DiscriminatorValue;
+import javax.persistence.Entity;
 import java.io.Serializable;
 
 /**
@@ -25,6 +27,8 @@ import java.io.Serializable;
  * @author Manuel Schulze <manuel_schulze@i-entwicklung.de>
  * @since 11.11.12 - 14:04
  */
+@Entity
+@DiscriminatorValue(value = "de.iew.domain.sketchpad.RgbaColor")
 public class RgbaColor extends RgbColor implements Serializable {
 
     private double a;
@@ -43,7 +47,7 @@ public class RgbaColor extends RgbColor implements Serializable {
                 "r=" + getR() +
                 ", g=" + getG() +
                 ", b=" + getB() +
-                "a=" + a +
+                ", a=" + a +
                 '}';
     }
 }

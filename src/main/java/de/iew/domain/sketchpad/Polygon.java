@@ -16,8 +16,13 @@
 
 package de.iew.domain.sketchpad;
 
+import de.iew.domain.DataSource;
+
+import javax.persistence.*;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 /**
  * Implementiert das Domainmodell für ein Polygon.
@@ -29,26 +34,33 @@ import java.util.Arrays;
  * @author Manuel Schulze <manuel_schulze@i-entwicklung.de>
  * @since 10.11.12 - 23:27
  */
-public class Polygon implements Serializable {
+@Entity
+@Table(name = "sketch_polygon")
+@PrimaryKeyJoinColumn(name = "id")
+public class Polygon extends DataSource implements Serializable {
 
-    private Long id;
-
-    private double[] segments = new double[100];
-
-    private int segmentCount = 0;
+    private SketchPad sketchPad;
 
     private RgbColor lineColor;
 
     private Stroke stroke;
 
-    public Long getId() {
-        return id;
+    private List<Segment> segments = new ArrayList<Segment>();
+
+    private State state;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "sketch_pad_id")
+    public SketchPad getSketchPad() {
+        return sketchPad;
     }
 
-    public void setId(Long id) {
-        this.id = id;
+    public void setSketchPad(SketchPad sketchPad) {
+        this.sketchPad = sketchPad;
     }
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "line_color_id")
     public RgbColor getLineColor() {
         return lineColor;
     }
@@ -57,6 +69,8 @@ public class Polygon implements Serializable {
         this.lineColor = lineColor;
     }
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "stroke_id")
     public Stroke getStroke() {
         return stroke;
     }
@@ -65,43 +79,27 @@ public class Polygon implements Serializable {
         this.stroke = stroke;
     }
 
-    public synchronized boolean addSegment(double x, double y) {
-
-        int arrayIndex = this.segmentCount * 2;
-
-        if (this.segmentCount > 0) {
-            double lastx = this.segments[arrayIndex - 2];
-            double lasty = this.segments[arrayIndex - 1];
-            if (x == lastx && y == lasty) {
-                return false;
-            }
-        }
-
-        resize();
-        this.segments[arrayIndex] = x;
-        this.segments[arrayIndex + 1] = y;
-        this.segmentCount++;
-        return true;
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "polygon")
+    public List<Segment> getSegments() {
+        return segments;
     }
 
-    public synchronized int getSegmentCount() {
-        return this.segmentCount;
+    public void setSegments(List<Segment> segments) {
+        this.segments = segments;
     }
 
-    public double[] getSegments() {
-        return this.segments;
+    @Column
+    @Enumerated(value = EnumType.STRING)
+    public State getState() {
+        return state;
     }
 
-    protected void resize() {
-        if (this.segmentCount == this.segments.length / 2) {
-            this.segments = Arrays.copyOf(this.segments, this.segments.length + 100);
-        }
+    public void setState(State state) {
+        this.state = state;
     }
 
-    @Override
-    public String toString() {
-        return "Polygon{" +
-                "segmentCount=" + segmentCount +
-                '}';
+    public static enum State {
+        OPEN,
+        CLOSED
     }
 }
