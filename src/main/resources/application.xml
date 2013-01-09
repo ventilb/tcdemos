@@ -40,7 +40,7 @@ http://www.springframework.org/schema/util/spring-util-2.0.xsd">
     <mvc:annotation-driven/>
 
     <context:component-scan
-            base-package="de.iew.services, de.iew.demos, de.iew.sketchpad, de.iew.web.controllers, de.iew.web">
+            base-package="de.iew.services, de.iew.demos, de.iew.web.controllers, de.iew.web">
         <context:exclude-filter type="aspectj" expression="de.iew.persistence..*"/>
     </context:component-scan>
 
