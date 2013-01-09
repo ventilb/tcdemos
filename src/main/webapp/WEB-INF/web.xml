@@ -97,8 +97,8 @@
 
     Das "Open Session In View Pattern" ist umstritten, da es auch Nachteile hat.
 
-    @see http://stackoverflow.com/questions/1103363/why-is-hibernate-open-session-in-view-considered-a-bad-practice
-    @see http://blog.frankel.ch/the-opensessioninview-antipattern
+    see http://stackoverflow.com/questions/1103363/why-is-hibernate-open-session-in-view-considered-a-bad-practice
+    see http://blog.frankel.ch/the-opensessioninview-antipattern
     -->
     <filter>
         <filter-name>openSessionInViewFilter</filter-name>
