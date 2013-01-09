@@ -22,6 +22,11 @@
  */
 
 body {
+    background-color: #ffffff;
+    font-family: Calibra, Verdana, Tahoma, Arial, Helvetica, Sans-Serif;
+    color: #333333;
+    font-size: 12px;
+    line-height: 14px;
     margin: 0;
     padding: 0;
     text-align: center;
@@ -40,6 +45,30 @@ body #content {
     width: 1000px;
     margin: 20px auto;
     text-align: left;
+}
+
+/* Die Loginseite sieht etwas anders aus */
+body #content.login_form {
+    text-align: center;
+    padding-top: 100px;
+    padding-bottom: 100px;
+}
+
+/* Die Kopfzeile mit Login/Logout Links */
+body #content_top {
+    height: 30px;
+    line-height: 30px;
+}
+
+body #content_top .inner {
+    width: 1000px;
+    margin: 0 auto;
+    text-align: right;
+    color: #1d2d44;
+}
+
+body #content_top .inner a:visited {
+    color: #1d2d44;
 }
 
 /* Header */
