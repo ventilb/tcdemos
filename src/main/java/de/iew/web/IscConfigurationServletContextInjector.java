@@ -24,7 +24,7 @@ import java.util.Properties;
 
 /**
  * Verwaltet die Smartclient Konfiguration und speichert sie im
- * {@link ServletContext} damit in den Taglibs daraus zurückgegriffen werden
+ * {@link ServletContext} damit in den Taglibs darauf zurückgegriffen werden
  * kann.
  *
  * @author Manuel Schulze <manuel_schulze@i-entwicklung.de>
