@@ -27,6 +27,10 @@ import de.iew.domain.principals.Authority;
  * @since 01.12.12 - 15:57
  */
 public interface UserDetailsService {
+    // TODO: Die folgenden zwei Methoden gefallen mir nicht. Jeder Aufruf geht unnötigerweise durch AOP. Das ist mir zu viel. Entweder AOP per Config abschalten oder ähnlich SecurityContextHolderAwareRequestWrapper einen Wrapper um die Daten basteln und zurückgeben
+    public Account getAuthenticatedUser();
+
+    public boolean isAuthenticatedUserInRole(String role);
 
     /**
      * Liefert die Accountdaten zu dem angegebenen Loginnamen.

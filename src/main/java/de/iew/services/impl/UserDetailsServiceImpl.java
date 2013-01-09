@@ -23,9 +23,14 @@ import de.iew.persistence.AccountDao;
 import de.iew.persistence.AuthorityDao;
 import de.iew.services.UserDetailsService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
+
+import java.util.Collection;
 
 /**
  * Implementiert zusätzlich auch {@link org.springframework.security.core.userdetails.UserDetailsService}.
@@ -38,11 +43,49 @@ import org.springframework.stereotype.Service;
 @Service(value = "userDetailsService")
 public class UserDetailsServiceImpl implements UserDetailsService, org.springframework.security.core.userdetails.UserDetailsService {
 
-    private AccountDao accountDao;
-
-    private AuthorityDao authorityDao;
-
     private String administrativeAuthoritySystemName = "ROLE_ADMIN";
+
+    public Account getAuthenticatedUser() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+
+        // TODO: Prüfen ob wirklich eingeloggt. siehe dafür SecurityContextHolderAwareRequestWrapper Klasse
+
+        Object principal = auth.getPrincipal();
+        if (principal instanceof Account) {
+            return (Account) principal;
+        }
+
+        return null;
+    }
+
+    /**
+     * {@inheritDoc}
+     * <p>
+     * Die Implementierung wurde von Spring übernommen.
+     * </p>
+     *
+     * @see {SecurityContextHolderAwareRequestWrapper#isGranted}
+     */
+    public boolean isAuthenticatedUserInRole(String role) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth == null || auth.getPrincipal() == null) {
+            return false;
+        }
+
+        Collection<? extends GrantedAuthority> authorities = auth.getAuthorities();
+
+        if (authorities == null) {
+            return false;
+        }
+
+        for (GrantedAuthority grantedAuthority : authorities) {
+            if (role.equals(grantedAuthority.getAuthority())) {
+                return true;
+            }
+        }
+
+        return false;
+    }
 
     public Account loadUserByLoginName(String loginName) throws ModelNotFoundException {
         Account account = this.accountDao.findAccountByUsername(loginName);
@@ -85,6 +128,12 @@ public class UserDetailsServiceImpl implements UserDetailsService, org.springfra
             throw new UsernameNotFoundException("The requested account was not found.");
         }
     }
+
+    // Service und Dao Abhängigkeiten /////////////////////////////////////////
+
+    private AccountDao accountDao;
+
+    private AuthorityDao authorityDao;
 
     @Autowired
     public void setAccountDao(AccountDao accountDao) {
