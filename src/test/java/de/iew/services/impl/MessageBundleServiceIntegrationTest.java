@@ -42,7 +42,7 @@ import static junit.framework.Assert.*;
  * @since 25.11.12 - 03:52
  */
 @RunWith(value = SpringJUnit4ClassRunner.class)
-@ContextConfiguration(locations = "classpath:application.xml")
+@ContextConfiguration(locations = {"classpath:application.xml", "classpath:spring-db-config.xml", "classpath:spring-security-config.xml", "classpath:spring-acl-config.xml"})
 @TransactionConfiguration(transactionManager = "txManager", defaultRollback = true)
 @Transactional // Wichtig, sonst haben wir hier keine Transaktion und die Testdaten werden nicht zurück gerollt.
 public class MessageBundleServiceIntegrationTest {
