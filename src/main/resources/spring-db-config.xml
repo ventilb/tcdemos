@@ -72,6 +72,7 @@
     <tx:advice id="hbmDaoAdvice" transaction-manager="txManager">
         <tx:attributes>
             <tx:method name="find*" propagation="REQUIRED" read-only="true"/>
+            <tx:method name="fetch*" propagation="REQUIRED" read-only="true"/>
             <tx:method name="save*" propagation="REQUIRED" read-only="false"/>
             <tx:method name="remove*" propagation="REQUIRED" read-only="false"/>
             <tx:method name="*"/>
