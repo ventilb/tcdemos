@@ -64,7 +64,7 @@ public class UserDetailsServiceImpl implements UserDetailsService, org.springfra
      * Die Implementierung wurde von Spring übernommen.
      * </p>
      *
-     * @see {SecurityContextHolderAwareRequestWrapper#isGranted}
+     * @see org.springframework.security.web.servletapi.SecurityContextHolderAwareRequestWrapper#isGranted(String)
      */
     public boolean isAuthenticatedUserInRole(String role) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
