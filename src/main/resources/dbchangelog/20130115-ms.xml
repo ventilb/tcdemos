@@ -1,0 +1,174 @@
+<!--
+  ~ Copyright 2012-2013 Manuel Schulze <manuel_schulze@i-entwicklung.de>
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~     http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+    http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-2.0.xsd">
+
+    <changeSet id="55-ms" author="Manuel Schulze">
+        <createTable tableName="web_resource">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="pattern" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="method" type="varchar(10)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="requiresChannel" type="varchar(10)" defaultValue="">
+                <constraints nullable="true"/>
+            </column>
+            <column name="patternMatcher" type="varchar(255)" defaultValue="ANT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <modifySql dbms="mysql">
+            <!--
+            http://www.liquibase.org/manual/modify_sql
+            -->
+            <append value=" engine innodb"/>
+        </modifySql>
+    </changeSet>
+
+    <changeSet id="56-ms" author="Manuel Schulze">
+        <createTable tableName="web_resource_access_rule">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="ruleDiscriminator" type="varchar(255)" defaultValue="HAS_AUTHORITY">
+                <constraints nullable="false"/>
+            </column>
+            <column name="web_resource_id" type="bigint">
+                <constraints nullable="false"/>
+            </column>
+            <column name="authority_id" type="bigint">
+                <constraints nullable="true"/>
+            </column>
+            <column name="permitAll" type="boolean" defaultValueBoolean="false">
+                <constraints nullable="false"/>
+            </column>
+            <column name="denyAll" type="boolean" defaultValueBoolean="false">
+                <constraints nullable="false"/>
+            </column>
+            <column name="isAnonymous" type="boolean" defaultValueBoolean="false">
+                <constraints nullable="false"/>
+            </column>
+            <column name="isRememberMe" type="boolean" defaultValueBoolean="false">
+                <constraints nullable="false"/>
+            </column>
+            <column name="isAuthenticated" type="boolean" defaultValueBoolean="false">
+                <constraints nullable="false"/>
+            </column>
+            <column name="isFullyAuthenticated" type="boolean" defaultValueBoolean="false">
+                <constraints nullable="false"/>
+            </column>
+
+        </createTable>
+        <modifySql dbms="mysql">
+            <!--
+            http://www.liquibase.org/manual/modify_sql
+            -->
+            <append value=" engine innodb"/>
+        </modifySql>
+    </changeSet>
+
+    <changeSet id="57-ms" author="Manuel Schulze">
+        <addForeignKeyConstraint baseTableName="web_resource_access_rule" baseColumnNames="web_resource_id"
+                                 constraintName="fk_web_resource_authority_web_resource"
+                                 referencedTableName="web_resource"
+                                 referencedColumnNames="id" onDelete="RESTRICT" onUpdate="RESTRICT"/>
+        <addForeignKeyConstraint baseTableName="web_resource_access_rule" baseColumnNames="authority_id"
+                                 constraintName="fk_web_resource_authority_authority"
+                                 referencedTableName="authority"
+                                 referencedColumnNames="id" onDelete="RESTRICT" onUpdate="RESTRICT"/>
+    </changeSet>
+
+    <changeSet id="58-s" author="Manuel Schulze">
+        <sql>
+            INSERT INTO text_item_collection VALUES(NULL);
+            SET @TEXT_ITEM_COLLECTION__ID=(LAST_INSERT_ID());
+            INSERT INTO text_item VALUES (NULL, "de", "DE", "Anonymer Besucher", @TEXT_ITEM_COLLECTION__ID);
+            INSERT INTO data_source VALUES (NULL);
+            SET @DATA_SOURCE_ID=(LAST_INSERT_ID());
+            INSERT INTO authority VALUES(@DATA_SOURCE_ID, "ROLE_ANONYMOUS", @TEXT_ITEM_COLLECTION__ID);
+            SET @ROLE_ANONYMOUS_ID=(LAST_INSERT_ID());
+
+            SET @ROLE_SKETCHPAD_VISITOR_ID=(SELECT id FROM authority WHERE system_name='ROLE_SKETCHPAD_VISITOR');
+            SET @ROLE_SKETCHPAD_USER_ID=(SELECT id FROM authority WHERE system_name='ROLE_SKETCHPAD_USER');
+            SET @ROLE_ADMIN_ID=(SELECT id FROM authority WHERE system_name='ROLE_ADMIN');
+
+            INSERT INTO web_resource VALUES (NULL, "/jsconfig.js", NULL, NULL, "ANT");
+            INSERT INTO web_resource_access_rule VALUES(NULL, "FLAG", LAST_INSERT_ID(), NULL, true, false, false, false, false, false);
+
+            INSERT INTO web_resource VALUES (NULL, "/nls/**", NULL, NULL, "ANT");
+            INSERT INTO web_resource_access_rule VALUES(NULL, "FLAG", LAST_INSERT_ID(), NULL, true, false, false, false, false, false);
+
+            INSERT INTO web_resource VALUES (NULL, "/static/**", NULL, NULL, "ANT");
+            INSERT INTO web_resource_access_rule VALUES(NULL, "FLAG", LAST_INSERT_ID(), NULL, true, false, false, false, false, false);
+
+            INSERT INTO web_resource VALUES (NULL, "/", NULL, NULL, "ANT");
+            INSERT INTO web_resource_access_rule VALUES(NULL, "FLAG", LAST_INSERT_ID(), NULL, true, false, false, false, false, false);
+
+            INSERT INTO web_resource VALUES (NULL, "/identity/login.html", NULL, NULL, "ANT");
+            INSERT INTO web_resource_access_rule VALUES(NULL, "FLAG", LAST_INSERT_ID(), NULL, false, false, true, false, false, false);
+
+            INSERT INTO web_resource VALUES (NULL, "/identity/logout.html", NULL, NULL, "ANT");
+            INSERT INTO web_resource_access_rule VALUES(NULL, "FLAG", LAST_INSERT_ID(), NULL, false, false, false, false, true, false);
+
+            INSERT INTO web_resource VALUES (NULL, "/sketchpad.html", NULL, NULL, "ANT");
+            INSERT INTO web_resource_access_rule VALUES(NULL, "HAS_AUTHORITY", LAST_INSERT_ID(), @ROLE_SKETCHPAD_VISITOR_ID, false, false, false, false, false, false);
+
+            INSERT INTO web_resource VALUES (NULL, "/sketchpad/listpolygons.json", NULL, NULL, "ANT");
+            INSERT INTO web_resource_access_rule VALUES(NULL, "HAS_AUTHORITY", LAST_INSERT_ID(), @ROLE_SKETCHPAD_VISITOR_ID, false, false, false, false, false, false);
+
+            INSERT INTO web_resource VALUES (NULL, "/sketchpad/newpolygon.json", NULL, NULL, "ANT");
+            INSERT INTO web_resource_access_rule VALUES(NULL, "HAS_AUTHORITY", LAST_INSERT_ID(), @ROLE_SKETCHPAD_USER_ID, false, false, false, false, false, false);
+
+            INSERT INTO web_resource VALUES (NULL, "/sketchpad/addsegment.json", NULL, NULL, "ANT");
+            INSERT INTO web_resource_access_rule VALUES(NULL, "HAS_AUTHORITY", LAST_INSERT_ID(), @ROLE_SKETCHPAD_USER_ID, false, false, false, false, false, false);
+
+            INSERT INTO web_resource VALUES (NULL, "/sketchpad/closepolygon.json", NULL, NULL, "ANT");
+            INSERT INTO web_resource_access_rule VALUES(NULL, "HAS_AUTHORITY", LAST_INSERT_ID(), @ROLE_SKETCHPAD_USER_ID, false, false, false, false, false, false);
+
+            INSERT INTO web_resource VALUES (NULL, "/sketchpad/listcolors.json", NULL, NULL, "ANT");
+            INSERT INTO web_resource_access_rule VALUES(NULL, "HAS_AUTHORITY", LAST_INSERT_ID(), @ROLE_SKETCHPAD_VISITOR_ID, false, false, false, false, false, false);
+
+            INSERT INTO web_resource VALUES (NULL, "/sketchpad/choosecolor.json", NULL, NULL, "ANT");
+            INSERT INTO web_resource_access_rule VALUES(NULL, "HAS_AUTHORITY", LAST_INSERT_ID(), @ROLE_SKETCHPAD_USER_ID, false, false, false, false, false, false);
+
+            INSERT INTO web_resource VALUES (NULL, "/sketchpad/liststrokes.json", NULL, NULL, "ANT");
+            INSERT INTO web_resource_access_rule VALUES(NULL, "HAS_AUTHORITY", LAST_INSERT_ID(), @ROLE_SKETCHPAD_VISITOR_ID, false, false, false, false, false, false);
+
+            INSERT INTO web_resource VALUES (NULL, "/sketchpad/choosestroke.json", NULL, NULL, "ANT");
+            INSERT INTO web_resource_access_rule VALUES(NULL, "HAS_AUTHORITY", LAST_INSERT_ID(), @ROLE_SKETCHPAD_USER_ID, false, false, false, false, false, false);
+
+            INSERT INTO web_resource VALUES (NULL, "/treedemo.html", NULL, NULL, "ANT");
+            INSERT INTO web_resource_access_rule VALUES(NULL, "HAS_AUTHORITY", LAST_INSERT_ID(), @ROLE_ADMIN_ID, false, false, false, false, false, false);
+
+            INSERT INTO web_resource VALUES (NULL, "/tree/**", NULL, NULL, "ANT");
+            INSERT INTO web_resource_access_rule VALUES(NULL, "HAS_AUTHORITY", LAST_INSERT_ID(), @ROLE_ADMIN_ID, false, false, false, false, false, false);
+
+            INSERT INTO web_resource VALUES (NULL, "/list/**", NULL, NULL, "ANT");
+            INSERT INTO web_resource_access_rule VALUES(NULL, "HAS_AUTHORITY", LAST_INSERT_ID(), @ROLE_ADMIN_ID, false, false, false, false, false, false);
+
+            INSERT INTO web_resource VALUES (NULL, "/**", NULL, NULL, "ANT");
+            INSERT INTO web_resource_access_rule VALUES(NULL, "FLAG", LAST_INSERT_ID(), NULL, false, false, false, false, false, true);
+        </sql>
+    </changeSet>
+</databaseChangeLog>

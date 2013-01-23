@@ -14,30 +14,20 @@
  * limitations under the License.
  */
 
-package de.iew.domain;
+package de.iew.framework.security.access;
+
+import org.springframework.security.access.ConfigAttribute;
 
 /**
- * Exception, die gemeldet wird wenn ein Domainmodell nicht erstellt werden
- * kann oder im Zusammenhang der Domainmodelle abhängige Objekte nicht
- * erstellt werden konnten.
+ * Interface to implement our own hierarchy of {@link ConfigAttribute} classes.
+ * <p>
+ * Our web resources are configured by domain models. This hierarchy provides
+ * a simple interface to create {@link ConfigAttribute} instances from these
+ * domain models.
+ * </p>
  *
  * @author Manuel Schulze <manuel_schulze@i-entwicklung.de>
- * @since 17.01.13 - 21:16
+ * @since 17.01.13 - 21:48
  */
-public class ModelInstantiationException extends Exception {
-
-    public ModelInstantiationException() {
-    }
-
-    public ModelInstantiationException(String message) {
-        super(message);
-    }
-
-    public ModelInstantiationException(String message, Throwable cause) {
-        super(message, cause);
-    }
-
-    public ModelInstantiationException(Throwable cause) {
-        super(cause);
-    }
+public interface WebResourceAccessRuleConfigAttribute extends ConfigAttribute {
 }

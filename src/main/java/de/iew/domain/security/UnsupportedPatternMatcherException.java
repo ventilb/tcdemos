@@ -14,30 +14,20 @@
  * limitations under the License.
  */
 
-package de.iew.domain;
+package de.iew.domain.security;
 
 /**
- * Exception, die gemeldet wird wenn ein Domainmodell nicht erstellt werden
- * kann oder im Zusammenhang der Domainmodelle abhängige Objekte nicht
- * erstellt werden konnten.
+ * Exception to indicate references to unsupported
+ * {@link WebResourcePatternMatcher}s.
  *
  * @author Manuel Schulze <manuel_schulze@i-entwicklung.de>
- * @since 17.01.13 - 21:16
+ * @since 17.01.13 - 20:50
  */
-public class ModelInstantiationException extends Exception {
-
-    public ModelInstantiationException() {
+public class UnsupportedPatternMatcherException extends RuntimeException {
+    public UnsupportedPatternMatcherException() {
     }
 
-    public ModelInstantiationException(String message) {
+    public UnsupportedPatternMatcherException(String message) {
         super(message);
-    }
-
-    public ModelInstantiationException(String message, Throwable cause) {
-        super(message, cause);
-    }
-
-    public ModelInstantiationException(Throwable cause) {
-        super(cause);
     }
 }

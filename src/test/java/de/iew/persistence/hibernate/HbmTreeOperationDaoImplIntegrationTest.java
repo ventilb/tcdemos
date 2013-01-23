@@ -39,7 +39,7 @@ import static junit.framework.Assert.*;
  * @since 30.11.12 - 15:22
  */
 @RunWith(value = SpringJUnit4ClassRunner.class)
-@ContextConfiguration(locations = {"classpath:application.xml", "classpath:spring-db-config.xml", "classpath:spring-security-config.xml"})
+@ContextConfiguration(locations = {"classpath:application.xml", "classpath:spring-db-config.xml", "classpath:snippets/spring-security-config.xml"})
 @TransactionConfiguration(transactionManager = "txManager", defaultRollback = true)
 @Transactional // Wichtig, sonst haben wir hier keine Transaktion und die Testdaten werden nicht zurück gerollt.
 public class HbmTreeOperationDaoImplIntegrationTest {

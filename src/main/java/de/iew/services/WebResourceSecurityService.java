@@ -14,30 +14,13 @@
  * limitations under the License.
  */
 
-package de.iew.domain;
+package de.iew.services;
 
 /**
- * Exception, die gemeldet wird wenn ein Domainmodell nicht erstellt werden
- * kann oder im Zusammenhang der Domainmodelle abhängige Objekte nicht
- * erstellt werden konnten.
+ * Interface description for implementing web resource services.
  *
  * @author Manuel Schulze <manuel_schulze@i-entwicklung.de>
- * @since 17.01.13 - 21:16
+ * @since 16.01.13 - 23:00
  */
-public class ModelInstantiationException extends Exception {
-
-    public ModelInstantiationException() {
-    }
-
-    public ModelInstantiationException(String message) {
-        super(message);
-    }
-
-    public ModelInstantiationException(String message, Throwable cause) {
-        super(message, cause);
-    }
-
-    public ModelInstantiationException(Throwable cause) {
-        super(cause);
-    }
+public interface WebResourceSecurityService {
 }
