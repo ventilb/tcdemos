@@ -66,11 +66,6 @@
         </dependency>
         <dependency>
             <groupId>org.springframework</groupId>
-            <artifactId>spring-orm</artifactId>
-            <version>3.1.2.RELEASE</version>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework</groupId>
             <artifactId>spring-aop</artifactId>
             <version>3.1.2.RELEASE</version>
         </dependency>
@@ -103,17 +98,12 @@
             <version>3.1.2.RELEASE</version>
         </dependency>
         <dependency>
-            <!-- Zum Schützen der Webseiten und Webservices -->
-            <groupId>org.springframework.security</groupId>
-            <artifactId>spring-security-web</artifactId>
-            <version>3.1.2.RELEASE</version>
-        </dependency>
-        <dependency>
             <groupId>org.springframework.security</groupId>
             <artifactId>spring-security-taglibs</artifactId>
             <version>3.1.2.RELEASE</version>
         </dependency>
         <dependency>
+            <!-- Zum Schützen der Webseiten und Webservices -->
             <groupId>org.springframework.security</groupId>
             <artifactId>spring-security-web</artifactId>
             <version>3.1.2.RELEASE</version>
@@ -296,15 +286,27 @@
                 </configuration>
             </plugin>
         </plugins>
-        <!--
-        Hiermit sagen wir Maven, dass es das angegebene Verzeichnis filtern
-        und die Properties aus dem Build-Profil ersetzen soll. Zum Beispiel
-        wird dadurch die Datenbank konfiguriert.
-        -->
         <resources>
+            <!--
+            Hiermit sagen wir Maven, dass es das angegebene Verzeichnis filtern
+            und die Properties aus dem Build-Profil ersetzen soll. Zum Beispiel
+            wird dadurch die Datenbank konfiguriert.
+            -->
             <resource>
                 <directory>src/main/resources</directory>
                 <filtering>true</filtering>
+            </resource>
+            <!--
+            Mit der folgenden Ressourcen können wir abhängig vom eingestellten
+            Build-Profil eine log4j.xml Konfiguration für das Projekt festlegen.
+
+            see http://maven.apache.org/plugins/maven-resources-plugin/examples/include-exclude.html
+            -->
+            <resource>
+                <directory>profiles/${build.profile.id}</directory>
+                <includes>
+                    <include>log4j.xml</include>
+                </includes>
             </resource>
         </resources>
         <filters>
