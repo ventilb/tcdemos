@@ -36,17 +36,17 @@
 
     <!-- MySQL DataSource -->
     <bean id="dataSource" class="com.mchange.v2.c3p0.ComboPooledDataSource">
-        <property name="driverClass" value="com.mysql.jdbc.Driver"/>
-        <property name="jdbcUrl" value="jdbc:mysql://squeeze:3306/tcdemos?characterEncoding=UTF-8"/>
-        <property name="user" value="tcdemos"/>
-        <property name="password" value="tcdemos"/>
+        <property name="driverClass" value="@db.driverClass@"/>
+        <property name="jdbcUrl" value="@db.jdbcUrl@"/>
+        <property name="user" value="@db.user@"/>
+        <property name="password" value="@db.password@"/>
     </bean>
 
     <!-- Hibernate SessionFactory -->
     <!--
     Für die Liquibase Integration:
 
-    @see http://www.insaneprogramming.be/?p=56
+    see http://www.insaneprogramming.be/?p=56
     -->
     <bean id="sessionFactory"
           class="org.springframework.orm.hibernate4.LocalSessionFactoryBean" depends-on="liquibase">
@@ -102,11 +102,8 @@
         <property name="changeLog" value="classpath:db-changelog.xml"/>
 
         <!--
-        contexts specifies the runtime contexts to use.
-        -->
-        <!--
         Könnte für Unit Tests nützlich sein. Mal sehen wie das mit Maven spielt.
-        <property name="contexts" value="test, production"/>
         -->
+        <property name="contexts" value="@build.profile.id@"/>
     </bean>
 </beans>

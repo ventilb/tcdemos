@@ -268,6 +268,10 @@
         </dependency>
     </dependencies>
     <build>
+        <!--
+        see http://www.manydesigns.com/en/portofino/portofino3/tutorials/using-maven-profiles-and-resource-filtering
+        see http://www.petrikainulainen.net/programming/tips-and-tricks/creating-profile-specific-configuration-files-with-maven/
+        -->
         <finalName>tcdemos</finalName>
         <plugins>
             <plugin>
@@ -279,6 +283,49 @@
                     <docencoding>UTF-8</docencoding>
                 </configuration>
             </plugin>
+            <!--
+            Das Resources Plugin ist in der Lage über konfigurierbare Ressourcen
+            zu iterieren und bspw. Ersetzungen in den Dateien durchzuführen.
+            -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-resources-plugin</artifactId>
+                <version>2.5</version>
+                <configuration>
+                    <encoding>UTF-8</encoding>
+                </configuration>
+            </plugin>
         </plugins>
+        <!--
+        Hiermit sagen wir Maven, dass es das angegebene Verzeichnis filtern
+        und die Properties aus dem Build-Profil ersetzen soll. Zum Beispiel
+        wird dadurch die Datenbank konfiguriert.
+        -->
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+                <filtering>true</filtering>
+            </resource>
+        </resources>
+        <filters>
+            <filter>profiles/${build.profile.id}/config.properties</filter>
+        </filters>
     </build>
+    <profiles>
+        <profile>
+            <id>development</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <properties>
+                <build.profile.id>development</build.profile.id>
+            </properties>
+        </profile>
+        <profile>
+            <id>production</id>
+            <properties>
+                <build.profile.id>production</build.profile.id>
+            </properties>
+        </profile>
+    </profiles>
 </project>
