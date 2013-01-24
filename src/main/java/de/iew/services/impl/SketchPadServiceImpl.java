@@ -21,20 +21,16 @@ import de.iew.domain.sketchpad.*;
 import de.iew.persistence.*;
 import de.iew.services.AclEditorService;
 import de.iew.services.SketchPadService;
+import de.iew.services.events.SketchPadEvent;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.context.ApplicationEventPublisherAware;
 import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.security.access.prepost.PostFilter;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.acls.domain.BasePermission;
-import org.springframework.security.acls.model.MutableAcl;
-import org.springframework.security.acls.model.Permission;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.web.servletapi.SecurityContextHolderAwareRequestWrapper;
 import org.springframework.stereotype.Service;
 
-import java.util.Collection;
 import java.util.List;
 
 /**
@@ -45,7 +41,7 @@ import java.util.List;
  * @since 02.01.13 - 14:41
  */
 @Service(value = "sketchPadService")
-public class SketchPadServiceImpl implements SketchPadService {
+public class SketchPadServiceImpl implements SketchPadService, ApplicationEventPublisherAware {
 
     /**
      * {@inheritDoc}
@@ -87,6 +83,8 @@ public class SketchPadServiceImpl implements SketchPadService {
 
         polygon = this.polygonDao.save(polygon);
 
+        this.applicationEventPublisher.publishEvent(new SketchPadEvent(this, SketchPadEvent.Action.POLYGON_CREATED, polygon));
+
         // ACL aufsetzen
         this.aclEditorService.setupDemoSketchPadPolygonPermissionsIfSketchPadAdmin(polygon.getId());
         this.aclEditorService.setupDemoSketchPadPolygonPermissionsIfSketchPadUser(polygon.getId());
@@ -119,6 +117,8 @@ public class SketchPadServiceImpl implements SketchPadService {
         //polygon.getSegments().add(segment);
         this.polygonDao.refresh(polygon);
 
+        this.applicationEventPublisher.publishEvent(new SketchPadEvent(this, SketchPadEvent.Action.POLYGON_UPDATED, polygon));
+
         return true;
     }
 
@@ -129,6 +129,8 @@ public class SketchPadServiceImpl implements SketchPadService {
         polygon.setState(Polygon.State.CLOSED);
 
         // TODO Schreibrecht entziehen
+
+        this.applicationEventPublisher.publishEvent(new SketchPadEvent(this, SketchPadEvent.Action.POLYGON_CLOSED, polygon));
 
         return true;
     }
@@ -191,6 +193,8 @@ public class SketchPadServiceImpl implements SketchPadService {
 
     // Service und Dao Abhängigkeiten /////////////////////////////////////////
 
+    private ApplicationEventPublisher applicationEventPublisher;
+
     private AclEditorService aclEditorService;
 
     private SketchPadDao sketchPadDao;
@@ -202,6 +206,10 @@ public class SketchPadServiceImpl implements SketchPadService {
     private RgbColorDao sketchPadColorDao;
 
     private StrokeDao sketchPadStrokeDao;
+
+    public void setApplicationEventPublisher(ApplicationEventPublisher applicationEventPublisher) {
+        this.applicationEventPublisher = applicationEventPublisher;
+    }
 
     @Autowired
     public void setAclEditorService(AclEditorService aclEditorService) {
