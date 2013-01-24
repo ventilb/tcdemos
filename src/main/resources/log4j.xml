@@ -44,7 +44,7 @@
     </logger>
 
     <logger name="org.hibernate.SQL">
-        <level value="debug"/>
+        <level value="info"/>
     </logger>
 
     <logger name="liquibase">
