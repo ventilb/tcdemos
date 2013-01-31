@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright 2012-2013 Manuel Schulze <manuel_schulze@i-entwicklung.de>
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~     http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+  http://www.springframework.org/schema/beans/spring-beans-3.1.xsd">
+
+    <!--
+    see http://static.springsource.org/spring-security/site/docs/3.1.x/apidocs/org/springframework/security/access/hierarchicalroles/RoleHierarchyImpl.html
+    -->
+    <bean id="roleHierarchy" class="org.springframework.security.access.hierarchicalroles.RoleHierarchyImpl">
+        <property name="hierarchy">
+            <value>
+                ROLE_ADMIN > ROLE_USER
+                ROLE_USER > ROLE_VISITOR
+                ROLE_ADMIN > ROLE_SKETCHPAD_ADMIN
+                ROLE_SKETCHPAD_ADMIN > ROLE_SKETCHPAD_USER
+                ROLE_SKETCHPAD_USER > ROLE_SKETCHPAD_VISITOR
+            </value>
+        </property>
+    </bean>
+
+    <!--
+    Dieser Filter ist notwendig, damit Spring Security das Authentication
+    Objekt und Principal in den ServletContext injiziert und wir damit das
+    Authentication und Principal Objekt des aufrufenden Nutzers direkt als
+    Methodenparameter in Spring Controller verwenden können.
+    -->
+    <bean id="securityContextHolderAwareRequestFilter"
+          class="org.springframework.security.web.servletapi.SecurityContextHolderAwareRequestFilter">
+    </bean>
+
+    <bean id="concurrentSessionFilter" class="org.springframework.security.web.session.ConcurrentSessionFilter">
+        <constructor-arg index="0" ref="sessionRegistry"/>
+    </bean>
+
+    <!--
+    Verwaltet die aktiven Sessions.
+
+    see http://static.springsource.org/spring-security/site/docs/3.1.x/apidocs/org/springframework/security/core/session/SessionRegistry.html
+    -->
+    <bean id="sessionRegistry" class="org.springframework.security.core.session.SessionRegistryImpl">
+    </bean>
+
+    <bean id="sas"
+          class="org.springframework.security.web.authentication.session.SessionFixationProtectionStrategy"/>
+
+    <bean id="accessDecisionManager" class="org.springframework.security.access.vote.AffirmativeBased">
+        <property name="allowIfAllAbstainDecisions" value="false"/>
+        <constructor-arg>
+            <list>
+                <ref bean="webResourceAccessDecisionVoter"/>
+                <bean class="org.springframework.security.access.vote.RoleVoter"/>
+                <bean class="org.springframework.security.access.vote.AuthenticatedVoter"/>
+            </list>
+        </constructor-arg>
+    </bean>
+
+    <bean id="filterSecurityInterceptor"
+          class="org.springframework.security.web.access.intercept.FilterSecurityInterceptor">
+        <property name="securityMetadataSource" ref="filterInvocationSecurityMetadata"/>
+        <property name="authenticationManager" ref="authenticationManager"/>
+        <property name="accessDecisionManager" ref="accessDecisionManager"/>
+    </bean>
+
+    <bean id="webResourceAccessEvaluator" class="de.iew.framework.security.access.WebResourceAccessEvaluator">
+        <property name="roleHierarchy" ref="roleHierarchy"/>
+    </bean>
+
+    <bean id="webResourceAccessDecisionVoter" class="de.iew.framework.security.access.WebResourceAccessDecisionVoter">
+        <property name="webResourceAccessEvaluator" ref="webResourceAccessEvaluator"/>
+    </bean>
+
+    <bean id="filterInvocationSecurityMetadata"
+          class="de.iew.services.impl.WebResourceSecurityServiceImpl">
+    </bean>
+
+    <!--
+    Nicht authentifizierte Nutzer bekommen trotzdem ein Authentification Objekt
+    damit Spring Security trotzdem greift. Ohne diesen Filter würde alle
+    Autorisationsprüfungen (auch die Prüfung der ACL-Regeln) ins leere laufen
+    und eine Exception gemeldet.
+    -->
+    <bean id="anonymousAuthFilter"
+          class="org.springframework.security.web.authentication.AnonymousAuthenticationFilter">
+        <constructor-arg name="key" value="foobar" index="0"/>
+        <constructor-arg name="principal" value="anonymous" index="1"/>
+        <constructor-arg name="authorities" index="2">
+            <list>
+                <bean class="org.springframework.security.core.authority.SimpleGrantedAuthority">
+                    <constructor-arg index="0" value="ROLE_ANONYMOUS"/>
+                </bean>
+                <bean class="org.springframework.security.core.authority.SimpleGrantedAuthority">
+                    <constructor-arg index="0" value="ROLE_SKETCHPAD_VISITOR"/>
+                </bean>
+            </list>
+        </constructor-arg>
+    </bean>
+
+</beans>

@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright 2012-2013 Manuel Schulze <manuel_schulze@i-entwicklung.de>
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~     http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:util="http://www.springframework.org/schema/util"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+  http://www.springframework.org/schema/beans/spring-beans-3.1.xsd
+
+   http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd">
+
+    <!--
+    Damit wir die Urls nicht immer wiederholen müssen.
+    -->
+    <util:properties id="defaultUrls">
+        <prop key="login">/identity/login.html</prop>
+        <prop key="logout">/identity/logout.html</prop>
+        <prop key="loginerror">/identity/loginerror.html</prop>
+    </util:properties>
+
+    <!--
+    Der ExceptionTranslationFilter greift immer dann wenn während der
+    vorangegangenden Filter Verarbeitung eine Spring Security Exception
+    aufgetreten ist. Hiermit wird entweder ein "Zugriff verweigert" gemeldet
+    oder der Login-Mechanismus angestoßen.
+
+    see http://static.springsource.org/spring-security/site/docs/3.0.x/reference/core-web-filters.html
+    see http://static.springsource.org/spring-security/site/docs/3.1.x/apidocs/org/springframework/security/web/access/ExceptionTranslationFilter.html
+    -->
+    <bean id="formLoginExceptionTranslationFilter"
+          class="org.springframework.security.web.access.ExceptionTranslationFilter">
+        <property name="authenticationEntryPoint" ref="formAuthenticationEntryPoint"/>
+        <property name="accessDeniedHandler" ref="accessDeniedHandler"/>
+    </bean>
+
+    <bean id="accessDeniedHandler"
+          class="org.springframework.security.web.access.AccessDeniedHandlerImpl">
+        <property name="errorPage" value="/accessDenied.htm"/>
+    </bean>
+
+    <!--
+    Wird einmal im gesamten Request aufgerufen und sorgt dafür, dass im
+    SecurityContextHolder-Objekt ein SecurityContext vorhanden ist auf dem die
+    nachfolgenden Filter dann arbeiten.
+
+    see http://static.springsource.org/spring-security/site/docs/3.1.x/reference/security-filter-chain.html
+    -->
+    <bean id="securityContextPersistenceFilterWithASCTrue"
+          class="org.springframework.security.web.context.SecurityContextPersistenceFilter">
+        <constructor-arg ref="sessionSecurityContextRepositoryWithASCTrue" index="0"/>
+    </bean>
+
+    <bean id="sessionSecurityContextRepositoryWithASCTrue"
+          class='org.springframework.security.web.context.HttpSessionSecurityContextRepository'>
+        <property name='allowSessionCreation' value='true'/>
+    </bean>
+
+    <!--
+    Führt erweiterte Prüfungen auf die Nutzersession durch wie bspw.
+    SessionFixation-Checks oder Mehrfach-Logins.
+
+    see http://static.springsource.org/spring-security/site/docs/3.1.x/apidocs/org/springframework/security/web/session/SessionManagementFilter.html
+    -->
+    <bean id="webSessionManagementFilter" class="org.springframework.security.web.session.SessionManagementFilter">
+        <constructor-arg index="0" ref="sessionSecurityContextRepositoryWithASCTrue"/>
+        <constructor-arg index="1" ref="sas"/>
+    </bean>
+
+    <bean id="logoutFilter"
+          class="org.springframework.security.web.authentication.logout.LogoutFilter">
+        <constructor-arg value="/sketchpad.html"/>
+        <constructor-arg>
+            <list>
+                <bean class="org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler"/>
+            </list>
+        </constructor-arg>
+        <property name="filterProcessesUrl" value="#{defaultUrls.logout}"/>
+    </bean>
+
+    <bean id="formAuthenticationEntryPoint"
+          class="org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint">
+        <constructor-arg index="0" value="#{defaultUrls.login}"/>
+    </bean>
+
+    <bean id="formAuthenticationFilter" class="de.iew.web.utils.ValidatingFormAuthenticationFilter">
+        <property name="authenticationManager" ref="authenticationManager"/>
+        <property name="filterProcessesUrl" value="#{defaultUrls.login}"/>
+        <property name="authenticationSuccessHandler" ref="formAuthenticationSuccessHandler"/>
+        <property name="authenticationFailureHandler" ref="formAuthenticationFailureHandler"/>
+        <property name="sessionAuthenticationStrategy" ref="sas"/>
+    </bean>
+
+    <bean id="formAuthenticationSuccessHandler"
+          class="org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler">
+        <property name="defaultTargetUrl" value="/sketchpad.html"/>
+        <property name="alwaysUseDefaultTargetUrl" value="true"/>
+        <property name="useReferer" value="true"/>
+    </bean>
+
+    <bean id="formAuthenticationFailureHandler"
+          class="org.springframework.security.web.authentication.SimpleUrlAuthenticationFailureHandler">
+        <property name="defaultFailureUrl" value="#{defaultUrls.loginerror}"/>
+        <property name="useForward" value="true"/>
+    </bean>
+
+</beans>
