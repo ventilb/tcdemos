@@ -49,7 +49,7 @@
 
     <bean id="accessDeniedHandler"
           class="org.springframework.security.web.access.AccessDeniedHandlerImpl">
-        <property name="errorPage" value="/accessDenied.htm"/>
+        <property name="errorPage" value="/identity/loginerror.html"/>
     </bean>
 
     <!--
@@ -105,9 +105,9 @@
     </bean>
 
     <bean id="formAuthenticationSuccessHandler"
-          class="org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler">
+          class="org.springframework.security.web.authentication.SavedRequestAwareAuthenticationSuccessHandler">
         <property name="defaultTargetUrl" value="/sketchpad.html"/>
-        <property name="alwaysUseDefaultTargetUrl" value="true"/>
+        <property name="alwaysUseDefaultTargetUrl" value="false"/>
         <property name="useReferer" value="true"/>
     </bean>
 
