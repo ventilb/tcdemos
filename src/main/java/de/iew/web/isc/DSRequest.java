@@ -40,6 +40,22 @@ public class DSRequest {
 
     private String isc_dataFormat;
 
+    public Integer getStartRow() {
+        return _startRow;
+    }
+
+    public void setStartRow(Integer _startRow) {
+        this._startRow = _startRow;
+    }
+
+    public Integer getEndRow() {
+        return _endRow;
+    }
+
+    public void setEndRow(Integer _endRow) {
+        this._endRow = _endRow;
+    }
+
     public String get_operationType() {
         return _operationType;
     }
