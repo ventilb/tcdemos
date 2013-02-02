@@ -83,7 +83,7 @@ public class SketchPadServiceImpl implements SketchPadService, ApplicationEventP
 
         polygon = this.polygonDao.save(polygon);
 
-        this.applicationEventPublisher.publishEvent(new SketchPadEvent(this, SketchPadEvent.Action.POLYGON_CREATED, polygon));
+        this.applicationEventPublisher.publishEvent(new SketchPadEvent(this, SketchPadEvent.Action.POLYGON_CREATED, polygon, sketchPadUser));
 
         // ACL aufsetzen
         this.aclEditorService.setupDemoSketchPadPolygonPermissionsIfSketchPadAdmin(polygon.getId());
@@ -117,7 +117,7 @@ public class SketchPadServiceImpl implements SketchPadService, ApplicationEventP
         //polygon.getSegments().add(segment);
         this.polygonDao.refresh(polygon);
 
-        this.applicationEventPublisher.publishEvent(new SketchPadEvent(this, SketchPadEvent.Action.POLYGON_UPDATED, polygon));
+        this.applicationEventPublisher.publishEvent(new SketchPadEvent(this, SketchPadEvent.Action.POLYGON_UPDATED, polygon, sketchPadUser));
 
         return true;
     }
@@ -130,7 +130,7 @@ public class SketchPadServiceImpl implements SketchPadService, ApplicationEventP
 
         // TODO Schreibrecht entziehen
 
-        this.applicationEventPublisher.publishEvent(new SketchPadEvent(this, SketchPadEvent.Action.POLYGON_CLOSED, polygon));
+        this.applicationEventPublisher.publishEvent(new SketchPadEvent(this, SketchPadEvent.Action.POLYGON_CLOSED, polygon, sketchPadUser));
 
         return true;
     }

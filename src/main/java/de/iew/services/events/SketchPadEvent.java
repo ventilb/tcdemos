@@ -18,6 +18,7 @@ package de.iew.services.events;
 
 import de.iew.domain.sketchpad.Polygon;
 import org.springframework.context.ApplicationEvent;
+import org.springframework.security.core.Authentication;
 import org.springframework.util.Assert;
 
 /**
@@ -29,6 +30,11 @@ import org.springframework.util.Assert;
  * @since 24.01.13 - 21:02
  */
 public class SketchPadEvent extends ApplicationEvent implements AuditEvent {
+
+    /**
+     * The authentication which caused this event.
+     */
+    private Authentication authentication;
 
     /**
      * The action which caused this event.
@@ -43,17 +49,47 @@ public class SketchPadEvent extends ApplicationEvent implements AuditEvent {
     /**
      * Create a new ApplicationEvent.
      *
-     * @param source      the component that published the event (never <code>null</code>)
-     * @param eventAction the event action
-     * @param polygon     the polygon
+     * @param source         the component that published the event (never <code>null</code>)
+     * @param eventAction    the event action
+     * @param polygon        the polygon
+     * @param authentication
      */
-    public SketchPadEvent(Object source, Action eventAction, Polygon polygon) {
+    public SketchPadEvent(Object source, Action eventAction, Polygon polygon, Authentication authentication) {
         super(source);
         Assert.notNull(eventAction);
         Assert.notNull(polygon);
 
         this.eventAction = eventAction;
         this.polygon = polygon;
+        this.authentication = authentication;
+    }
+
+    public Authentication getAuthentication() {
+        return this.authentication;
+    }
+
+    public Severity getSeverity() {
+        return Severity.DEBUG;
+    }
+
+    public String getMessage() {
+        String message;
+
+        switch (this.eventAction) {
+            case POLYGON_CREATED:
+                message = "The polygon " + this.polygon.getId() + " was created.";
+                break;
+            case POLYGON_UPDATED:
+                message = "The polygon " + this.polygon.getId() + " was changed.";
+                break;
+            case POLYGON_CLOSED:
+                message = "The polygon " + this.polygon.getId() + " was closed.";
+                break;
+            default:
+                message = "UNSUPPORTED AuditEvent action " + this.eventAction + ". The polygon " + this.polygon.getId() + " changed.";
+        }
+
+        return message;
     }
 
     /**
