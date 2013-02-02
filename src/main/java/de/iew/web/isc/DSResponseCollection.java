@@ -16,6 +16,7 @@
 
 package de.iew.web.isc;
 
+import de.iew.domain.utils.CollectionHolder;
 import org.springframework.ui.ExtendedModelMap;
 
 import java.util.ArrayList;
@@ -31,6 +32,16 @@ import java.util.Collection;
 public class DSResponseCollection extends DSResponseAbstract {
     public DSResponseCollection() {
         init();
+    }
+
+    public DSResponseCollection(CollectionHolder collectionHolder) {
+        init(collectionHolder.getCollection());
+
+        long startRow = collectionHolder.getFirstItem();
+
+        setTotalRows((int) collectionHolder.getTotalCount());
+        setStartRow((int) startRow);
+        setEndRow((int) (startRow + collectionHolder.getCollectionSize()));
     }
 
     public DSResponseCollection(Collection data) {

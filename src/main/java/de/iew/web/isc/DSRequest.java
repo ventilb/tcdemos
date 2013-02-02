@@ -26,9 +26,9 @@ public class DSRequest {
 
     private String _operationType;
 
-    private Integer _startRow;
+    private Long _startRow;
 
-    private Integer _endRow;
+    private Long _endRow;
 
     private String _textMatchStyle;
 
@@ -40,19 +40,19 @@ public class DSRequest {
 
     private String isc_dataFormat;
 
-    public Integer getStartRow() {
+    public Long getStartRow() {
         return _startRow;
     }
 
-    public void setStartRow(Integer _startRow) {
+    public void setStartRow(Long _startRow) {
         this._startRow = _startRow;
     }
 
-    public Integer getEndRow() {
+    public Long getEndRow() {
         return _endRow;
     }
 
-    public void setEndRow(Integer _endRow) {
+    public void setEndRow(Long _endRow) {
         this._endRow = _endRow;
     }
 
@@ -60,23 +60,27 @@ public class DSRequest {
         return _operationType;
     }
 
+    public long getRowCount() {
+        return getEndRow() - getStartRow();
+    }
+
     public void set_operationType(String _operationType) {
         this._operationType = _operationType;
     }
 
-    public Integer get_startRow() {
+    public Long get_startRow() {
         return _startRow;
     }
 
-    public void set_startRow(Integer _startRow) {
+    public void set_startRow(Long _startRow) {
         this._startRow = _startRow;
     }
 
-    public Integer get_endRow() {
+    public Long get_endRow() {
         return _endRow;
     }
 
-    public void set_endRow(Integer _endRow) {
+    public void set_endRow(Long _endRow) {
         this._endRow = _endRow;
     }
 
