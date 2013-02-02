@@ -17,10 +17,10 @@
 package de.iew.persistence.mock;
 
 import de.iew.domain.AbstractModel;
+import de.iew.domain.utils.DomainModelByIdComparator;
 import de.iew.persistence.DomainModelDao;
 
-import java.util.Collection;
-import java.util.Hashtable;
+import java.util.*;
 
 /**
  * Basisklasse für Mock-Implementierungen für
@@ -70,6 +70,21 @@ public abstract class AbstractMockDomainModelDaoImpl<M extends AbstractModel> im
 
     public Collection<M> findAll() {
         return this.models.values();
+    }
+
+    public Collection<M> findAll(long firstResult, long maxResults) {
+        List<M> models = (List<M>) findAll();
+        Collections.sort(models, DomainModelByIdComparator.ASCENDING);
+
+        if (models.size() < firstResult) {
+            return models.subList((int) firstResult, (int) (firstResult + maxResults));
+        } else {
+            return Collections.EMPTY_LIST;
+        }
+    }
+
+    public long count() {
+        return this.models.size();
     }
 
     public void refresh(M domainModel) {

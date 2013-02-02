@@ -112,4 +112,25 @@ public interface DomainModelDao<M extends AbstractModel> {
      * @return Auflistung der verwalteten Domainmodelle.
      */
     public Collection<M> findAll();
+
+    /**
+     * Returns a view portion of the domain model collection.
+     * <p>
+     * The view starts at <code>firstResult</code> and contains maximum
+     * <code>maxResults</code> models.
+     * </p>
+     *
+     *
+     * @param firstResult the model number to start from
+     * @param maxResults  the maximum model count
+     * @return view portion of the domain models
+     */
+    public Collection<M> findAll(long firstResult, long maxResults);
+
+    /**
+     * Counts the available domain models of type <code>M</code>.
+     *
+     * @return the domain model count
+     */
+    public long count();
 }

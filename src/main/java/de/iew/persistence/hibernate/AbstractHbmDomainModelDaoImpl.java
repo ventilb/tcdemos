@@ -19,9 +19,9 @@ package de.iew.persistence.hibernate;
 import de.iew.domain.AbstractModel;
 import de.iew.persistence.DomainModelDao;
 import org.hibernate.Criteria;
-import org.hibernate.Session;
-import org.hibernate.SessionFactory;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.hibernate.criterion.Projection;
+import org.hibernate.criterion.Projections;
+import org.springframework.util.Assert;
 
 import java.lang.reflect.ParameterizedType;
 import java.util.Collection;
@@ -62,6 +62,30 @@ public abstract class AbstractHbmDomainModelDaoImpl<M extends AbstractModel> ext
     public Collection<M> findAll() {
         Criteria crit = createCriteria();
         return (Collection<M>) crit.list();
+    }
+
+    public Collection<M> findAll(long firstResult, long maxResults) {
+        Assert.isTrue(firstResult >= 0);
+        Assert.isTrue(maxResults >= 0);
+
+        /*
+        Komisch wir können zwar long-Zeilen zählen aber dürfen nur int-Zeilen
+        abfragen.
+         */
+        Criteria crit = createCriteria();
+        crit.setFirstResult((int) firstResult);
+        crit.setMaxResults((int) maxResults);
+
+        return (Collection<M>) crit.list();
+    }
+
+    public long count() {
+        Projection rowCountProjection = Projections.rowCount();
+
+        Criteria crit = createCriteria();
+        crit.setProjection(rowCountProjection);
+
+        return (Long) crit.uniqueResult();
     }
 
     public void refresh(M domainModel) {
