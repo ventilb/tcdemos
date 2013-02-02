@@ -14,26 +14,18 @@
  * limitations under the License.
  */
 
-package de.iew.services;
+package de.iew.persistence.hibernate;
 
 import de.iew.domain.audit.AuditEventMessage;
-import de.iew.domain.utils.CollectionHolder;
+import de.iew.persistence.AuditEventMessageDao;
+import org.springframework.stereotype.Repository;
 
 /**
- * Describes an interface to implement audit services to track whats happening
- * in the application.
+ * Hibernate implementation of the {@link AuditEventMessageDao}.
  *
  * @author Manuel Schulze <mschulze@geneon.de>
- * @since 24.01.13 - 21:01
+ * @since 26.01.13 - 19:35
  */
-public interface AuditService {
-
-    /**
-     * Gets audit event messages.
-     *
-     * @param firstItem the first item
-     * @param itemCount the item count
-     * @return the audit event messages
-     */
-    public CollectionHolder<AuditEventMessage> getAuditEventMessages(long firstItem, long itemCount);
+@Repository(value = "auditEventMessageDao")
+public class HbmAuditEventMessageDaoImpl extends AbstractHbmDomainModelDaoImpl<AuditEventMessage> implements AuditEventMessageDao {
 }

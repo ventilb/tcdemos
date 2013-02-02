@@ -16,6 +16,8 @@
 
 package de.iew.services.events;
 
+import org.springframework.security.core.Authentication;
+
 /**
  * Specifies an interface to declare application events as audit events.
  * <p>
@@ -26,4 +28,53 @@ package de.iew.services.events;
  * @since 24.01.13 - 21:03
  */
 public interface AuditEvent {
+
+    /**
+     * Gets the authentication object which caused this audit event. May be
+     * NULL.
+     *
+     * @return the authentication
+     */
+    public Authentication getAuthentication();
+
+    /**
+     * Gets the audit event severity.
+     *
+     * @return the severity
+     */
+    public Severity getSeverity();
+
+    /**
+     * Gets the audit event message.
+     *
+     * @return the message
+     */
+    public String getMessage();
+
+    /**
+     * Enum of the audit events severity's.
+     */
+    public enum Severity {
+        /**
+         * Used to track calls through the system.
+         */
+        TRACE,
+        /**
+         * Used to print out developer informations.
+         */
+        DEBUG,
+        /**
+         * Default. Used for informational purposes.
+         */
+        INFO,
+        /**
+         * Something went wrong. You should investigate the cause.
+         */
+        WARN,
+        /**
+         * Something definitively went wrong. Administrators should be notified
+         * about these issues.
+         */
+        CRITICAL;
+    }
 }
