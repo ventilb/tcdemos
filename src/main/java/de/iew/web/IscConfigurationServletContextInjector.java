@@ -16,21 +16,34 @@
 
 package de.iew.web;
 
+import de.iew.web.isc.spring.IscRequestMethodArgumentResolver;
+import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.web.context.ServletContextAware;
+import org.springframework.web.method.support.HandlerMethodArgumentResolver;
+import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter;
 
 import javax.servlet.ServletContext;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Properties;
 
 /**
- * Verwaltet die Smartclient Konfiguration und speichert sie im
- * {@link ServletContext} damit in den Taglibs darauf zurückgegriffen werden
- * kann.
+ * Manages the Smartclient configuration.
+ * <p>
+ * Stores the configuration in the {@link ServletContext}. We need the Smartclient
+ * configuration for our Smartclient taglib.
+ * </p>
+ * <p>
+ * Configures an {@link IscRequestMethodArgumentResolver} instance for resolving
+ * Smartclient request meta data at request.
+ * </p>
  *
  * @author Manuel Schulze <manuel_schulze@i-entwicklung.de>
  * @since 16.11.12 - 20:35
  */
-public class IscConfigurationServletContextInjector implements ServletContextAware, InitializingBean {
+public class IscConfigurationServletContextInjector implements ServletContextAware, InitializingBean, BeanPostProcessor {
 
     public static final String CONTEXT_KEY = "de.iew.web.IscConfiguration.CONTEXT_KEY";
 
@@ -40,6 +53,38 @@ public class IscConfigurationServletContextInjector implements ServletContextAwa
 
     public void afterPropertiesSet() throws Exception {
         servletContext.setAttribute(CONTEXT_KEY, this.iscConfiguration);
+    }
+
+    /**
+     * {@inheritDoc}
+     * <p>
+     * Adds a {@link de.iew.web.isc.spring.IscRequestMethodArgumentResolver} instance to Springs {@link RequestMappingHandlerAdapter}
+     * bean for resolving Smartclient meta data during the request.
+     * </p>
+     * <code>
+     * public Model fetchAction(@IscRequest DSRequest dsRequest) throws Exception;
+     * </code>
+     *
+     * @see <a href="https://jira.springsource.org/browse/SPR-8648">https://jira.springsource.org/browse/SPR-8648</a>
+     */
+    public Object postProcessBeforeInitialization(Object o, String s) throws BeansException {
+        if (o instanceof RequestMappingHandlerAdapter) {
+            RequestMappingHandlerAdapter requestMappingHandlerAdapter = (RequestMappingHandlerAdapter) o;
+
+
+            List<HandlerMethodArgumentResolver> handlerMethodArgumentResolvers = requestMappingHandlerAdapter.getCustomArgumentResolvers();
+            if (handlerMethodArgumentResolvers == null) {
+                handlerMethodArgumentResolvers = new ArrayList<HandlerMethodArgumentResolver>();
+            }
+            handlerMethodArgumentResolvers.add(new IscRequestMethodArgumentResolver());
+            requestMappingHandlerAdapter.setCustomArgumentResolvers(handlerMethodArgumentResolvers);
+
+        }
+        return o;
+    }
+
+    public Object postProcessAfterInitialization(Object o, String s) throws BeansException {
+        return o;
     }
 
     public void setServletContext(ServletContext servletContext) {
