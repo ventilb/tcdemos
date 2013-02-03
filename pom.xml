@@ -333,7 +333,9 @@
             </resource>
             <!--
             Mit der folgenden Ressourcen können wir abhängig vom eingestellten
-            Build-Profil eine log4j.xml Konfiguration für das Projekt festlegen.
+            Build-Profil Konfigurationsdateien in das Projekt kopieren. Kopiert
+            * log4j.xml
+            * config.properties
 
             see http://maven.apache.org/plugins/maven-resources-plugin/examples/include-exclude.html
             -->
@@ -341,6 +343,7 @@
                 <directory>profiles/${build.profile.id}</directory>
                 <includes>
                     <include>log4j.xml</include>
+                    <include>config.properties</include>
                 </includes>
             </resource>
         </resources>
