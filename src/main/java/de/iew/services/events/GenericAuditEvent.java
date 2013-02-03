@@ -26,7 +26,7 @@ import org.springframework.security.core.Authentication;
  * This event can be used to fire generic audit events.
  * </p>
  *
- * @author Manuel Schulze <mschulze@geneon.de>
+ * @author Manuel Schulze <manuel_schulze@i-entwicklung.de>
  * @since 02.02.13 - 23:04
  */
 public class GenericAuditEvent extends ApplicationEvent implements AuditEvent {

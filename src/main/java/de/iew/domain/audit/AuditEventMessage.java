@@ -25,7 +25,7 @@ import java.util.Date;
 /**
  * Implements a domain model to manage audit event messages.
  *
- * @author Manuel Schulze <mschulze@geneon.de>
+ * @author Manuel Schulze <manuel_schulze@i-entwicklung.de>
  * @since 26.01.13 - 19:24
  */
 @Entity

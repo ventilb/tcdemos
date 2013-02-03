@@ -19,7 +19,7 @@ package de.iew.web.isc;
 /**
  * Implements a simple bean to encapsulate Smartclient request meta data.
  *
- * @author Manuel Schulze <mschulze@geneon.de>
+ * @author Manuel Schulze <manuel_schulze@i-entwicklung.de>
  * @since 01.02.13 - 23:40
  */
 public class DSRequest {

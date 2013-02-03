@@ -30,7 +30,7 @@ import org.springframework.integration.transformer.Transformer;
  * transformer pattern to deal with these situations.
  * </p>
  *
- * @author Manuel Schulze <mschulze@geneon.de>
+ * @author Manuel Schulze <manuel_schulze@i-entwicklung.de>
  * @since 03.02.13 - 00:38
  */
 public class SimpleThrowableTransformer implements Transformer {

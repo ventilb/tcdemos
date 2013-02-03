@@ -49,7 +49,7 @@ import java.util.Date;
 /**
  * Implements a simple audit service.
  *
- * @author Manuel Schulze <mschulze@geneon.de>
+ * @author Manuel Schulze <manuel_schulze@i-entwicklung.de>
  * @since 24.01.13 - 21:01
  */
 @Service(value = "auditService")

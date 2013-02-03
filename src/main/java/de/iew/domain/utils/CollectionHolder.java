@@ -26,7 +26,7 @@ import java.util.Collection;
  * This class can be used to implement paginating.
  * </p>
  *
- * @author Manuel Schulze <mschulze@geneon.de>
+ * @author Manuel Schulze <manuel_schulze@i-entwicklung.de>
  * @since 02.02.13 - 12:06
  */
 public class CollectionHolder<T> {

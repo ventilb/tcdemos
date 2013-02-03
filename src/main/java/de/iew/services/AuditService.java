@@ -23,7 +23,7 @@ import de.iew.domain.utils.CollectionHolder;
  * Describes an interface to implement audit services to track whats happening
  * in the application.
  *
- * @author Manuel Schulze <mschulze@geneon.de>
+ * @author Manuel Schulze <manuel_schulze@i-entwicklung.de>
  * @since 24.01.13 - 21:01
  */
 public interface AuditService {

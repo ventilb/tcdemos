@@ -24,7 +24,7 @@ import org.springframework.security.core.Authentication;
  * Audit events will be intercepted by an {@link de.iew.services.AuditService}.
  * </p>
  *
- * @author Manuel Schulze <mschulze@geneon.de>
+ * @author Manuel Schulze <manuel_schulze@i-entwicklung.de>
  * @since 24.01.13 - 21:03
  */
 public interface AuditEvent {

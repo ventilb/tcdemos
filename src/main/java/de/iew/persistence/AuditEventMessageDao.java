@@ -21,7 +21,7 @@ import de.iew.domain.audit.AuditEventMessage;
 /**
  * Specifies an interface to access {@link AuditEventMessage} domain models.
  *
- * @author Manuel Schulze <mschulze@geneon.de>
+ * @author Manuel Schulze <manuel_schulze@i-entwicklung.de>
  * @since 26.01.13 - 19:34
  */
 public interface AuditEventMessageDao extends DomainModelDao<AuditEventMessage> {

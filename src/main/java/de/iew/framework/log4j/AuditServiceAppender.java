@@ -34,7 +34,7 @@ import org.springframework.util.Assert;
 /**
  * Implements a Log4j appender to fire Log4j messages as audit events.
  *
- * @author Manuel Schulze <mschulze@geneon.de>
+ * @author Manuel Schulze <manuel_schulze@i-entwicklung.de>
  * @since 02.02.13 - 21:51
  */
 public class AuditServiceAppender extends AppenderSkeleton {

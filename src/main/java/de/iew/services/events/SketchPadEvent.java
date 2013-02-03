@@ -25,7 +25,7 @@ import org.springframework.util.Assert;
  * Implements a spring application event to notify interested listeners about
  * changes in the sketch pad service.
  *
- * @author Manuel Schulze <mschulze@geneon.de>
+ * @author Manuel Schulze <manuel_schulze@i-entwicklung.de>
  * @see <a href="http://learningviacode.blogspot.de/2012/07/spring-and-events-and-listeners.html">http://learningviacode.blogspot.de/2012/07/spring-and-events-and-listeners.html</a>
  * @since 24.01.13 - 21:02
  */

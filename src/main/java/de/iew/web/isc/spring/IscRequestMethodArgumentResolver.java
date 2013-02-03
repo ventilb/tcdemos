@@ -36,7 +36,7 @@ import javax.servlet.http.HttpServletRequest;
  * public Model fetchAction(@IscRequest DSRequest dsRequest) throws Exception;
  * </code>
  *
- * @author Manuel Schulze <mschulze@geneon.de>
+ * @author Manuel Schulze <manuel_schulze@i-entwicklung.de>
  * @since 02.02.13 - 00:26
  */
 public class IscRequestMethodArgumentResolver implements HandlerMethodArgumentResolver {

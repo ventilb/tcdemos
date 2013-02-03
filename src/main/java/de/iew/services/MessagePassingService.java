@@ -26,7 +26,7 @@ package de.iew.services;
  * <li>system messages are meant to inform about system events such as exceptions or maloperation</li>
  * </ul>
  *
- * @author Manuel Schulze <mschulze@geneon.de>
+ * @author Manuel Schulze <manuel_schulze@i-entwicklung.de>
  * @since 03.02.13 - 09:50
  */
 public interface MessagePassingService {

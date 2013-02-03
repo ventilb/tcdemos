@@ -24,7 +24,7 @@ import java.util.Comparator;
  * Provides {@link Comparator} implementations to compare domain models by
  * their id.
  *
- * @author Manuel Schulze <mschulze@geneon.de>
+ * @author Manuel Schulze <manuel_schulze@i-entwicklung.de>
  * @since 02.02.13 - 11:46
  */
 public interface DomainModelByIdComparator {

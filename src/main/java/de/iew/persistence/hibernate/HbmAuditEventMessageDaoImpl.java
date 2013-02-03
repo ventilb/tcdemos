@@ -23,7 +23,7 @@ import org.springframework.stereotype.Repository;
 /**
  * Hibernate implementation of the {@link AuditEventMessageDao}.
  *
- * @author Manuel Schulze <mschulze@geneon.de>
+ * @author Manuel Schulze <manuel_schulze@i-entwicklung.de>
  * @since 26.01.13 - 19:35
  */
 @Repository(value = "auditEventMessageDao")

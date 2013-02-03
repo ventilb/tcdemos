@@ -35,7 +35,7 @@ import java.util.*;
  * Implementation of the {@link MessagePassingService}. Sends systems messages to XMPP services. Uses the spring
  * integration framework.
  *
- * @author Manuel Schulze <mschulze@geneon.de>
+ * @author Manuel Schulze <manuel_schulze@i-entwicklung.de>
  * @since 03.02.13 - 09:51
  */
 @Service(value = "messagePassingService")

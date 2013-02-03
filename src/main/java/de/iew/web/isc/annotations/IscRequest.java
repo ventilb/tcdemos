@@ -23,7 +23,7 @@ import java.lang.annotation.*;
  * Webaufruf als Container für die Smartclient DataSource-Metadaten zu
  * deklarieren.
  *
- * @author Manuel Schulze <mschulze@geneon.de>
+ * @author Manuel Schulze <manuel_schulze@i-entwicklung.de>
  * @since 02.02.13 - 00:24
  */
 @Target(ElementType.PARAMETER)

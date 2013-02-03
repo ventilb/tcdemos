@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 /**
  * Implements a controller to manage the audit event messages.
  *
- * @author Manuel Schulze <mschulze@geneon.de>
+ * @author Manuel Schulze <manuel_schulze@i-entwicklung.de>
  * @since 01.02.13 - 23:01
  */
 @Controller
