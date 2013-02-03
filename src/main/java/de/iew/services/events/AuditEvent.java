@@ -52,6 +52,13 @@ public interface AuditEvent {
     public String getMessage();
 
     /**
+     * Gets throwable.
+     *
+     * @return the throwable
+     */
+    public Throwable getThrowable();
+
+    /**
      * Enum of the audit events severity's.
      */
     public enum Severity {
@@ -76,5 +83,9 @@ public interface AuditEvent {
          * about these issues.
          */
         CRITICAL;
+
+        public boolean isHigherOrEqualAs(Severity other) {
+            return this.ordinal() >= other.ordinal();
+        }
     }
 }

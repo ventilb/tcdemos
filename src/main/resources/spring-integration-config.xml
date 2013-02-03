@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright 2012-2013 Manuel Schulze <manuel_schulze@i-entwicklung.de>
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~     http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:int-xmpp="http://www.springframework.org/schema/integration/xmpp"
+       xmlns:int-event="http://www.springframework.org/schema/integration/event"
+       xmlns:task="http://www.springframework.org/schema/task"
+       xmlns:int="http://www.springframework.org/schema/integration"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+ http://www.springframework.org/schema/beans/spring-beans-3.1.xsd
+ http://www.springframework.org/schema/integration/xmpp
+ http://www.springframework.org/schema/integration/xmpp/spring-integration-xmpp.xsd
+ http://www.springframework.org/schema/integration/event
+ http://www.springframework.org/schema/integration/event/spring-integration-event.xsd
+ http://www.springframework.org/schema/task
+ http://www.springframework.org/schema/task/spring-task.xsd
+ http://www.springframework.org/schema/integration
+ http://www.springframework.org/schema/integration/spring-integration.xsd">
+
+    <bean id="throwableToStringTransformer"
+          class="de.iew.framework.spring.integration.transformer.SimpleThrowableTransformer"/>
+
+    <task:executor id="executor" pool-size="5"/>
+
+    <int:poller id="defaultPoller" max-messages-per-poll="1" task-executor="executor" fixed-rate="100"/>
+
+    <!--
+    Kanal zum Absenden von Spring AplicationEvents
+    -->
+    <int:channel id="applicationEventChannel">
+        <int:queue/>
+    </int:channel>
+
+    <int-event:outbound-channel-adapter id="auditEventOutboundAdapter" channel="applicationEventChannel">
+        <int:poller ref="defaultPoller"/>
+    </int-event:outbound-channel-adapter>
+
+    <!--
+    Der eingetragene Wert für id entspricht dem Default und könnte auch weggelassen
+    werden.
+
+    resource entspricht der Nutzergruppe, der man beitreten möchte. In Openfire
+    sind das die konfigurierten Gruppen.
+
+    see http://static.springsource.org/spring-integration/reference/htmlsingle/#xmpp
+    -->
+    <int-xmpp:xmpp-connection id="xmppConnection" user="@xmpp.user@" password="@xmpp.password@" host="@xmpp.host@"
+                              port="@xmpp.port@"
+                              resource="@xmpp.resource@" subscription-mode="@xmpp.subscription_mode@"
+                              service-name="@xmpp.service_name@"/>
+
+    <!--
+    Kanal zum Absenden von XMPP-Nachrichten.
+
+    Die Chain sieht wie folgt aus:
+
+    \o/
+      |     -> xmppOutboundEventChannel -> Transformer -> transformedXmppOutboundEventChannel -> outboundEventAdapter -> XMPP-Server
+     /\
+    -->
+    <int:channel id="xmppOutboundEventChannel"/>
+
+    <int:transformer ref="throwableToStringTransformer" input-channel="xmppOutboundEventChannel"
+                     method="transform" output-channel="transformedXmppOutboundEventChannel">
+    </int:transformer>
+
+    <int:channel id="transformedXmppOutboundEventChannel">
+        <int:queue/>
+    </int:channel>
+
+    <int-xmpp:outbound-channel-adapter id="outboundEventAdapter"
+                                       channel="transformedXmppOutboundEventChannel"
+                                       xmpp-connection="xmppConnection">
+        <int:poller ref="defaultPoller"/>
+    </int-xmpp:outbound-channel-adapter>
+
+    <!--
+    Spring Integration Konfiguration zum Empfangen von XMPP-Nachrichten.
+    -->
+    <int:channel id="xmppInboundEventChannel"/>
+
+    <int-xmpp:inbound-channel-adapter id="xmppInboundAdapter"
+                                      channel="xmppInboundEventChannel"
+                                      xmpp-connection="xmppConnection"
+                                      extract-payload="false"
+                                      auto-startup="true"/>
+</beans>

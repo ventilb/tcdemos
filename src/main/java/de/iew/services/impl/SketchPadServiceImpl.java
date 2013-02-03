@@ -23,8 +23,9 @@ import de.iew.services.AclEditorService;
 import de.iew.services.SketchPadService;
 import de.iew.services.events.SketchPadEvent;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.context.ApplicationEventPublisherAware;
+import org.springframework.integration.Message;
+import org.springframework.integration.MessageChannel;
+import org.springframework.integration.message.GenericMessage;
 import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.security.access.prepost.PostFilter;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -41,7 +42,7 @@ import java.util.List;
  * @since 02.01.13 - 14:41
  */
 @Service(value = "sketchPadService")
-public class SketchPadServiceImpl implements SketchPadService, ApplicationEventPublisherAware {
+public class SketchPadServiceImpl implements SketchPadService {
 
     /**
      * {@inheritDoc}
@@ -83,7 +84,11 @@ public class SketchPadServiceImpl implements SketchPadService, ApplicationEventP
 
         polygon = this.polygonDao.save(polygon);
 
-        this.applicationEventPublisher.publishEvent(new SketchPadEvent(this, SketchPadEvent.Action.POLYGON_CREATED, polygon, sketchPadUser));
+        if (this.applicationEventChannel != null) {
+            SketchPadEvent sketchPadEvent = new SketchPadEvent(this, SketchPadEvent.Action.POLYGON_CREATED, polygon, sketchPadUser);
+            Message<SketchPadEvent> eventMessage = new GenericMessage<SketchPadEvent>(sketchPadEvent);
+            this.applicationEventChannel.send(eventMessage);
+        }
 
         // ACL aufsetzen
         this.aclEditorService.setupDemoSketchPadPolygonPermissionsIfSketchPadAdmin(polygon.getId());
@@ -117,7 +122,11 @@ public class SketchPadServiceImpl implements SketchPadService, ApplicationEventP
         //polygon.getSegments().add(segment);
         this.polygonDao.refresh(polygon);
 
-        this.applicationEventPublisher.publishEvent(new SketchPadEvent(this, SketchPadEvent.Action.POLYGON_UPDATED, polygon, sketchPadUser));
+        if (this.applicationEventChannel != null) {
+            SketchPadEvent sketchPadEvent = new SketchPadEvent(this, SketchPadEvent.Action.POLYGON_UPDATED, polygon, sketchPadUser);
+            Message<SketchPadEvent> eventMessage = new GenericMessage<SketchPadEvent>(sketchPadEvent);
+            this.applicationEventChannel.send(eventMessage);
+        }
 
         return true;
     }
@@ -130,7 +139,11 @@ public class SketchPadServiceImpl implements SketchPadService, ApplicationEventP
 
         // TODO Schreibrecht entziehen
 
-        this.applicationEventPublisher.publishEvent(new SketchPadEvent(this, SketchPadEvent.Action.POLYGON_CLOSED, polygon, sketchPadUser));
+        if (this.applicationEventChannel != null) {
+            SketchPadEvent sketchPadEvent = new SketchPadEvent(this, SketchPadEvent.Action.POLYGON_CLOSED, polygon, sketchPadUser);
+            Message<SketchPadEvent> eventMessage = new GenericMessage<SketchPadEvent>(sketchPadEvent);
+            this.applicationEventChannel.send(eventMessage);
+        }
 
         return true;
     }
@@ -193,7 +206,7 @@ public class SketchPadServiceImpl implements SketchPadService, ApplicationEventP
 
     // Service und Dao Abhängigkeiten /////////////////////////////////////////
 
-    private ApplicationEventPublisher applicationEventPublisher;
+    private MessageChannel applicationEventChannel;
 
     private AclEditorService aclEditorService;
 
@@ -207,8 +220,9 @@ public class SketchPadServiceImpl implements SketchPadService, ApplicationEventP
 
     private StrokeDao sketchPadStrokeDao;
 
-    public void setApplicationEventPublisher(ApplicationEventPublisher applicationEventPublisher) {
-        this.applicationEventPublisher = applicationEventPublisher;
+    @Autowired(required = false)
+    public void setApplicationEventChannel(MessageChannel applicationEventChannel) {
+        this.applicationEventChannel = applicationEventChannel;
     }
 
     @Autowired

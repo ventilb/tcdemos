@@ -52,7 +52,7 @@ public class SketchPadEvent extends ApplicationEvent implements AuditEvent {
      * @param source         the component that published the event (never <code>null</code>)
      * @param eventAction    the event action
      * @param polygon        the polygon
-     * @param authentication
+     * @param authentication the authentication causing this sketch pad event
      */
     public SketchPadEvent(Object source, Action eventAction, Polygon polygon, Authentication authentication) {
         super(source);
@@ -92,6 +92,10 @@ public class SketchPadEvent extends ApplicationEvent implements AuditEvent {
         return message;
     }
 
+    public Throwable getThrowable() {
+        return null;
+    }
+
     /**
      * Gets the action which caused this event.
      *
@@ -125,6 +129,6 @@ public class SketchPadEvent extends ApplicationEvent implements AuditEvent {
         /**
          * The POLYGON_CLOSED.
          */
-        POLYGON_CLOSED;
+        POLYGON_CLOSED
     }
 }

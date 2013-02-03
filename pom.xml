@@ -109,6 +109,31 @@
             <version>3.1.2.RELEASE</version>
         </dependency>
         <!--
+        Spring Integration Unterstützung
+        -->
+        <dependency>
+        	<groupId>org.springframework.integration</groupId>
+        	<artifactId>spring-integration-core</artifactId>
+        	<version>2.2.1.RELEASE</version>
+        </dependency>
+        <dependency>
+        	<groupId>org.springframework.integration</groupId>
+        	<artifactId>spring-integration-event</artifactId>
+        	<version>2.2.1.RELEASE</version>
+        </dependency>
+        <!--
+        Für die Jabber Unterstützung.
+
+        Verwendet Smack. Für Lizenzdetails siehe:
+        Lizenz: Apache 2.0
+        See: http://www.igniterealtime.org/builds/smack/docs/latest/README.html
+        -->
+        <dependency>
+        	<groupId>org.springframework.integration</groupId>
+        	<artifactId>spring-integration-xmpp</artifactId>
+        	<version>2.2.1.RELEASE</version>
+        </dependency>
+        <!--
         Benötigen wir für AOP Funktionen
 
         Lizenz: Eclipse Public License - v 1.0 (http://www.eclipse.org/legal/epl-v10.html)
@@ -237,6 +262,16 @@
             <groupId>commons-beanutils</groupId>
             <artifactId>commons-beanutils</artifactId>
             <version>1.8.3</version>
+        </dependency>
+        <dependency>
+        	<groupId>commons-lang</groupId>
+        	<artifactId>commons-lang</artifactId>
+        	<version>2.6</version>
+        </dependency>
+        <dependency>
+        	<groupId>commons-collections</groupId>
+        	<artifactId>commons-collections</artifactId>
+        	<version>3.2.1</version>
         </dependency>
         <!--
         Für Formular Validierung. API und Implementierung von JSR-303
