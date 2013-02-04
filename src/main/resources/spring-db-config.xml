@@ -18,24 +18,21 @@
 <beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xmlns:tx="http://www.springframework.org/schema/tx"
-       xmlns:cache="http://www.springframework.org/schema/cache"
        xmlns:context="http://www.springframework.org/schema/context"
-       xmlns:aop="http://www.springframework.org/schema/aop"
+       xmlns:aop="http://www.springframework.org/schema/aop" xmlns:util="http://www.springframework.org/schema/util"
        xsi:schemaLocation="http://www.springframework.org/schema/beans
   http://www.springframework.org/schema/beans/spring-beans-3.1.xsd
   http://www.springframework.org/schema/tx
   http://www.springframework.org/schema/tx/spring-tx-3.1.xsd
-  http://www.springframework.org/schema/cache
-  http://www.springframework.org/schema/cache/spring-cache.xsd
   http://www.springframework.org/schema/context
   http://www.springframework.org/schema/context/spring-context-3.1.xsd
   http://www.springframework.org/schema/aop
-  http://www.springframework.org/schema/aop/spring-aop-2.0.xsd">
+  http://www.springframework.org/schema/aop/spring-aop-2.0.xsd http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd">
 
     <context:component-scan base-package="de.iew.persistence, de.iew.domain"></context:component-scan>
 
     <!-- MySQL DataSource -->
-    <bean id="dataSource" class="com.mchange.v2.c3p0.ComboPooledDataSource">
+    <bean id="dataSource" class="com.mchange.v2.c3p0.ComboPooledDataSource" destroy-method="close">
         <property name="driverClass" value="@db.driverClass@"/>
         <property name="jdbcUrl" value="@db.jdbcUrl@"/>
         <property name="user" value="@db.user@"/>
@@ -47,11 +44,17 @@
     Für die Liquibase Integration:
 
     see http://www.insaneprogramming.be/?p=56
+
+    Für die hibernate.properties Konfiguration:
+    see http://tersesystems.com/2007/03/16/configuring-hibernate-properties-in-spring
     -->
     <bean id="sessionFactory"
           class="org.springframework.orm.hibernate4.LocalSessionFactoryBean" depends-on="liquibase">
         <property name="dataSource" ref="dataSource"/>
         <property name="packagesToScan" value="de.iew.domain"></property>
+        <property name="hibernateProperties">
+            <util:properties location="classpath:hibernate.properties"/>
+        </property>
     </bean>
 
     <!-- Transaction Management -->
@@ -83,18 +86,6 @@
         <aop:advisor advice-ref="serviceAdvice" pointcut="execution(* de.iew.services..*.*(..))"/>
         <aop:advisor advice-ref="hbmDaoAdvice" pointcut="execution(* de.iew.persistence.hibernate.*.*(..))"/>
     </aop:config>
-
-    <!-- Cache Configuration -->
-    <cache:annotation-driven/>
-
-    <bean id="ehcache" class="org.springframework.cache.ehcache.EhCacheManagerFactoryBean">
-        <property name="configLocation" value="classpath:ehcache.xml"/>
-        <property name="shared" value="true"/>
-    </bean>
-
-    <bean id="cacheManager" class="org.springframework.cache.ehcache.EhCacheCacheManager">
-        <property name="cacheManager" ref="ehcache"/>
-    </bean>
 
     <!-- Liquibase Integration -->
     <bean id="liquibase" class="liquibase.integration.spring.SpringLiquibase">

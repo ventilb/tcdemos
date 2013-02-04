@@ -18,20 +18,23 @@
 <beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xmlns:context="http://www.springframework.org/schema/context"
-       xmlns:util="http://www.springframework.org/schema/util"
+       xmlns:util="http://www.springframework.org/schema/util" xmlns:cache="http://www.springframework.org/schema/cache"
+       xmlns:task="http://www.springframework.org/schema/task"
        xsi:schemaLocation="http://www.springframework.org/schema/beans
 http://www.springframework.org/schema/beans/spring-beans-3.1.xsd
 http://www.springframework.org/schema/context
 http://www.springframework.org/schema/context/spring-context-3.1.xsd
 http://www.springframework.org/schema/util
-http://www.springframework.org/schema/util/spring-util-2.0.xsd">
+http://www.springframework.org/schema/util/spring-util-2.0.xsd
+http://www.springframework.org/schema/cache
+http://www.springframework.org/schema/cache/spring-cache.xsd http://www.springframework.org/schema/task http://www.springframework.org/schema/task/spring-task.xsd">
 
     <util:properties id="config" location="classpath:config.properties"/>
 
     <context:annotation-config/>
 
     <context:component-scan
-            base-package="de.iew.services, de.iew.demos, de.iew.web.controllers, de.iew.web">
+            base-package="de.iew.services, de.iew.demos, de.iew.web.controllers, de.iew.web, de.iew.framework">
         <context:exclude-filter type="aspectj" expression="de.iew.persistence..*"/>
     </context:component-scan>
 
@@ -56,4 +59,29 @@ http://www.springframework.org/schema/util/spring-util-2.0.xsd">
     Quelle für die I18N-Strings nehmen können.
     -->
     <alias name="messageBundleService" alias="messageSource"/>
+
+    <!-- Cache Configuration -->
+    <cache:annotation-driven cache-manager="cacheManager"/>
+
+    <bean id="ehcache" class="org.springframework.cache.ehcache.EhCacheManagerFactoryBean" scope="singleton">
+        <property name="configLocation" value="classpath:ehcache.xml"/>
+        <!--
+        TRUE damit wir den CacheManager mit Hibernate teilen. Sonst haben wir mehr Aufwand bei der Konfiguration. Das
+        funktioniert erst ab ehcache 2.5.
+        -->
+        <property name="shared" value="true"/>
+    </bean>
+
+    <bean id="cacheManager" class="org.springframework.cache.ehcache.EhCacheCacheManager">
+        <property name="cacheManager" ref="ehcache"/>
+    </bean>
+
+    <!-- Task Scheduling -->
+    <task:annotation-driven scheduler="scheduler" executor="executorWithPoolSizeRange"/>
+
+    <task:scheduler id="scheduler" pool-size="10"/>
+
+    <task:executor id="executorWithPoolSizeRange"
+    	               pool-size="5-25"
+    	               queue-capacity="100"/>
 </beans>

@@ -112,14 +112,14 @@
         Spring Integration Unterstützung
         -->
         <dependency>
-        	<groupId>org.springframework.integration</groupId>
-        	<artifactId>spring-integration-core</artifactId>
-        	<version>2.2.1.RELEASE</version>
+            <groupId>org.springframework.integration</groupId>
+            <artifactId>spring-integration-core</artifactId>
+            <version>2.2.1.RELEASE</version>
         </dependency>
         <dependency>
-        	<groupId>org.springframework.integration</groupId>
-        	<artifactId>spring-integration-event</artifactId>
-        	<version>2.2.1.RELEASE</version>
+            <groupId>org.springframework.integration</groupId>
+            <artifactId>spring-integration-event</artifactId>
+            <version>2.2.1.RELEASE</version>
         </dependency>
         <!--
         Für die Jabber Unterstützung.
@@ -129,9 +129,9 @@
         See: http://www.igniterealtime.org/builds/smack/docs/latest/README.html
         -->
         <dependency>
-        	<groupId>org.springframework.integration</groupId>
-        	<artifactId>spring-integration-xmpp</artifactId>
-        	<version>2.2.1.RELEASE</version>
+            <groupId>org.springframework.integration</groupId>
+            <artifactId>spring-integration-xmpp</artifactId>
+            <version>2.2.1.RELEASE</version>
         </dependency>
         <!--
         Benötigen wir für AOP Funktionen
@@ -215,11 +215,6 @@
         -->
         <dependency>
             <groupId>org.hibernate</groupId>
-            <artifactId>hibernate-c3p0</artifactId>
-            <version>4.1.7.Final</version>
-        </dependency>
-        <dependency>
-            <groupId>org.hibernate</groupId>
             <artifactId>hibernate-core</artifactId>
             <version>4.1.7.Final</version>
         </dependency>
@@ -227,6 +222,19 @@
             <groupId>org.hibernate</groupId>
             <artifactId>hibernate-ehcache</artifactId>
             <version>4.1.7.Final</version>
+        </dependency>
+        <!--
+        Für Caching Unterstützung. Wir haben explizit auf ehcache 2.6 aktualisiert. hibernate-ehcache bindet die 2.4er
+        Version ein. Damit ist die doppelte Konfiguration (Spring, Hibernate) umständlich. Ab 2.5 können wir den
+        CacheManager teilen.
+
+        Lizenz: Apache 2.0 http://ehcache.org/about/license
+        see http://ehcache.org/
+        -->
+        <dependency>
+            <groupId>net.sf.ehcache</groupId>
+            <artifactId>ehcache-core</artifactId>
+            <version>2.6.3</version>
         </dependency>
         <!--
         MySQL Treiber für Datenbank.
@@ -242,6 +250,19 @@
             <groupId>mysql</groupId>
             <artifactId>mysql-connector-java</artifactId>
             <version>5.1.21</version>
+        </dependency>
+        <!--
+        Für Connection Pooling. Wir verwenden c3p0 explizit und nicht hibernate-c3p0 weil wir den Connection Pool auf
+        DataSource Ebene anlegen wollen und nicht in Hibernate.
+
+        Lizenz: LGPL
+
+        see http://www.mchange.com/projects/c3p0/
+        -->
+        <dependency>
+            <groupId>c3p0</groupId>
+            <artifactId>c3p0</artifactId>
+            <version>0.9.1.2</version>
         </dependency>
         <!--
         Liquibase für einfache Datenbank-Überarbeitungen.
@@ -264,14 +285,14 @@
             <version>1.8.3</version>
         </dependency>
         <dependency>
-        	<groupId>commons-lang</groupId>
-        	<artifactId>commons-lang</artifactId>
-        	<version>2.6</version>
+            <groupId>commons-lang</groupId>
+            <artifactId>commons-lang</artifactId>
+            <version>2.6</version>
         </dependency>
         <dependency>
-        	<groupId>commons-collections</groupId>
-        	<artifactId>commons-collections</artifactId>
-        	<version>3.2.1</version>
+            <groupId>commons-collections</groupId>
+            <artifactId>commons-collections</artifactId>
+            <version>3.2.1</version>
         </dependency>
         <!--
         Für Formular Validierung. API und Implementierung von JSR-303

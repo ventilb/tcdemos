@@ -17,6 +17,12 @@
 
 <ehcache xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:noNamespaceSchemaLocation="http://ehcache.org/ehcache.xsd">
+    <!--
+
+    see http://anirbanchowdhury.wordpress.com/2012/07/23/hibernate-second-level-cache-ehcache/
+    see http://www.javalobby.org/java/forums/t48846.html
+    -->
+
     <!-- Required elements -->
     <diskStore path="java.io.tmpdir"/>
     <defaultCache
@@ -26,17 +32,16 @@
             timeToLiveSeconds="120"
             overflowToDisk="true"/>
 
-    <cache
-            name="org.hibernate.cache.internal.StandardQueryCache"
-            maxElementsInMemory="5"
-            eternal="false"
-            timeToLiveSeconds="120">
-    </cache>
-    <cache
-            name="org.hibernate.cache.spi.UpdateTimestampsCache"
-            maxElementsInMemory="5000"
-            eternal="true">
-    </cache>
+    <cache name="org.hibernate.cache.spi.UpdateTimestampsCache"
+           maxElementsInMemory="1"
+           eternal="true"
+           overflowToDisk="true"/>
+
+    <cache name="org.hibernate.cache.internal.StandardQueryCache"
+           maxElementsInMemory="1"
+           eternal="false"
+           timeToLiveSeconds="120"
+           overflowToDisk="true"/>
 
     <!-- Cache settings per class -->
     <cache name="java.text.MessageFormat"
