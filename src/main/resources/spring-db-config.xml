@@ -58,7 +58,7 @@
     </bean>
 
     <!-- Transaction Management -->
-    <tx:annotation-driven transaction-manager="txManager"/>
+    <tx:annotation-driven transaction-manager="txManager" proxy-target-class="true"/>
 
     <bean id="txManager"
           class="org.springframework.orm.hibernate4.HibernateTransactionManager">
@@ -82,7 +82,7 @@
         </tx:attributes>
     </tx:advice>
 
-    <aop:config>
+    <aop:config proxy-target-class="true">
         <aop:advisor advice-ref="serviceAdvice" pointcut="execution(* de.iew.services..*.*(..))"/>
         <aop:advisor advice-ref="hbmDaoAdvice" pointcut="execution(* de.iew.persistence.hibernate.*.*(..))"/>
     </aop:config>

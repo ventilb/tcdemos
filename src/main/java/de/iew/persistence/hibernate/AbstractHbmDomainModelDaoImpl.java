@@ -19,34 +19,41 @@ package de.iew.persistence.hibernate;
 import de.iew.domain.AbstractModel;
 import de.iew.domain.DomainModel;
 import de.iew.domain.Order;
+import de.iew.framework.utils.ClassUtils;
 import de.iew.persistence.DomainModelDao;
 import org.hibernate.Criteria;
 import org.hibernate.criterion.Projection;
 import org.hibernate.criterion.Projections;
 import org.springframework.util.Assert;
 
-import java.lang.reflect.ParameterizedType;
 import java.util.Collection;
 
 /**
- * Basisklasse für Hibernate Implentierungen der
- * {@link DomainModelDao}-Schnittstellen.
+ * Base class to implement concrete Hibernate {@link DomainModelDao}s.
  *
  * @author Manuel Schulze <manuel_schulze@i-entwicklung.de>
- * @see <a href="http://blog.xebia.com/2009/02/07/acessing-generic-types-at-runtime-in-java/">http://blog.xebia.com/2009/02/07/acessing-generic-types-at-runtime-in-java/</a>
  * @since 24.11.12 - 20:25
  */
 public abstract class AbstractHbmDomainModelDaoImpl<M extends AbstractModel> extends AbstractHbmDao implements DomainModelDao<M> {
 
     private final Class<M> domainModelClass;
 
+    /**
+     * Default constructor to implement {@link DomainModelDao}s.
+     * <p>
+     * Determines the domain model class by Java reflection.
+     * </p>
+     *
+     * @see ClassUtils#determineFirstGenericSuperType(Object) Method description for more information
+     */
     protected AbstractHbmDomainModelDaoImpl() {
-        this.domainModelClass = ((Class) ((ParameterizedType) getClass()
-                .getGenericSuperclass()).getActualTypeArguments()[0]);
+        this.domainModelClass = ClassUtils.determineFirstGenericSuperType(this);
+        Assert.notNull(this.domainModelClass);
     }
 
     protected AbstractHbmDomainModelDaoImpl(Class<M> domainModelClass) {
         this.domainModelClass = domainModelClass;
+        Assert.notNull(this.domainModelClass);
     }
 
     public M save(M domainModel) {
