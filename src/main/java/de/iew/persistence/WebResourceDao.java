@@ -18,11 +18,9 @@ package de.iew.persistence;
 
 import de.iew.domain.ModelInstantiationException;
 import de.iew.domain.security.WebResource;
-import org.springframework.security.access.ConfigAttribute;
-import org.springframework.security.web.util.RequestMatcher;
+import de.iew.persistence.models.RequestMapEntry;
 
 import java.util.Collection;
-import java.util.LinkedHashMap;
 
 /**
  * DAO interface description to manage {@link WebResource} domain model
@@ -34,10 +32,13 @@ import java.util.LinkedHashMap;
 public interface WebResourceDao extends DomainModelDao<WebResource> {
 
     /**
-     * Returns a spring security compatible request map for the web resources.
+     * Returns a collection of request map entries.
+     * <p>
+     * Each request map entry contains enough information to build spring security compatible request map.
+     * </p>
      *
-     * @return the linked hash map
+     * @return the collection of request map entries.
      * @throws ModelInstantiationException the model instantiation exception
      */
-    public LinkedHashMap<RequestMatcher, Collection<ConfigAttribute>> fetchRequestMap() throws ModelInstantiationException;
+    public Collection<RequestMapEntry> fetchRequestMap() throws ModelInstantiationException;
 }

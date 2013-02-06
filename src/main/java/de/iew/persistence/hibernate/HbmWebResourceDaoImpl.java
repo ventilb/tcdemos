@@ -21,13 +21,15 @@ import de.iew.domain.security.WebResource;
 import de.iew.domain.security.WebResourceAccessRule;
 import de.iew.domain.security.WebResourcePatternMatcher;
 import de.iew.persistence.WebResourceDao;
+import de.iew.persistence.models.RequestMapEntry;
+import org.hibernate.Session;
 import org.springframework.security.access.ConfigAttribute;
 import org.springframework.security.web.util.RequestMatcher;
 import org.springframework.stereotype.Repository;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.LinkedHashMap;
+import java.util.List;
 
 /**
  * Implementation of the {@link WebResourceDao} interface to access our web
@@ -38,21 +40,35 @@ import java.util.LinkedHashMap;
  */
 @Repository(value = "webResourceDao")
 public class HbmWebResourceDaoImpl extends AbstractHbmDomainModelDaoImpl<WebResource> implements WebResourceDao {
-    public LinkedHashMap<RequestMatcher, Collection<ConfigAttribute>> fetchRequestMap() throws ModelInstantiationException {
-        LinkedHashMap<RequestMatcher, Collection<ConfigAttribute>> requestMap = new LinkedHashMap<RequestMatcher, Collection<ConfigAttribute>>();
 
-        Collection<WebResource> webResources = findAll();
+    /**
+     * {@inheritDoc}
+     * <p>
+     * Evicts the loaded {@link WebResource} models from the hibernate session. We want to cache the web resources
+     * independent from hibernate in the service. All required associations will be also evicted from the hibernate
+     * session. Don't fear the Hibernate Exceptions :-)
+     * </p>
+     */
+    public Collection<RequestMapEntry> fetchRequestMap() throws ModelInstantiationException {
+        Session session = getCurrentSession();
 
+        List<RequestMapEntry> requestMapEntries = new ArrayList<RequestMapEntry>();
+
+        Collection<WebResource> webResources = findAllOrderedAscending();
+
+        RequestMapEntry requestMapEntry;
         RequestMatcher requestMatcher;
         Collection<ConfigAttribute> configAttributes;
         for (WebResource webResource : webResources) {
-            configAttributes = createConfigAttributeFromWebResource(webResource);
             requestMatcher = createRequestMatcherFromWebResource(webResource);
+            configAttributes = createConfigAttributeFromWebResource(webResource);
 
-            requestMap.put(requestMatcher, configAttributes);
+            session.evict(webResource);
+            requestMapEntry = new RequestMapEntry(requestMatcher, webResource, configAttributes);
+            requestMapEntries.add(requestMapEntry);
         }
 
-        return requestMap;
+        return requestMapEntries;
     }
 
     private Collection<ConfigAttribute> createConfigAttributeFromWebResource(WebResource webResource) throws ModelInstantiationException {

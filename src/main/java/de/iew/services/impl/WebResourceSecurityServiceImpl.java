@@ -16,7 +16,10 @@
 
 package de.iew.services.impl;
 
+import de.iew.domain.security.WebResource;
+import de.iew.framework.security.access.RequestMapbuilder;
 import de.iew.persistence.WebResourceDao;
+import de.iew.persistence.models.RequestMapEntry;
 import de.iew.services.WebResourceSecurityService;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -28,6 +31,7 @@ import org.springframework.security.web.access.intercept.FilterInvocationSecurit
 import org.springframework.security.web.util.RequestMatcher;
 import org.springframework.stereotype.Service;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.*;
 
 /**
@@ -46,27 +50,46 @@ public class WebResourceSecurityServiceImpl implements WebResourceSecurityServic
 
     private static final Log log = LogFactory.getLog(WebResourceSecurityServiceImpl.class);
 
-    private volatile boolean initialized = false;
+    private boolean initialized = false;
 
     private DefaultFilterInvocationSecurityMetadataSource metadataSource;
 
+    private LinkedHashMap<RequestMatcher, WebResource> requestWebResourceMap;
+
     public synchronized void getFromDatabase() {
-        LinkedHashMap<RequestMatcher, Collection<ConfigAttribute>> requestMap;
+        LinkedHashMap<RequestMatcher, Collection<ConfigAttribute>> requestConfigAttributeMap;
+
+        Collection<RequestMapEntry> requestMapEntries;
 
         try {
             if (!this.initialized) {
-                requestMap = this.webResourceDao.fetchRequestMap();
-                this.metadataSource = new DefaultFilterInvocationSecurityMetadataSource(requestMap);
+                requestMapEntries = this.webResourceDao.fetchRequestMap();
+                requestConfigAttributeMap = RequestMapbuilder.buildRequestConfigAttributeMap(requestMapEntries);
+                this.metadataSource = new DefaultFilterInvocationSecurityMetadataSource(requestConfigAttributeMap);
+
+                this.requestWebResourceMap = RequestMapbuilder.buildRequestWebResourceMap(requestMapEntries);
+
                 this.initialized = true;
             }
         } catch (Exception e) {
             if (log.isErrorEnabled()) {
-                log.error("MetadataSource wurde nicht aufgebaut wegen DAO-Fehlern.", e);
+                log.error("MetadataSource und WebResourceMap wurden nicht aufgebaut wegen DAO-Fehlern.", e);
             }
             this.initialized = false;
-            requestMap = new LinkedHashMap<RequestMatcher, Collection<ConfigAttribute>>();
-            this.metadataSource = new DefaultFilterInvocationSecurityMetadataSource(requestMap);
+            requestConfigAttributeMap = new LinkedHashMap<RequestMatcher, Collection<ConfigAttribute>>();
+            this.metadataSource = new DefaultFilterInvocationSecurityMetadataSource(requestConfigAttributeMap);
+            this.requestWebResourceMap = new LinkedHashMap<RequestMatcher, WebResource>();
         }
+    }
+
+    public WebResource getWebResource(HttpServletRequest request) {
+        getFromDatabase();
+        for (Map.Entry<RequestMatcher, WebResource> webResourceMapEntry : this.requestWebResourceMap.entrySet()) {
+            if (webResourceMapEntry.getKey().matches(request)) {
+                return webResourceMapEntry.getValue();
+            }
+        }
+        return null;
     }
 
     public Collection<ConfigAttribute> getAttributes(Object object) throws IllegalArgumentException {

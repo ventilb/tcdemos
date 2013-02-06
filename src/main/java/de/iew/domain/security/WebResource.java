@@ -17,6 +17,7 @@
 package de.iew.domain.security;
 
 import de.iew.domain.AbstractModel;
+import de.iew.domain.Order;
 
 import javax.persistence.*;
 import java.util.ArrayList;
@@ -33,7 +34,7 @@ import java.util.List;
  */
 @Entity
 @Table(name = "web_resource")
-public class WebResource extends AbstractModel {
+public class WebResource extends AbstractModel implements Order {
     /**
      * The URI pattern
      */
@@ -45,6 +46,12 @@ public class WebResource extends AbstractModel {
     private String method;
 
     private String requiresChannel;
+
+    private String uniqueAccesskey;
+
+    private int ordinalNumber;
+
+    private boolean requestCacheable;
 
     private WebResourcePatternMatcher patternMatcher = WebResourcePatternMatcher.ANT;
 
@@ -105,6 +112,63 @@ public class WebResource extends AbstractModel {
      */
     public void setRequiresChannel(String requiresChannel) {
         this.requiresChannel = requiresChannel;
+    }
+
+    /**
+     * Gets unique accesskey.
+     *
+     * @return the unique accesskey
+     */
+    @Column(name = "uniqueAccesskey", length = 255)
+    public String getUniqueAccesskey() {
+        return uniqueAccesskey;
+    }
+
+    /**
+     * Sets unique accesskey.
+     *
+     * @param uniqueAccesskey the unique accesskey
+     */
+    public void setUniqueAccesskey(String uniqueAccesskey) {
+        this.uniqueAccesskey = uniqueAccesskey;
+    }
+
+    /**
+     * Gets ordinal number.
+     *
+     * @return the ordinal number
+     */
+    @Column(name = "ordinalNumber")
+    public int getOrdinalNumber() {
+        return ordinalNumber;
+    }
+
+    /**
+     * Sets ordinal number.
+     *
+     * @param ordinalNumber the ordinal number
+     */
+    public void setOrdinalNumber(int ordinalNumber) {
+        this.ordinalNumber = ordinalNumber;
+    }
+
+    /**
+     * Is request cacheable.
+     *
+     * @return the boolean
+     */
+    @Column(name = "requestCacheable", columnDefinition = "BIT")
+    public boolean isRequestCacheable() {
+        return requestCacheable;
+    }
+
+    /**
+     * Sets request cacheable.
+     *
+     * @param requestCacheable the request cacheable
+     */
+    public void setRequestCacheable(boolean requestCacheable) {
+        this.requestCacheable = requestCacheable;
     }
 
     /**

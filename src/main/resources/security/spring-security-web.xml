@@ -33,6 +33,23 @@
     </util:properties>
 
     <!--
+    Ein Filter, der eingehende Requests gegen unsere WebResource Domainmodelle prüft und den Request zwischenspeichert
+    wenn das requestCacheable TRUE ist.
+    -->
+    <bean id="webResourceRequestSaveFilter"
+          class="de.iew.framework.spring.web.savedrequest.WebResourceRequestSaveFilter"></bean>
+
+    <!--
+    Ein RequestCache um einen HTTP-Request zwischen zu speichern. Wir verwenden dieses Feature um nach dem Login auf
+    die zuletzt aufgerufene Seite zurück zu springen.
+
+    Mit dieser Konfiguration wird der Request in der Nutzersession gespeichert. Es sind aber auch andere Strategien
+    denkbar,
+    -->
+    <bean id="portalRequestCache"
+          class="org.springframework.security.web.savedrequest.HttpSessionRequestCache"></bean>
+
+    <!--
     Der ExceptionTranslationFilter greift immer dann wenn während der
     vorangegangenden Filter Verarbeitung eine Spring Security Exception
     aufgetreten ist. Hiermit wird entweder ein "Zugriff verweigert" gemeldet
@@ -43,7 +60,8 @@
     -->
     <bean id="formLoginExceptionTranslationFilter"
           class="org.springframework.security.web.access.ExceptionTranslationFilter">
-        <property name="authenticationEntryPoint" ref="formAuthenticationEntryPoint"/>
+        <constructor-arg index="0" ref="formAuthenticationEntryPoint"/>
+        <constructor-arg index="1" ref="portalRequestCache"/>
         <property name="accessDeniedHandler" ref="accessDeniedHandler"/>
     </bean>
 
@@ -82,7 +100,7 @@
 
     <bean id="logoutFilter"
           class="org.springframework.security.web.authentication.logout.LogoutFilter">
-        <constructor-arg value="/sketchpad.html"/>
+        <constructor-arg value="/index.html"/>
         <constructor-arg>
             <list>
                 <bean class="org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler"/>
@@ -104,9 +122,19 @@
         <property name="sessionAuthenticationStrategy" ref="sas"/>
     </bean>
 
+    <!--
+    Der SavedRequestAwareAuthenticationSuccessHandler greift auf den requestCache zurück und leitet bei erfolgreichem
+    Login auf die, im requestCache, gespeicherte URL weiter. Problematisch ist noch das Abspeichern der URL in den
+    requestCache. Oben, beim ExceptionTranslationFilter passiert das, wenn der Zugriff auf eine Seite verweigert wird.
+
+    Wenn man sich über den Login-Knopf einloggt, ist die Seite auf der man den Login-Knopf gedrückt hat, nicht
+    gespeichert. Das kann man im Controller manuell machen, indem man authenticationRequestCache#saveRequest()
+    aufruft oder wir finden einen besseren Weg.
+    -->
     <bean id="formAuthenticationSuccessHandler"
           class="org.springframework.security.web.authentication.SavedRequestAwareAuthenticationSuccessHandler">
-        <property name="defaultTargetUrl" value="/sketchpad.html"/>
+        <property name="requestCache" ref="portalRequestCache"/>
+        <property name="defaultTargetUrl" value="/index.html"/>
         <property name="alwaysUseDefaultTargetUrl" value="false"/>
         <property name="useReferer" value="true"/>
     </bean>
