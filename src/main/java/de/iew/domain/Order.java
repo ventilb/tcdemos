@@ -34,6 +34,11 @@ import java.util.Comparator;
 public interface Order {
 
     /**
+     * Definition of the ordinal number property name constant. Prevents magic strings in the code.
+     */
+    public static final String ORDER_PROPERTY_NAME = "ordinalNumber";
+
+    /**
      * Wiederverwendbares Singleton-Exemplar für Vergleiche auf Basis dieser
      * {@link Order}-Schnittstelle.
      */

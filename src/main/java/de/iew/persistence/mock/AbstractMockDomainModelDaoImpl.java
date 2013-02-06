@@ -83,6 +83,10 @@ public abstract class AbstractMockDomainModelDaoImpl<M extends AbstractModel> im
         }
     }
 
+    public Collection<M> findAllOrderedAscending() {
+        throw new UnsupportedOperationException("Operation not supported");
+    }
+
     public long count() {
         return this.models.size();
     }

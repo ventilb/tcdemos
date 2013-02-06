@@ -120,12 +120,22 @@ public interface DomainModelDao<M extends AbstractModel> {
      * <code>maxResults</code> models.
      * </p>
      *
-     *
      * @param firstResult the model number to start from
      * @param maxResults  the maximum model count
      * @return view portion of the domain models
      */
     public Collection<M> findAll(long firstResult, long maxResults);
+
+    /**
+     * Finds all domain models in ascending order.
+     * <p>
+     * If this domain model implements {@link de.iew.domain.Order} then ordering is performed on
+     * {@link de.iew.domain.Order#getOrdinalNumber()}. Otherwise the domain models are sorted by their id.
+     * </p>
+     *
+     * @return the domain model collection
+     */
+    public Collection<M> findAllOrderedAscending();
 
     /**
      * Counts the available domain models of type <code>M</code>.

@@ -17,6 +17,8 @@
 package de.iew.persistence.hibernate;
 
 import de.iew.domain.AbstractModel;
+import de.iew.domain.DomainModel;
+import de.iew.domain.Order;
 import de.iew.persistence.DomainModelDao;
 import org.hibernate.Criteria;
 import org.hibernate.criterion.Projection;
@@ -76,6 +78,16 @@ public abstract class AbstractHbmDomainModelDaoImpl<M extends AbstractModel> ext
         crit.setFirstResult((int) firstResult);
         crit.setMaxResults((int) maxResults);
 
+        return (Collection<M>) crit.list();
+    }
+
+    public Collection<M> findAllOrderedAscending() {
+        Criteria crit = createCriteria();
+        if (this.domainModelClass.isAssignableFrom(Order.class)) {
+            crit.addOrder(org.hibernate.criterion.Order.asc(Order.ORDER_PROPERTY_NAME));
+        } else {
+            crit.addOrder(org.hibernate.criterion.Order.asc(DomainModel.ID_PROPERTY_NAME));
+        }
         return (Collection<M>) crit.list();
     }
 

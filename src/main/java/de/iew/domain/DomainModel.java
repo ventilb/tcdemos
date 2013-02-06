@@ -25,6 +25,11 @@ package de.iew.domain;
  */
 public interface DomainModel {
     /**
+     * Definition of the id property name constant. Prevents magic strings in the code.
+     */
+    public static final String ID_PROPERTY_NAME = "ordinalNumber";
+
+    /**
      * Liefert die Id dieses Domainmodells oder NULL wenn dieses Domainmodell
      * keine Id hat.
      *
