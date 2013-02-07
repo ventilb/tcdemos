@@ -38,11 +38,16 @@ import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.event.ContextStartedEvent;
 import org.springframework.integration.MessageChannel;
+import org.springframework.jmx.export.annotation.ManagedAttribute;
+import org.springframework.jmx.export.annotation.ManagedResource;
+import org.springframework.jmx.export.notification.NotificationPublisher;
+import org.springframework.jmx.export.notification.NotificationPublisherAware;
 import org.springframework.security.access.prepost.PostFilter;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
+import javax.management.Notification;
 import java.util.Collection;
 import java.util.Date;
 
@@ -53,7 +58,8 @@ import java.util.Date;
  * @since 24.01.13 - 21:01
  */
 @Service(value = "auditService")
-public class AuditServiceImpl implements AuditService, ApplicationListener<ApplicationEvent>, InitializingBean {
+@ManagedResource(objectName = "modelmbean:name=AuditService", description = "AuditService für wichtige System Ereignisse")
+public class AuditServiceImpl implements AuditService, ApplicationListener<ApplicationEvent>, InitializingBean, NotificationPublisherAware {
 
     private static final Log log = LogFactory.getLog(AuditServiceImpl.class);
 
@@ -99,29 +105,54 @@ public class AuditServiceImpl implements AuditService, ApplicationListener<Appli
         return new CollectionHolder<AuditEventMessage>(auditMessages, firstItem, totalCount);
     }
 
-    protected void persistMessage(Date date, Authentication authentication, AuditEvent.Severity severity, String message, Throwable throwable) {
+    protected void persistMessage(Object source, Date date, Authentication authentication, AuditEvent.Severity severity, String message, Throwable throwable) {
         String principal = null;
 
         if (authentication != null) {
             principal = authentication.getName();
         }
 
-        passMessage(severity, message);
-        passThrowable(severity, throwable);
+        try {
+            passMessage(severity, message);
+            passThrowable(severity, throwable);
+        } catch (Exception e) {
+            if (log.isFatalEnabled()) {
+                log.fatal("AuditEvent was not passed to " + MessagePassingService.class.getName() + " due to an unexpected error", e);
+            }
+        }
 
-        AuditEventMessage auditEventMessage = new AuditEventMessage();
-        auditEventMessage.setTimestamp(date);
-        auditEventMessage.setPrincipal(principal);
-        auditEventMessage.setSeverity(severity);
-        auditEventMessage.setMessage(toAuditEventMessage(message, throwable));
+        AuditEventMessage auditEventMessage = null;
+        try {
+            auditEventMessage = new AuditEventMessage();
+            auditEventMessage.setTimestamp(date);
+            auditEventMessage.setPrincipal(principal);
+            auditEventMessage.setSeverity(severity);
+            auditEventMessage.setMessage(toAuditEventMessage(message, throwable));
 
-        this.auditEventMessageDao.save(auditEventMessage);
+            this.auditEventMessageDao.save(auditEventMessage);
+        } catch (Exception e) {
+            if (log.isFatalEnabled()) {
+                log.fatal("AuditEvent was not persisted due to an unexpected error", e);
+            }
+        }
+
+        try {
+            if (auditEventMessage != null) {
+                sendMBeanNotification(source, auditEventMessage);
+            }
+        } catch (Exception e) {
+            if (log.isFatalEnabled()) {
+                log.fatal("AuditEvent was not populated to mbean service due to an unexpected error", e);
+            }
+        }
     }
 
     protected String toAuditEventMessage(String message, Throwable throwable) {
         StringBuilder sb = new StringBuilder(message);
-        sb.append(SystemUtils.LINE_SEPARATOR);
-        sb.append(ExceptionUtils.getFullStackTrace(throwable));
+        if (throwable != null) {
+            sb.append(SystemUtils.LINE_SEPARATOR);
+            sb.append(ExceptionUtils.getFullStackTrace(throwable));
+        }
         return sb.toString();
     }
 
@@ -135,6 +166,12 @@ public class AuditServiceImpl implements AuditService, ApplicationListener<Appli
         if (severity.isHigherOrEqualAs(this.mpsPassSeverity)) {
             this.messagePassingService.passThrowableSystemMessage(throwable);
         }
+    }
+
+    protected void sendMBeanNotification(Object source, AuditEventMessage auditEventMessage) {
+        Date timestamp = auditEventMessage.getTimestamp();
+        String message = auditEventMessage.getMessage();
+        this.notificationPublisher.sendNotification(new Notification(AuditEvent.class.getName(), source.toString(), notificationSequence++, timestamp.getTime(), message));
     }
 
     public void onApplicationEvent(ApplicationEvent event) {
@@ -154,18 +191,36 @@ public class AuditServiceImpl implements AuditService, ApplicationListener<Appli
      * @param evt    the audit event
      */
     public void onAuditEvent(Object source, AuditEvent evt) {
-        /*
-        Beware of logging from here. You will enter an infinite loop.
-         */
-        Date date;
-        if (evt instanceof GenericAuditEvent) {
-            date = new Date(((GenericAuditEvent) evt).getAuditEventTimestamp());
-        } else {
-            date = new Date();
-        }
+        try {
+            /*
+            Beware of logging from here. You will enter an infinite loop. Ignoring events coming from ourselves.
+             */
+            if (checkIgnoreAuditEventBySource(source)) {
+                return;
+            }
+            Date date;
+            if (evt instanceof GenericAuditEvent) {
+                date = new Date(((GenericAuditEvent) evt).getAuditEventTimestamp());
+            } else {
+                date = new Date();
+            }
 
-        Authentication authentication = evt.getAuthentication();
-        persistMessage(date, authentication, evt.getSeverity(), evt.getMessage(), evt.getThrowable());
+            Authentication authentication = evt.getAuthentication();
+            persistMessage(source, date, authentication, evt.getSeverity(), evt.getMessage(), evt.getThrowable());
+        } catch (Exception e) {
+            if (log.isFatalEnabled()) {
+                log.fatal("AuditEvent was not persisted due to an unexpected error", e);
+            }
+        }
+    }
+
+    protected boolean checkIgnoreAuditEventBySource(Object source) {
+        boolean ignore = false;
+        if (source != null) {
+            String sourceAsString = source.toString();
+            ignore = sourceAsString.contains(AuditService.class.getSimpleName());
+        }
+        return ignore;
     }
 
     /**
@@ -218,16 +273,30 @@ public class AuditServiceImpl implements AuditService, ApplicationListener<Appli
         this.auditServiceAppenderName = auditServiceAppenderName;
     }
 
+    @ManagedAttribute(description = "The name of the log4j appender logging level.",
+            defaultValue = "WARN")
     @Value(value = "#{config['audit.audit_service_appender_log4j_priority']}")
-    public void setAuditServiceAppenderLog4jPriority(String name) {
-        this.auditServiceAppenderLog4jPriority = Level.toLevel(name, AuditServiceAppender.DEFAULT_AUDIT_SERVICE_APPENDER_LOG4J_PRIORITY);
+    public void setAuditServiceAppenderLog4jPriority(String auditServiceAppenderLog4jPriority) {
+        this.auditServiceAppenderLog4jPriority = Level.toLevel(auditServiceAppenderLog4jPriority, AuditServiceAppender.DEFAULT_AUDIT_SERVICE_APPENDER_LOG4J_PRIORITY);
 
         changeAuditServiceAppenderLog4jPriority();
     }
 
+    @ManagedAttribute
+    public String getAuditServiceAppenderLog4jPriority() {
+        return this.auditServiceAppenderLog4jPriority.toString();
+    }
+
+    @ManagedAttribute(description = "The audit message severity from which audit events are passed to the message passing service.",
+            defaultValue = "WARN")
     @Value(value = "#{config['audit.mps_pass_severity']}")
     public void setMpsPassSeverity(String mpsPassSeverity) {
         this.mpsPassSeverity = AuditEvent.Severity.valueOf(mpsPassSeverity);
+    }
+
+    @ManagedAttribute
+    public String getMpsPassSeverity() {
+        return this.mpsPassSeverity.name();
     }
 
     // Service und Dao Abhängigkeiten /////////////////////////////////////////
@@ -237,6 +306,10 @@ public class AuditServiceImpl implements AuditService, ApplicationListener<Appli
     private MessagePassingService messagePassingService;
 
     private MessageChannel applicationEventChannel;
+
+    private NotificationPublisher notificationPublisher;
+
+    private long notificationSequence = 0;
 
     @Autowired
     public void setAuditEventMessageDao(AuditEventMessageDao auditEventMessageDao) {
@@ -251,5 +324,9 @@ public class AuditServiceImpl implements AuditService, ApplicationListener<Appli
     @Autowired(required = false)
     public void setApplicationEventChannel(MessageChannel applicationEventChannel) {
         this.applicationEventChannel = applicationEventChannel;
+    }
+
+    public void setNotificationPublisher(NotificationPublisher notificationPublisher) {
+        this.notificationPublisher = notificationPublisher;
     }
 }
