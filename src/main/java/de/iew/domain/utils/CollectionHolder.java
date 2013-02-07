@@ -17,6 +17,7 @@
 package de.iew.domain.utils;
 
 import java.util.Collection;
+import java.util.Iterator;
 
 /**
  * Implements a utility class to hold a view portion of a collection
@@ -29,7 +30,7 @@ import java.util.Collection;
  * @author Manuel Schulze <manuel_schulze@i-entwicklung.de>
  * @since 02.02.13 - 12:06
  */
-public class CollectionHolder<T> {
+public class CollectionHolder<T> implements Collection<T> {
 
     private final long firstItem;
 
@@ -93,5 +94,57 @@ public class CollectionHolder<T> {
      */
     public long getCollectionSize() {
         return this.collection.size();
+    }
+
+    public int size() {
+        return this.collection.size();
+    }
+
+    public boolean isEmpty() {
+        return this.collection.isEmpty();
+    }
+
+    public boolean contains(Object o) {
+        return this.collection.contains(o);
+    }
+
+    public Iterator<T> iterator() {
+        return this.collection.iterator();
+    }
+
+    public Object[] toArray() {
+        return this.collection.toArray();
+    }
+
+    public <T1 extends Object> T1[] toArray(T1[] a) {
+        return this.collection.toArray(a);
+    }
+
+    public boolean add(T t) {
+        return this.collection.add(t);
+    }
+
+    public boolean remove(Object o) {
+        return this.collection.remove(o);
+    }
+
+    public boolean containsAll(Collection<?> c) {
+        return this.collection.containsAll(c);
+    }
+
+    public boolean addAll(Collection<? extends T> c) {
+        return this.collection.addAll(c);
+    }
+
+    public boolean removeAll(Collection<?> c) {
+        return this.collection.removeAll(c);
+    }
+
+    public boolean retainAll(Collection<?> c) {
+        return this.collection.retainAll(c);
+    }
+
+    public void clear() {
+        this.collection.clear();
     }
 }

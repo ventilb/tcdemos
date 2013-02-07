@@ -43,6 +43,7 @@ import org.springframework.jmx.export.annotation.ManagedResource;
 import org.springframework.jmx.export.notification.NotificationPublisher;
 import org.springframework.jmx.export.notification.NotificationPublisherAware;
 import org.springframework.security.access.prepost.PostFilter;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
@@ -89,7 +90,7 @@ public class AuditServiceImpl implements AuditService, ApplicationListener<Appli
         Assert.notNull(this.mpsPassSeverity);
     }
 
-    @PostFilter(value = "hasRole(filterObject, 'ROLE_ADMIN')")
+    @PreAuthorize(value = "hasRole('ROLE_ADMIN')")
     public CollectionHolder<AuditEventMessage> getAuditEventMessages(long firstItem, long itemCount) {
         if (log.isDebugEnabled()) {
             log.debug("Lade AuditMessages ab " + firstItem + " mit Anzahl " + itemCount + ".");
