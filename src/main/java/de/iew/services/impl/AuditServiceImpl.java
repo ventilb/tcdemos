@@ -138,7 +138,7 @@ public class AuditServiceImpl implements AuditService, ApplicationListener<Appli
 
         try {
             if (auditEventMessage != null) {
-                sendMBeanNotification(source, auditEventMessage);
+                sendMBeanNotification(source, date, severity, message, throwable);
             }
         } catch (Exception e) {
             if (log.isFatalEnabled()) {
@@ -168,10 +168,15 @@ public class AuditServiceImpl implements AuditService, ApplicationListener<Appli
         }
     }
 
-    protected void sendMBeanNotification(Object source, AuditEventMessage auditEventMessage) {
-        Date timestamp = auditEventMessage.getTimestamp();
-        String message = auditEventMessage.getMessage();
-        this.notificationPublisher.sendNotification(new Notification(AuditEvent.class.getName(), source.toString(), notificationSequence++, timestamp.getTime(), message));
+    protected void sendMBeanNotification(Object source, Date timestamp, AuditEvent.Severity severity, String message, Throwable throwable) {
+        Notification notification = new Notification(AuditEvent.class.getName(), source.toString(), notificationSequence++, timestamp.getTime(), message);
+        if (throwable != null) {
+            StringBuffer sb = new StringBuffer(throwable.getLocalizedMessage());
+            sb.append(SystemUtils.LINE_SEPARATOR).append(ExceptionUtils.getFullStackTrace(throwable));
+            notification.setUserData(sb);
+        }
+
+        this.notificationPublisher.sendNotification(notification);
     }
 
     public void onApplicationEvent(ApplicationEvent event) {
