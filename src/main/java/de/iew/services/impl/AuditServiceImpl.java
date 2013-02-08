@@ -172,7 +172,9 @@ public class AuditServiceImpl implements AuditService, ApplicationListener<Appli
     protected void sendMBeanNotification(Object source, Date timestamp, AuditEvent.Severity severity, String message, Throwable throwable) {
         Notification notification = new Notification(AuditEvent.class.getName(), source.toString(), notificationSequence++, timestamp.getTime(), message);
         if (throwable != null) {
-            StringBuffer sb = new StringBuffer(throwable.getLocalizedMessage());
+            String throwableMessage = throwable.getLocalizedMessage();
+
+            StringBuffer sb = new StringBuffer(throwableMessage == null ? "": throwableMessage);
             sb.append(SystemUtils.LINE_SEPARATOR).append(ExceptionUtils.getFullStackTrace(throwable));
             notification.setUserData(sb);
         }
