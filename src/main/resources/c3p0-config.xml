@@ -29,6 +29,10 @@
         <property name="maxIdleTime">30</property>
         <property name="maxStatements">50</property>
         <property name="idleConnectionTestPeriod">30</property>
-        <property name="checkoutTimeout">300</property>
+        <!--
+        checkoutTimeout sollte hoch genug sein um beim Tomcat Bootstrap genügend Zeit für die Initialisierung zu haben.
+        Sonst kommt es zu Connection-Timeouts beim Bootstrap.
+        -->
+        <property name="checkoutTimeout">5000</property>
     </default-config>
 </c3p0-config>
