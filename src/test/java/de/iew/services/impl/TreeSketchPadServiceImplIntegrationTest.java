@@ -129,53 +129,16 @@ public class TreeSketchPadServiceImplIntegrationTest {
 
         SketchPadService sketchPadService = (SketchPadService) this.applicationContext.getBean("sketchPadService");
 
-        Polygon polygon = sketchPadService.createPolygon(sketchPadUser, 1, 100, 150, 1, 1);
+        double[] x = new double[]{0, 1, 2, 3};
+        double[] y = new double[]{4, 5, 6, 7};
+
+        Polygon polygon = sketchPadService.createPolygon(sketchPadUser, 1, x, y, 1, 1);
         assertNotNull(polygon.getId());
 
         assertEquals(this.sketchPadDao.findById(1), polygon.getSketchPad());
         assertEquals(this.sketchPadColorDao.findById(1), polygon.getLineColor());
         assertEquals(this.sketchPadStrokeDao.findById(1), polygon.getStroke());
-        assertEquals(1, polygon.getSegments().size());
-    }
-
-    @Test
-    public void testExtendPolygon() throws Exception {
-        SecurityContext securityContext = SecurityContextHolder.getContext();
-        Authentication sketchPadUser = securityContext.getAuthentication();
-
-        SketchPadService sketchPadService = (SketchPadService) this.applicationContext.getBean("sketchPadService");
-
-        Polygon polygon = sketchPadService.createPolygon(sketchPadUser, 1, 100, 150, 1, 1);
-        assertEquals(1, polygon.getSegments().size());
-        assertEquals(0, polygon.getSegments().get(0).getOrdinalNumber());
-
-        boolean extendResult = sketchPadService.extendPolygon(sketchPadUser, polygon.getId(), 160, 160);
-
-        assertTrue(extendResult);
-        assertEquals(2, polygon.getSegments().size());
-        assertEquals(1, polygon.getSegments().get(1).getOrdinalNumber());
-
-        extendResult = sketchPadService.extendPolygon(sketchPadUser, polygon.getId(), 170, 160);
-
-        assertTrue(extendResult);
-        assertEquals(3, polygon.getSegments().size());
-        assertEquals(2, polygon.getSegments().get(2).getOrdinalNumber());
-    }
-
-    @Test
-    public void testClosePolygon() throws Exception {
-        SecurityContext securityContext = SecurityContextHolder.getContext();
-        Authentication sketchPadUser = securityContext.getAuthentication();
-
-        SketchPadService sketchPadService = (SketchPadService) this.applicationContext.getBean("sketchPadService");
-
-        Polygon polygon = sketchPadService.createPolygon(sketchPadUser, 1, 100, 150, 1, 1);
-
-        sketchPadService.closePolygon(sketchPadUser, polygon.getId(), 200, 200);
-
-
-        assertEquals(Polygon.State.CLOSED, this.polygonDao.findById(polygon.getId()).getState());
-        assertEquals(2, this.polygonDao.findById(polygon.getId()).getSegments().size());
+        assertEquals(4, polygon.getSegments().size());
     }
 
     @Test
@@ -185,10 +148,14 @@ public class TreeSketchPadServiceImplIntegrationTest {
 
         SketchPadService sketchPadService = (SketchPadService) this.applicationContext.getBean("sketchPadService");
 
-        sketchPadService.createPolygon(sketchPadUser, 1, 100, 150, 1, 1);
-        sketchPadService.createPolygon(this.user2, 1, 100, 150, 1, 1);
+        double[] x = new double[]{0, 1, 2, 3};
+        double[] y = new double[]{4, 5, 6, 7};
+
+        sketchPadService.createPolygon(sketchPadUser, 1, x, y, 1, 1);
+        sketchPadService.createPolygon(this.user2, 1, x, y, 1, 1);
 
         List<Polygon> polygons = sketchPadService.listAllPolygons(1);
         assertEquals(1, polygons.size());
     }
+
 }

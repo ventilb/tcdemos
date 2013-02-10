@@ -18,27 +18,242 @@
  * Implementiert die Javascript-seitigen Funktionen für das Sketchpad.
  *
  * @author Manuel Schulze <manuel_schulze@i-entwicklung.de>
- * @since 11.11.12 - 00:34
+ * @since 11.11.2012 - 00:34
  */
 
-define(['jquery', 'core', './strokechooser', './colorchooser', './paint', './shapes'], function ($, core, /* function of StrokeChooser */ StrokeChooser, /* function of ColorChooser */ ColorChooser, /* function of Paint */ Paint, Shapes) {
-    function createPolygon(/* Object */ definition, /* function of Paint */ paint, /* function of ColorChooser */ colorChooser, /* function of StrokeChooser */ strokeChooser) {
-        var polygon = new Shapes.Polygon();
-        var lineColor = colorChooser.getColorById(definition.lineColor.id);
-        var stroke = strokeChooser.getStrokeById(definition.stroke.id);
+define(['jquery', 'core', './strokechooser', './colorchooser', './paint', './shapes', './shapeindex'], function ($, core, /* {StrokeChooser} */ StrokeChooser, /* {ColorChooser} */ ColorChooser, /* {Paint} */ Paint, /* {Shapes} */ Shapes, /* {ShapeIndex} */ ShapeIndex) {
 
-        decoratePolygon(polygon, lineColor, stroke);
+    function SketchPad(/* String */ containerId, /* number */ sketchPadId) {
+        var sketchPadScope = this;
 
-        for (var i = 0; i < definition.segmentCount * 2; i += 2) {
-            polygon.moveTo(definition.segments[i], definition.segments[i + 1]);
+        // HTML Objekte
+        this.sketchPadContainer = $(containerId + ' canvas');
+        this.sketchPadCanvas = this.sketchPadContainer.get(0);
+        this.sketchPadContext2d = this.sketchPadCanvas.getContext('2d');
+
+        // Objekteigenschaften, Ids und Zustände
+        this.sketchPadId = sketchPadId;
+        this.pollingId = null;
+        this.lastInsertedPolygonId = null;
+        /**
+         * Die Funktion des Zeichenbretts. PAINT = Zeichnen, PAN = Verschieben
+         *
+         * @type {String}
+         */
+        this.operationMode = null;
+
+        this.mousePanningX = -1;
+        this.mousePanningY = -1;
+
+        var operationTimerId = null;
+        var operationFirstMove = false;
+
+        // Zusätzliche Zeichentools
+        this.shapeIndex = new ShapeIndex();
+        this.colorChooser = new ColorChooser($(containerId + ' .color_chooser'), this.sketchPadId);
+        this.strokeChooser = new StrokeChooser($(containerId + ' .stroke_chooser'), this.sketchPadId);
+
+        if (this.sketchPadContext2d) {
+            this.paint = new Paint(this.sketchPadContext2d, this.shapeIndex, this.sketchPadCanvas.width, this.sketchPadCanvas.height);
+            this.paint.clearPaintOnDraw = true;
+            this.paint.animate();
+
+            sketchPadScope.startPolling();
+
+            $(document).keydown(function (evt) {
+                sketchPadScope.paint.clearPaint();
+                switch (evt.keyCode) {
+                    case 37:
+                        // Links
+                        sketchPadScope.paint.translate(-50, 0);
+                        break;
+                    case 38:
+                        // Hoch
+                        sketchPadScope.paint.translate(0, -50);
+                        break;
+                    case 39:
+                        // Rechts
+                        sketchPadScope.paint.translate(50, 0);
+                        break;
+                    case 40:
+                        // Unten
+                        sketchPadScope.paint.translate(0, 50);
+                        break;
+                }
+            });
+
+            $(this.sketchPadContainer).bind('mousedown', function (evt) {
+                sketchPadScope.operationMode = 'PAINT';
+                sketchPadScope.mousePanningX = -1;
+                sketchPadScope.mousePanningY = -1;
+
+                operationFirstMove = true;
+                operationTimerId = setTimeout(function () {
+                    sketchPadScope.operationMode = 'PAN';
+                    sketchPadScope.setSketchPadCursor('move');
+                }, 1000);
+
+            })
+
+            $(this.sketchPadContainer).bind('mousemove', function (evt) {
+                clearTimeout(operationTimerId);
+
+                /*
+                 Damit wir in Chrome eigene Mauscursor beim Draggen und Zeichnen haben
+
+                 @see http://stackoverflow.com/questions/11106955/change-cursor-over-html5-canvas-when-dragging-in-chrome
+                 */
+                $(document).get(0).onselectstart = function () {
+                    return false;
+                }
+
+                switch (sketchPadScope.operationMode) {
+                    case 'PAINT':
+                        if (operationFirstMove) {
+                            sketchPadScope.mouseCreatePolygon(evt);
+                            operationFirstMove = false;
+                        } else {
+                            sketchPadScope.mouseMovePolygon(evt)
+                        }
+                        break;
+                    case 'PAN':
+                        sketchPadScope.mousePanCanvas(evt);
+                        break;
+                }
+            });
+
+            $(this.sketchPadContainer).bind('mouseup', function (evt) {
+                clearTimeout(operationTimerId);
+
+                switch (sketchPadScope.operationMode) {
+                    case 'PAINT':
+                        sketchPadScope.mouseClosePolygon(evt);
+                        break;
+                }
+
+                sketchPadScope.operationMode = null;
+                sketchPadScope.setSketchPadCursor('auto');
+            });
         }
-        paint.addShape(polygon);
+    }
+
+    SketchPad.prototype.mouseCreatePolygon = function (evt) {
+        this.stopPolling();
+        $(document).get(0).onselectstart = function () {
+            return false;
+        }
+
+        var sketchPadContainerPageOffset = this.sketchPadContainer.offset(); // Position auf der Seite für Mausberechnung
+        var mx = (evt.pageX - sketchPadContainerPageOffset.left) - this.paint.canvasX;
+        var my = (evt.pageY - sketchPadContainerPageOffset.top) - this.paint.canvasY;
+        var lineColor = this.colorChooser.selectedColor;
+        var stroke = this.strokeChooser.selectedStroke;
+
+        var polygon = new Shapes.Polygon();
+        polygon.dirty = true;
+
+        this.decoratePolygon(polygon, lineColor, stroke);
+
+        polygon.moveTo(mx, my);
+
+        this.paint.setPaintShape(polygon);
+    }
+
+    SketchPad.prototype.mouseMovePolygon = function (evt) {
+        var polygon = this.paint.getPaintShape();
+
+        if (polygon != null) {
+            var sketchPadContainerPageOffset = this.sketchPadContainer.offset(); // Position auf der Seite für Mausberechnung
+            var mx = (evt.pageX - sketchPadContainerPageOffset.left) - this.paint.canvasX;
+            var my = (evt.pageY - sketchPadContainerPageOffset.top) - this.paint.canvasY;
+
+            polygon.moveTo(mx, my);
+        }
+    }
+
+    SketchPad.prototype.mouseClosePolygon = function (evt) {
+        var polygon = this.paint.getPaintShape();
+
+        if (polygon != null) {
+            var sketchPadContainerPageOffset = this.sketchPadContainer.offset(); // Position auf der Seite für Mausberechnung
+            var mx = (evt.pageX - sketchPadContainerPageOffset.left) - this.paint.canvasX;
+            var my = (evt.pageY - sketchPadContainerPageOffset.top) - this.paint.canvasY;
+            var lineColor = this.colorChooser.selectedColor;
+            var stroke = this.strokeChooser.selectedStroke;
+
+            polygon.moveTo(mx, my);
+
+            var sketchPadScope = this;
+            $.ajax({
+                url: core.baseUrl('/sketchpad/newpolygon.json'),
+                contentType: 'application/json; charset=utf-8',
+                dataType: 'json',
+                type: 'POST',
+                data: JSON.stringify({
+                    sketchPadId: sketchPadScope.sketchPadId,
+                    lineColorId: lineColor.id,
+                    strokeId: stroke.id,
+                    segments: polygon.getSegments()
+                }),
+                success: function (data) {
+                    if (data) {
+                        polygon.id = data;
+
+                        sketchPadScope.shapeIndex.put(polygon);
+
+                        sketchPadScope.startPolling();
+                    }
+                    sketchPadScope.paint.setPaintShape(null);
+                }
+            });
+        }
+    }
+
+    SketchPad.prototype.mousePanCanvas = function (evt) {
+        var sketchPadContainerPageOffset = this.sketchPadContainer.offset();
+        var mx = (evt.pageX - sketchPadContainerPageOffset.left);
+        var my = (evt.pageY - sketchPadContainerPageOffset.top);
+
+        var deltaToPanX = 0;
+        var deltaToPanY = 0;
+
+        var doPan = this.mousePanningX >= 0 && this.mousePanningY >= 0;
+
+        if (this.mousePanningX >= 0) {
+            deltaToPanX = mx - this.mousePanningX;
+        }
+        if (this.mousePanningY >= 0) {
+            deltaToPanY = my - this.mousePanningY;
+        }
+
+        if (doPan) {
+            this.paint.translate(deltaToPanX, deltaToPanY);
+        }
+
+        this.mousePanningX = mx;
+        this.mousePanningY = my;
+    }
+
+    SketchPad.prototype.setSketchPadCursor = function (/* String */ cursor) {
+        $(this.sketchPadContainer).css('cursor', cursor);
+    }
+
+    SketchPad.prototype.createPolygon = function (/* Object */ polygonForm) {
+        var polygon = new Shapes.Polygon();
+        polygon.id = polygonForm.polygonId;
+        polygon.segments = polygonForm.segments;
+        polygon.dirty = true;
+
+        var lineColor = this.colorChooser.getColorById(polygonForm.lineColorId);
+        var stroke = this.strokeChooser.getStrokeById(polygonForm.strokeId);
+
+        this.decoratePolygon(polygon, lineColor, stroke);
 
         return polygon;
     }
 
-    function decoratePolygon(/* Shapes.Polygon */ polygon, /* Color */ lineColor, /* Stroke */ stroke) {
-        if (lineColor != null) {
+    SketchPad.prototype.decoratePolygon = function (/* {Shapes.Polygon} */ polygon, /* {Color} */ lineColor, /* {Stroke} */ stroke) {
+        if (lineColor) {
             polygon.lineColor = lineColor.asCssString();
         }
         if (stroke) {
@@ -46,156 +261,36 @@ define(['jquery', 'core', './strokechooser', './colorchooser', './paint', './sha
         }
     }
 
-    var pollingId = null;
+    SketchPad.prototype.startPolling = function () {
+        var sketchPadScope = this;
 
-    function startPolling(/* function of Paint */ paint, /* function of ColorChooser */ colorChooser, /* function of StrokeChooser */ strokeChooser) {
-        pollingId = setInterval(function () {
+        this.pollingId = setInterval(function () {
+
             jQuery.ajax({
                 url: core.baseUrl('/sketchpad/listpolygons.json'),
                 type: 'GET',
+                data: {
+                    sketchPadId: sketchPadScope.sketchPadId,
+                    lastInsertedShapeId: sketchPadScope.lastInsertedPolygonId
+                },
                 success: function (data) {
-                    paint.stopAnimation();
-                    paint.removeAllShapes();
-
                     var polygonCount = data.length;
                     for (var i = 0; i < polygonCount; i++) {
-                        createPolygon(data[i], paint, colorChooser, strokeChooser);
-                    }
+                        var polygon = sketchPadScope.createPolygon(data[i]);
+                        sketchPadScope.shapeIndex.put(polygon);
 
-                    paint.animate(1000);
+                        sketchPadScope.lastInsertedPolygonId = Math.max(sketchPadScope.lastInsertedPolygonId, polygon.id);
+                    }
                 }
             });
         }, 1000);
     }
 
-    function stopPolling() {
-        clearInterval(pollingId);
+    SketchPad.prototype.stopPolling = function () {
+        clearInterval(this.pollingId);
     }
 
-    return function (/* String */ containerId) {
-            var sketchPadContainer = $(containerId + ' canvas');
-
-            var sketchPadCanvas = sketchPadContainer.get(0);
-            var sketchPadContext2d = sketchPadCanvas.getContext('2d');
-
-            if (sketchPadContext2d) {
-                var paint = new Paint(sketchPadContext2d, sketchPadCanvas.width, sketchPadCanvas.height);
-                paint.clearPaintOnDraw = true;
-
-                var colorChooser = new ColorChooser($(containerId + ' .color_chooser'));
-                var strokeChooser = new StrokeChooser($(containerId + ' .stroke_chooser'));
-
-                startPolling(paint, colorChooser, strokeChooser);
-
-                var paintPolygon = null;
-                sketchPadContainer.mousedown(function (evt) {
-                    stopPolling();
-                    $(document).get(0).onselectstart = function () {
-                        return false;
-                    }
-
-                    var sketchPadContainerPageOffset = sketchPadContainer.offset(); // Position auf der Seite für Mausberechnung
-                    var mx = (evt.pageX - sketchPadContainerPageOffset.left);
-                    var my = (evt.pageY - sketchPadContainerPageOffset.top);
-                    var lineColor = colorChooser.selectedColor;
-                    var stroke = strokeChooser.selectedStroke;
-
-                    $.ajax({
-                        url: core.baseUrl('/sketchpad/newpolygon.json'),
-                        type: 'POST',
-                        data: {
-                            x: mx,
-                            y: my,
-                            lineColorId: lineColor.id,
-                            strokeId: stroke.id
-                        },
-                        success: function (data) {
-                            /*
-                             Erstelle und konfiguriere Polygon hier lokal um
-                             Race-Conditions zu vermeiden, da die Webservice Aufrufe
-                             asynchron sind.
-                             */
-                            var polygon = new Shapes.Polygon();
-                            polygon.id = data;
-
-                            decoratePolygon(polygon, lineColor, stroke);
-
-                            polygon.moveTo(mx, my);
-
-                            paintPolygon = polygon
-                            paint.addShape(polygon);
-
-                            paint.stopAnimation();
-                            paint.animate(50);
-                        }
-                    });
-
-                });
-
-                sketchPadContainer.mouseup(function (evt) {
-                    /*
-                     Kopiere das Polygon erst in den lokalen Kontext um Race-Conditions
-                     zu vermeiden, da die Webservice Aufrufe asynchron sind.
-                     */
-                    var polygon = paintPolygon;
-                    paintPolygon = null;
-
-                    $(document).get(0).onselectstart = function () {
-                        return true;
-                    }
-
-                    var sketchPadContainerPageOffset = sketchPadContainer.offset(); // Position auf der Seite für Mausberechnung
-                    var mx = (evt.pageX - sketchPadContainerPageOffset.left);
-                    var my = (evt.pageY - sketchPadContainerPageOffset.top);
-
-                    if (polygon != null) {
-                        $.ajax({
-                            url: core.baseUrl('/sketchpad/closepolygon.json'),
-                            type: 'POST',
-                            data: {
-                                polygonId: polygon.id,
-                                x: mx,
-                                y: my
-                            },
-                            success: function (data) {
-                                polygon.moveTo(mx, my);
-
-                                startPolling(paint, colorChooser, strokeChooser);
-                            }
-                        });
-                    }
-                });
-
-                // @TODO Vektorzeit einführen, da die Webservice Aufrufe asynchron sind und wir am Server die Reihenfolge herstellen müssen
-                sketchPadContainer.mousemove(function (evt) {
-                    /*
-                     Kopiere das Polygon erst in den lokalen Kontext um Race-Conditions
-                     zu vermeiden, da die Webservice Aufrufe asynchron sind.
-                     */
-                    var polygon = paintPolygon;
-
-                    var sketchPadContainerPageOffset = sketchPadContainer.offset(); // Position auf der Seite für Mausberechnung
-                    var mx = (evt.pageX - sketchPadContainerPageOffset.left);
-                    var my = (evt.pageY - sketchPadContainerPageOffset.top);
-
-                    if (polygon != null) {
-                        $.ajax({
-                            url: core.baseUrl('/sketchpad/addsegment.json'),
-                            type: 'POST',
-                            data: {
-                                polygonId: polygon.id,
-                                x: mx,
-                                y: my
-                            },
-                            success: function (data) {
-                                polygon.moveTo(mx, my);
-                            }
-                        });
-                    }
-                });
-
-            }
-        }
+    return SketchPad;
 
 // Deprecated /////////////////////////////////////////////////////////////////
     function createColorString(/* Array */ colorComponents) {

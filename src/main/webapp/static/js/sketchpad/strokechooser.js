@@ -19,10 +19,13 @@
  * einen Strichauswahldialog für das Sketchpad bereit.
  *
  * @author Manuel Schulze <manuel_schulze@i-entwicklung.de>
- * @since 02.01.13 - 12:32
+ * @since 02.01.2013 - 12:32
  */
 define(['jquery', 'core'], function ($, core) {
-    function StrokeChooser(/* HTMLElement */ uiElement) {
+    function StrokeChooser(/* HTMLElement */ uiElement, /* number */ sketchPadId) {
+        var strokeChooserScope = this;
+        this.sketchPadId = sketchPadId;
+
         /**
          * Das HTML-Container-Element in dem die Striche als Thumbnails abgelegt
          * werden.
@@ -47,22 +50,22 @@ define(['jquery', 'core'], function ($, core) {
         this.strokes = {};
 
         $.ajax({
-            strokeChooserScope: this, // Scopeverweis um im Callback auf den StrokeChooser zugreifen zu können
-
             url: core.baseUrl('/sketchpad/liststrokes.json'),
             type: 'GET',
+            data: {
+                sketchPadId: strokeChooserScope.sketchPadId
+            },
             success: function (strokes) {
                 var strokeCount = strokes.length;
 
                 if (strokeCount == 0) {
                     throw new Error('Illegal State: No strokes from server.');
                 }
-                var strokeChooser = this.strokeChooserScope;
 
-                strokeChooser.selectedStroke = strokeChooser.addStroke(strokes[0]);
+                strokeChooserScope.selectedStroke = strokeChooserScope.addStroke(strokes[0]);
 
                 for (var i = 1; i < strokeCount; i++) {
-                    strokeChooser.addStroke(strokes[i]);
+                    strokeChooserScope.addStroke(strokes[i]);
                 }
             }
         });
@@ -93,6 +96,7 @@ define(['jquery', 'core'], function ($, core) {
             url: core.baseUrl('/sketchpad/choosestroke.json'),
             type: 'POST',
             data: {
+                sketchPadId: this.sketchPadId,
                 strokeId: stroke.id
             },
             success: function (strokeFromServer) {

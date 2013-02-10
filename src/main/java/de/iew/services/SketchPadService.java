@@ -37,11 +37,9 @@ public interface SketchPadService {
 
     public List<Polygon> listAllPolygons(long sketchPadId);
 
-    public Polygon createPolygon(Authentication sketchPadUser, long sketchPadId, double x, double y, long lineColorId, long strokeId) throws ModelNotFoundException;
+    public List<Polygon> listAllPolygons(long sketchPadId, long fromPolygonId);
 
-    public boolean extendPolygon(Authentication sketchPadUser, long polygonId, double x, double y) throws ModelNotFoundException;
-
-    public boolean closePolygon(Authentication sketchPadUser, long polygonId, double x, double y) throws ModelNotFoundException;
+    public Polygon createPolygon(Authentication sketchPadUser, long sketchPadId, double [] x, double [] y, long lineColorId, long strokeId) throws ModelNotFoundException;
 
     public List<RgbColor> listAllColors(long sketchPadId);
 

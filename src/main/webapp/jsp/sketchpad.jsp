@@ -27,13 +27,15 @@
     <script type="text/javascript">
         require(['jquery', 'sketchpad/sketch-pad'], function($, SketchPad) {
             $(document).ready(function() {
-                var sketchPad = new SketchPad('#sketch_pad');
+                var sketchPad = new SketchPad('#sketch_pad', ${sketchPad.id});
             });
         });
     </script>
 
     <div id="sketch_pad" class="sketch_pad">
-        <canvas width="1000" height="700"></canvas>
+        <div class="sketch_pad_canvas_container">
+            <canvas width="${sketchPad.width}" height="${sketchPad.height}"></canvas>
+        </div>
         <div id="right_margin_toolbar">
             <ul class="color_chooser">
 

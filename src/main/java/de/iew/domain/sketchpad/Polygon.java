@@ -21,7 +21,6 @@ import de.iew.domain.DataSource;
 import javax.persistence.*;
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -79,7 +78,7 @@ public class Polygon extends DataSource implements Serializable {
         this.stroke = stroke;
     }
 
-    @OneToMany(fetch = FetchType.LAZY, mappedBy = "polygon")
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "polygon", cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     public List<Segment> getSegments() {
         return segments;
     }

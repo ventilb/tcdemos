@@ -19,11 +19,14 @@
  * einen Farbauswahldialog für das Sketchpad bereit.
  *
  * @author Manuel Schulze <manuel_schulze@i-entwicklung.de>
- * @since 02.01.13 - 12:29
+ * @since 02.01.2013 - 12:29
  */
 define(['jquery', 'core'], function ($, core) {
 
-    function ColorChooser(/* HTMLElement */ uiElement) {
+    function ColorChooser(/* HTMLElement */ uiElement, /* number */ sketchPadId) {
+        var colorChooserScope = this;
+        this.sketchPadId = sketchPadId;
+
         /**
          * Das HTML-Container-Element in dem die Farben abgelegt werden.
          *
@@ -46,22 +49,21 @@ define(['jquery', 'core'], function ($, core) {
         this.colors = {};
 
         $.ajax({
-            colorChooserScope: this, // Scopeverweis um im Callback auf den ColorChooser zugreifen zu können
-
             url: core.baseUrl('/sketchpad/listcolors.json'),
             type: 'GET',
+            data: {
+                sketchPadId: this.sketchPadId
+            },
             success: function (colors) {
                 var colorCount = colors.length;
 
                 if (colorCount == 0) {
                     throw new Error('Illegal State: No colors from server.');
                 }
-                var colorChooser = this.colorChooserScope;
-
-                colorChooser.selectedColor = colorChooser.addColor(colors[0]);
+                colorChooserScope.selectedColor = colorChooserScope.addColor(colors[0]);
 
                 for (var i = 1; i < colorCount; i++) {
-                    colorChooser.addColor(colors[i]);
+                    colorChooserScope.addColor(colors[i]);
                 }
             }
         });
@@ -83,6 +85,7 @@ define(['jquery', 'core'], function ($, core) {
 
         return color;
     }
+
     ColorChooser.prototype.getColorById = function (/* Integer */ id) {
         var color = null;
         if (id in this.colors) {
@@ -90,12 +93,14 @@ define(['jquery', 'core'], function ($, core) {
         }
         return color;
     }
+
     ColorChooser.prototype.selectColor = function (/* Color */ color) {
         var colorChooserScope = this;
         $.ajax({
             url: core.baseUrl('/sketchpad/choosecolor.json'),
             type: 'POST',
             data: {
+                sketchPadId: this.sketchPadId,
                 colorId: color.id
             },
             success: function (colorFromServer) {
@@ -128,6 +133,7 @@ define(['jquery', 'core'], function ($, core) {
 
         return color + ')';
     }
+
     Color.prototype.mixin = function (/* Object */ colorComponents) {
         delete this['a'];
 

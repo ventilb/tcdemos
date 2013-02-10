@@ -26,6 +26,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
@@ -36,7 +37,7 @@ import java.util.List;
  * Implementiert den Controller für die Funktionen des Sketchpad.
  *
  * @author Manuel Schulze <manuel_schulze@i-entwicklung.de>
- * @since 10.11.12 - 16:47
+ * @since 10.11.2012 - 16:47
  */
 @Controller
 @RequestMapping(value = "/sketchpad")
@@ -46,102 +47,91 @@ public class SketchPadController {
     private SketchPadService sketchPadService;
 
     @RequestMapping
-    public String indexAction() {
-        return "sketchpad";
+    public ModelAndView indexAction() throws Exception {
+        SketchPad sketchPad = this.sketchPadService.getActiveSketchPad();
+
+        ModelAndView modelAndView = new ModelAndView("sketchpad");
+        modelAndView.addObject("sketchPad", sketchPad);
+
+        return modelAndView;
     }
 
     @RequestMapping(value = "/listpolygons")
     @ResponseBody
-    public PolygonModels listPolygonsAction() throws Exception {
-        PolygonToPolygonModelTransformer polygonModelTransformer = getPolygonToPolygonModelTransformer();
+    public PolygonForms listPolygonsAction(
+            @RequestParam long sketchPadId,
+            @RequestParam Long lastInsertedShapeId
+    ) throws Exception {
+        PolygonToPolygonFormTransformer polygonModelTransformer = getPolygonToPolygonModelTransformer();
 
-        SketchPad sketchPad = this.sketchPadService.getActiveSketchPad();
-        List<Polygon> polygons = this.sketchPadService.listAllPolygons(sketchPad.getId());
+        List<Polygon> polygons;
+        if (lastInsertedShapeId == null) {
+            polygons = this.sketchPadService.listAllPolygons(sketchPadId);
+        } else {
+            polygons = this.sketchPadService.listAllPolygons(sketchPadId, lastInsertedShapeId);
+        }
 
-        Collection<PolygonModel> polygonModels = polygonModelTransformer.visitCollection(polygons);
-        return new PolygonModels(polygonModels);
+        Collection<PolygonForm> polygonModels = polygonModelTransformer.visitCollection(polygons);
+        return new PolygonForms(polygonModels);
     }
 
     @RequestMapping(method = RequestMethod.POST, value = "/newpolygon")
     @ResponseBody
     public Long createPolygonAction(
             Authentication sketchPadUser,
-            @RequestParam double x,
-            @RequestParam double y,
-            @RequestParam long lineColorId,
-            @RequestParam long strokeId) throws Exception {
-        SketchPad sketchPad = this.sketchPadService.getActiveSketchPad();
+            @RequestBody PolygonForm polygonForm) throws Exception {
+        SegmentForm[] segmentForms = polygonForm.getSegments();
+        double[] x = new double[segmentForms.length];
+        double[] y = new double[segmentForms.length];
+        for (int segmentNum = 0; segmentNum < segmentForms.length; segmentNum++) {
+            x[segmentNum] = segmentForms[segmentNum].getX();
+            y[segmentNum] = segmentForms[segmentNum].getY();
+        }
 
-        Polygon polygon = this.sketchPadService.createPolygon(sketchPadUser, sketchPad.getId(), x, y, lineColorId, strokeId);
+        Polygon polygon = this.sketchPadService.createPolygon(sketchPadUser, polygonForm.getSketchPadId(), x, y, polygonForm.getLineColorId(), polygonForm.getStrokeId());
         return polygon.getId();
-    }
-
-    @RequestMapping(method = RequestMethod.POST, value = "/addsegment")
-    @ResponseBody
-    public Boolean extendPolygonAction(
-            Authentication sketchPadUser,
-            @RequestParam long polygonId,
-            @RequestParam double x,
-            @RequestParam double y) throws Exception {
-        boolean webServiceResult = false;
-
-        webServiceResult = this.sketchPadService.extendPolygon(sketchPadUser, polygonId, x, y);
-
-        return webServiceResult;
-    }
-
-    @RequestMapping(method = RequestMethod.POST, value = "/closepolygon")
-    @ResponseBody
-    public Boolean closePolygonAction(
-            Authentication sketchPadUser,
-            @RequestParam long polygonId,
-            @RequestParam double x,
-            @RequestParam double y) throws Exception {
-        boolean webServiceResult = false;
-
-        webServiceResult = this.sketchPadService.closePolygon(sketchPadUser, polygonId, x, y);
-
-        return webServiceResult;
     }
 
     @RequestMapping(value = "/listcolors")
     @ResponseBody
-    public ColorModels listColorsAction() throws Exception {
+    public ColorModels listColorsAction(
+            @RequestParam long sketchPadId
+    ) throws Exception {
         ColorToColorModelTransformer colorModelTransformer = getColorModelTransformer();
 
-        SketchPad sketchPad = this.sketchPadService.getActiveSketchPad();
-        return new ColorModels(colorModelTransformer.visitCollection(this.sketchPadService.listAllColors(sketchPad.getId())));
+        return new ColorModels(colorModelTransformer.visitCollection(this.sketchPadService.listAllColors(sketchPadId)));
     }
 
     @RequestMapping(method = RequestMethod.POST, value = "/choosecolor")
     @ResponseBody
     public RgbColorModel chooseColorAction(
             Authentication sketchPadUser,
+            @RequestParam long sketchPadId,
             @RequestParam long colorId) throws Exception {
         ColorToColorModelTransformer colorModelTransformer = getColorModelTransformer();
 
-        SketchPad sketchPad = this.sketchPadService.getActiveSketchPad();
-        return colorModelTransformer.visit(this.sketchPadService.chooseColor(sketchPadUser, sketchPad.getId(), colorId));
+        return colorModelTransformer.visit(this.sketchPadService.chooseColor(sketchPadUser, sketchPadId, colorId));
     }
 
     @RequestMapping(value = "/liststrokes")
     @ResponseBody
-    public StrokeModels listStrokesAction() throws Exception {
+    public StrokeModels listStrokesAction(
+            @RequestParam long sketchPadId
+    ) throws Exception {
         StrokeToStrokeModelTransformer strokeModelTransformer = getStrokeModelTransformer();
 
-        SketchPad sketchPad = this.sketchPadService.getActiveSketchPad();
-        return new StrokeModels(strokeModelTransformer.visitCollection(this.sketchPadService.listAllStrokes(sketchPad.getId())));
+        return new StrokeModels(strokeModelTransformer.visitCollection(this.sketchPadService.listAllStrokes(sketchPadId)));
     }
 
     @RequestMapping(value = "/choosestroke")
     @ResponseBody
     public StrokeModel chooseStrokeAction(
             Authentication sketchPadUser,
+            @RequestParam long sketchPadId,
             @RequestParam long strokeId) throws Exception {
         StrokeToStrokeModelTransformer strokeModelTransformer = getStrokeModelTransformer();
 
-        SketchPad sketchPad = this.sketchPadService.getActiveSketchPad();
-        return strokeModelTransformer.visit(this.sketchPadService.chooseStroke(sketchPadUser, sketchPad.getId(), strokeId));
+        return strokeModelTransformer.visit(this.sketchPadService.chooseStroke(sketchPadUser, sketchPadId, strokeId));
     }
 
     @ExceptionHandler(Exception.class)
@@ -152,8 +142,8 @@ public class SketchPadController {
         return null;
     }
 
-    public PolygonToPolygonModelTransformer getPolygonToPolygonModelTransformer() {
-        return new PolygonToPolygonModelTransformer();
+    public PolygonToPolygonFormTransformer getPolygonToPolygonModelTransformer() {
+        return new PolygonToPolygonFormTransformer();
     }
 
     public StrokeToStrokeModelTransformer getStrokeModelTransformer() {

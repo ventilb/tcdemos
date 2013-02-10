@@ -18,7 +18,7 @@
  * Globale CSS-Styles für die Seite.
  *
  * @author Manuel Schulze <manuel_schulze@i-entwicklung.de>
- * @since 10.11.12 - 14:35
+ * @since 10.11.2012 - 14:35
  */
 
 body {
@@ -154,18 +154,15 @@ textarea {
     left: 0;
 }
 
-.sketch_pad canvas {
-    width: 100%;
-    height: 100%;
-    display: block;
-    position: absolute;
-    top: 0;
-    left: 0;
+.sketch_pad .sketch_pad_canvas_container {
+    width: 1000px;
+    height: 700px;
+    position: relative;
+    overflow: auto;
 }
 
-.sketch_pad canvas:active,
-.sketch_pad canvas:focus {
-    cursor: pointer;
+.sketch_pad .sketch_pad_canvas_container canvas {
+    display: block;
 }
 
 #right_margin_toolbar {

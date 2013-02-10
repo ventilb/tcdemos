@@ -44,4 +44,16 @@ public interface PolygonDao extends DomainModelDao<Polygon> {
      * @return Liste der Polygone.
      */
     public List<Polygon> listPolygons(long sketchPadId);
+
+    /**
+     * Returns all {@link Polygon} models from the given sketch pad starting with the given id.
+     * <p>
+     * The polygon with the given id is not included in the result.
+     * </p>
+     *
+     * @param sketchPadId   the sketch pad id
+     * @param fromPolygonId the polygon id to start from
+     * @return list of polygons matching the criteria
+     */
+    public List<Polygon> listPolygonsFrom(long sketchPadId, long fromPolygonId);
 }

@@ -15,37 +15,65 @@
  */
 
 /**
- * Implementiert eine Klasse für die Verwaltung der Grafikobjekte und zum
- * Zeichnen der Grafikobjekte.
+ * Implementiert eine Klasse zum Zeichnen der Grafikobjekte.
+ * <p>
+ * Arbeitet auf einem {@link ShapeIndex} für die Verwaltung der zu zeichnenden Objekte.
+ * </p>
  *
  * @author Manuel Schulze <manuel_schulze@i-entwicklung.de>
- * @since 11.11.12 - 00:42
+ * @since 11.11.2012 - 00:42
  */
 
 define(function () {
 
-    return function (context, width, height) {
+    return function (/* {CanvasRenderingContext2D} */ context, /* {ShapeIndex} */ shapeIndex, /* number */ width, /* number */ height) {
+        var paintScope = this;
+
+        /*
+         Prüfe ob requestAnimationFrame unterstützt wird. Wenn nicht, dann greifen wir auf den alten setIntervall
+         Mechanismus zurück.
+
+         @see https://developer.mozilla.org/en-US/docs/DOM/window.requestAnimationFrame
+         */
+        var requestAnimationFrame = window.requestAnimationFrame ||
+            window.mozRequestAnimationFrame ||
+            window.webkitRequestAnimationFrame ||
+            window.msRequestAnimationFrame;
+
+        this.supportsRequestAnimationFrame = !!requestAnimationFrame;
+
+        if (this.supportsRequestAnimationFrame) {
+            window.requestAnimationFrame = requestAnimationFrame;
+        }
+
         var animator = null;
         var animating = false;
 
-        this.context = context;
         this.clearPaintOnDraw = false;
-        this.shapes = new Array();
+        this.paintShape = null;
 
-        this.addShape = function (/* function of Shapes.Shape */ shape) {
-            shape.context = this.context;
-            this.shapes.push(shape);
+        /**
+         * Die aktuellen Koordinaten der linken oberen Ecke des Canvas. Wir benötigen sie nachdem das Canvas verschoben
+         * wurde um die Positionen der Zeichenopjekte zu berechnen.
+         *
+         * @type {number}
+         */
+        this.canvasX = 0;
+        this.canvasY = 0;
+
+        this.setPaintShape = function (/* Shapes.Shape */ paintShape) {
+            this.paintShape = paintShape;
         }
 
-        this.removeAllShapes = function () {
-            this.shapes.length = 0;
+        this.getPaintShape = function () {
+            return this.paintShape;
         }
 
         this.pickShapeAt = function (/* Integer */ x, /* Integer */ y) {
-            var shape = null;
-            var length = this.shapes.length;
-            for (var i = length - 1; i >= 0; i--) {
-                shape = this.shapes[i];
+            var shape;
+            var shapes = shapeIndex.list();
+            for (var shapeNum in shapes) {
+                shape = shapes[shapeNum];
                 if (shape.pickable && shape.contains(x, y)) {
                     return shape;
                 }
@@ -54,44 +82,68 @@ define(function () {
         }
 
         this.draw = function () {
-            if (this.clearPaintOnDraw) {
-                this.clearPaint();
+            if (paintScope.clearPaintOnDraw) {
+                paintScope.clearPaint();
             }
 
-            var shape = null;
-            var shapeCount = this.shapes.length;
-            for (var i = 0; i < shapeCount; i++) {
-                shape = this.shapes[i];
-                if (shape.dirty || this.clearPaintOnDraw) {
-                    shape.draw();
+            var shape;
+            var shapes = shapeIndex.list();
+            for (var i = 0; i < shapes.length; i++) {
+                shape = shapes[i];
+
+                if (shape.dirty || paintScope.clearPaintOnDraw) {
+                    shape.draw(context);
                 }
             }
+
+            if (paintScope.paintShape != null) {
+                paintScope.paintShape.draw(context);
+            }
+
+            if (animating && paintScope.supportsRequestAnimationFrame) {
+                requestAnimationFrame(paintScope.draw);
+            }
+        }
+
+        this.translate = function (x, y) {
+            this.canvasX += x;
+            this.canvasY += y;
+            context.translate(x, y);
         }
 
         this.clearPaint = function () {
+            context.save();
+            context.setTransform(1, 0, 0, 1, 0, 0);
             this.clearArea(0, 0, width, height);
+            context.restore();
         }
 
         this.clearArea = function (x, y, w, h) {
-            this.context.clearRect(x, y, w, h);
+            context.clearRect(x, y, w, h);
         }
 
-        this.animate = function (/* Integer */ refresh) {
+        this.animate = function () {
             if (animating) {
                 return;
             }
-            var paint = this;
-
-            paint.draw();
-            animator = setInterval(function () {
-                paint.draw();
-            }, refresh);
             animating = true;
+
+            var paint = this;
+            paint.draw();
+
+            if (!this.supportsRequestAnimationFrame) {
+                console.log('Browser does not support requestAnimationFrame. Falling back to setIntervall().');
+                animator = setInterval(function () {
+                    paint.draw();
+                }, 1000 / 60);
+            }
         }
 
         this.stopAnimation = function () {
             if (animating) {
-                clearInterval(animator);
+                if (!this.supportsRequestAnimationFrame) {
+                    clearInterval(animator);
+                }
                 animating = false;
             }
         }

@@ -39,6 +39,10 @@ public class SketchPad extends DataSource implements Serializable {
 
     private State state;
 
+    private int width;
+
+    private int height;
+
     private List<RgbColor> colors = new ArrayList<RgbColor>();
 
     private List<Stroke> strokes = new ArrayList<Stroke>();
@@ -61,6 +65,24 @@ public class SketchPad extends DataSource implements Serializable {
 
     public void setState(State state) {
         this.state = state;
+    }
+
+    @Column
+    public int getWidth() {
+        return width;
+    }
+
+    public void setWidth(int width) {
+        this.width = width;
+    }
+
+    @Column
+    public int getHeight() {
+        return height;
+    }
+
+    public void setHeight(int height) {
+        this.height = height;
     }
 
     @ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)

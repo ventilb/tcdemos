@@ -29,7 +29,7 @@ import java.util.List;
  * Hibernate Implementierung der {@link PolygonDao}-Schnittstelle.
  *
  * @author Manuel Schulze <manuel_schulze@i-entwicklung.de>
- * @since 02.01.13 - 17:46
+ * @since 02.01.2013 - 17:46
  */
 @Repository(value = "polygonDao")
 public class HbmPolygonDaoImpl extends AbstractHbmDomainModelDaoImpl<Polygon> implements PolygonDao {
@@ -54,4 +54,16 @@ public class HbmPolygonDaoImpl extends AbstractHbmDomainModelDaoImpl<Polygon> im
         return criteria.list();
     }
 
+    public List<Polygon> listPolygonsFrom(long sketchPadId, long fromPolygonId) {
+        Criteria criteria = createCriteria();
+        criteria.createAlias("sketchPad", "sp")
+                .add(Restrictions.eq("sp.id", sketchPadId))
+                .add(Restrictions.gt("id", fromPolygonId))
+                .createAlias("segments", "segs")
+                .setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY);
+
+        List list = criteria.list();
+
+        return list;
+    }
 }

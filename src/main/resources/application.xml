@@ -60,6 +60,8 @@ http://www.springframework.org/schema/cache/spring-cache.xsd http://www.springfr
     -->
     <alias name="messageBundleService" alias="messageSource"/>
 
+    <bean id="validator" class="org.springframework.validation.beanvalidation.LocalValidatorFactoryBean" />
+
     <!-- Cache Configuration -->
     <cache:annotation-driven cache-manager="cacheManager"/>
 

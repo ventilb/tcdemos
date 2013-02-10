@@ -20,21 +20,21 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 /**
- * Implementiert eine Polygonliste.
+ * Implements a model to manage a list of {@link PolygonForm} instances.
  *
  * @author Manuel Schulze <manuel_schulze@i-entwicklung.de>
  * @see <a href="http://stackoverflow.com/questions/10864049/map-json-array-of-objects-to-requestbody-listt-using-jackson">JSON-Array in Liste serialisieren</a>
- * @since 11.11.12 - 10:30
+ * @since 11.11.2012 - 10:30
  */
-public class PolygonModels extends ArrayList<PolygonModel> {
-    public PolygonModels(int initialCapacity) {
+public class PolygonForms extends ArrayList<PolygonForm> {
+    public PolygonForms(int initialCapacity) {
         super(initialCapacity);
     }
 
-    public PolygonModels() {
+    public PolygonForms() {
     }
 
-    public PolygonModels(Collection<? extends PolygonModel> c) {
+    public PolygonForms(Collection<? extends PolygonForm> c) {
         super(c);
     }
 }

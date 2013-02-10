@@ -31,6 +31,7 @@ import org.springframework.security.access.prepost.PostFilter;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
+import org.springframework.util.Assert;
 
 import java.util.List;
 
@@ -39,7 +40,7 @@ import java.util.List;
  * Spring-ACL Integration.
  *
  * @author Manuel Schulze <manuel_schulze@i-entwicklung.de>
- * @since 02.01.13 - 14:41
+ * @since 02.01.2013 - 14:41
  */
 @Service(value = "sketchPadService")
 public class SketchPadServiceImpl implements SketchPadService {
@@ -67,21 +68,39 @@ public class SketchPadServiceImpl implements SketchPadService {
         return this.polygonDao.listPolygons(sketchPadId);
     }
 
+    @PreAuthorize(value = "hasPermission(#sketchPadId, 'de.iew.domain.sketchpad.SketchPad', 'READ')")
+    @PostFilter(value = "hasPermission(filterObject, 'READ')")
+    public List<Polygon> listAllPolygons(long sketchPadId, long fromPolygonId) {
+        return this.polygonDao.listPolygonsFrom(sketchPadId, fromPolygonId);
+    }
+
     @PreAuthorize(value = "hasPermission(#sketchPadId, 'de.iew.domain.sketchpad.SketchPad', 'WRITE') and " +
             "hasPermission(#lineColorId, 'de.iew.domain.sketchpad.RgbColor', 'READ') and " +
             "hasPermission(#strokeId, 'de.iew.domain.sketchpad.Stroke', 'READ')"
     )
-    public Polygon createPolygon(Authentication sketchPadUser, long sketchPadId, double x, double y, long lineColorId, long strokeId) throws ModelNotFoundException {
-        SketchPad activeSketchPad = this.sketchPadDao.findById(sketchPadId);
+    public Polygon createPolygon(Authentication sketchPadUser, long sketchPadId, double[] x, double[] y, long lineColorId, long strokeId) throws ModelNotFoundException {
+        Assert.isTrue(x.length == y.length);
+
+        SketchPad sketchPad = this.sketchPadDao.findById(sketchPadId);
         RgbColor lineColor = getColorBySketchPadIdAndId(sketchPadId, lineColorId);
         Stroke stroke = getStrokeBySketchPadAndId(sketchPadId, strokeId);
 
         Polygon polygon = new Polygon();
         polygon.setState(Polygon.State.OPEN);
-        polygon.setSketchPad(activeSketchPad);
+        polygon.setSketchPad(sketchPad);
         polygon.setLineColor(lineColor);
         polygon.setStroke(stroke);
 
+        Segment segment;
+        for (int segmentNum = 0; segmentNum < x.length; segmentNum++) {
+            segment = new Segment();
+            segment.setOrdinalNumber(segmentNum);
+            segment.setX(x[segmentNum]);
+            segment.setY(y[segmentNum]);
+
+            segment.setPolygon(polygon);
+            polygon.getSegments().add(segment);
+        }
         polygon = this.polygonDao.save(polygon);
 
         if (this.applicationEventChannel != null) {
@@ -94,58 +113,7 @@ public class SketchPadServiceImpl implements SketchPadService {
         this.aclEditorService.setupDemoSketchPadPolygonPermissionsIfSketchPadAdmin(polygon.getId());
         this.aclEditorService.setupDemoSketchPadPolygonPermissionsIfSketchPadUser(polygon.getId());
 
-        extendPolygon(sketchPadUser, polygon.getId(), x, y);
-
         return polygon;
-    }
-
-    @PreAuthorize(value = "hasPermission(#polygonId, 'de.iew.domain.sketchpad.Polygon', 'WRITE')")
-    public boolean extendPolygon(Authentication sketchPadUser, long polygonId, double x, double y) throws ModelNotFoundException {
-        Polygon polygon = getPolygonById(polygonId);
-
-        Segment segment = new Segment();
-        segment.setOrdinalNumber((int) this.polygonDao.getSegmentCount(polygonId));
-        segment.setX(x);
-        segment.setY(y);
-
-        segment.setPolygon(polygon);
-        this.segmentDao.save(segment);
-        /*
-        Achtung Bad Code: Wenn ein Polygon sehr viele Segmente hat, dann
-        geht die Anwendung hier in die Knie weil getSegments() erst die Segmente
-        laden muss.
-        Besser: Speichern des Segments in die Dao Ebene verlagern. Dann können wir
-        das besser behandeln. Oder das Polygon Objekt neu aus der Datenbank laden.
-        Dann werden auch die Assoziationen neu geladen. Nachteil dieser Lösung
-        ist, eine zusätzliche Datenbankabfrage.
-         */
-        //polygon.getSegments().add(segment);
-        this.polygonDao.refresh(polygon);
-
-        if (this.applicationEventChannel != null) {
-            SketchPadEvent sketchPadEvent = new SketchPadEvent(this, SketchPadEvent.Action.POLYGON_UPDATED, polygon, sketchPadUser);
-            Message<SketchPadEvent> eventMessage = new GenericMessage<SketchPadEvent>(sketchPadEvent);
-            this.applicationEventChannel.send(eventMessage);
-        }
-
-        return true;
-    }
-
-    @PreAuthorize(value = "hasPermission(#polygonId, 'de.iew.domain.sketchpad.Polygon', 'WRITE')")
-    public boolean closePolygon(Authentication sketchPadUser, long polygonId, double x, double y) throws ModelNotFoundException {
-        extendPolygon(sketchPadUser, polygonId, x, y);
-        Polygon polygon = getPolygonById(polygonId);
-        polygon.setState(Polygon.State.CLOSED);
-
-        // TODO Schreibrecht entziehen
-
-        if (this.applicationEventChannel != null) {
-            SketchPadEvent sketchPadEvent = new SketchPadEvent(this, SketchPadEvent.Action.POLYGON_CLOSED, polygon, sketchPadUser);
-            Message<SketchPadEvent> eventMessage = new GenericMessage<SketchPadEvent>(sketchPadEvent);
-            this.applicationEventChannel.send(eventMessage);
-        }
-
-        return true;
     }
 
     @PreAuthorize(value = "hasPermission(#sketchPadId, 'de.iew.domain.sketchpad.SketchPad', 'READ')")

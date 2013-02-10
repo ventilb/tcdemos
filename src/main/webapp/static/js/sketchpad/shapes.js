@@ -15,22 +15,15 @@
  */
 
 /**
- * Implementiert Grafikobjekte.
+ * Implements graphic objects.
  *
  * @author Manuel Schulze <manuel_schulze@i-entwicklung.de>
- * @since 02.01.13 - 13:22
+ * @since 02.01.2013 - 13:22
  */
 
 define(function () {
     // Shape Basisklasse //////////////////////////////////////////////////////////
     function Shape() {
-
-        /**
-         * Der Paint-Context.
-         *
-         * @type {Context}
-         */
-        this.context = null;
 
         /**
          * Flag ob dieses Shape aus dem Paint herausgepickt werden kann.
@@ -47,7 +40,7 @@ define(function () {
         this.dirty = false;
     }
 
-    Shape.prototype.draw = function () {
+    Shape.prototype.draw = function (/* {CanvasRenderingContext2D} */ context) {
     }
     Shape.prototype.contains = function (/* Integer */ x, /* Integer */ y) {
         return false;
@@ -119,9 +112,9 @@ define(function () {
 
         this.locationChanged();
     }
-    Rect.prototype.draw = function () {
-        this.context.fillStyle = 'rgba(0, 0, 255, 0.5)';
-        this.context.fillRect(this.rx, this.ry, this.rw, this.rh);
+    Rect.prototype.draw = function (/* {CanvasRenderingContext2D} */ context) {
+        context.fillStyle = 'rgba(0, 0, 255, 0.5)';
+        context.fillRect(this.rx, this.ry, this.rw, this.rh);
 
         this.dirty = false;
     }
@@ -151,6 +144,11 @@ define(function () {
         this.segments.push({x: x, y: y});
         this.dirty = true;
     }
+    /**
+     * Returns the last segment of this polygon or NULL if this polygon does not have any semgments.
+     *
+     * @return {*}
+     */
     Polygon.prototype.getLastSegment = function () {
         var segmentCount = this.segments.length;
         if (segmentCount > 0) {
@@ -158,23 +156,31 @@ define(function () {
         }
         return null;
     }
-    Polygon.prototype.draw = function () {
-        this.context.lineWidth = this.lineWidth;
-        this.context.strokeStyle = this.lineColor;
+    /**
+     * Returns the segments maintained by this polygon.
+     *
+     * @return {Array}
+     */
+    Polygon.prototype.getSegments = function () {
+        return this.segments;
+    }
+    Polygon.prototype.draw = function (/* {CanvasRenderingContext2D} */ context) {
+        context.lineWidth = this.lineWidth;
+        context.strokeStyle = this.lineColor;
 
         var segmentCount = this.segments.length;
         if (segmentCount >= 2) {
-            this.context.beginPath();
+            context.beginPath();
 
             var segment = this.segments[0];
-            this.context.moveTo(segment.x, segment.y);
+            context.moveTo(segment.x, segment.y);
 
             for (var i = 1; i < segmentCount; i++) {
                 segment = this.segments[i];
-                this.context.lineTo(segment.x, segment.y);
+                context.lineTo(segment.x, segment.y);
             }
 
-            this.context.stroke();
+            context.stroke();
             this.dirty = false;
         }
     }
