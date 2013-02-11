@@ -46,7 +46,7 @@
             classpath:spring-db-config.xml
             classpath:spring-security-config.xml
             classpath:spring-acl-config.xml
-            classpath:spring-integration-config.xml
+            <!--classpath:spring-integration-config.xml-->
             classpath:spring-mbean-config.xml
         </param-value>
     </context-param>
