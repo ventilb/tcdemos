@@ -37,7 +37,7 @@
     wenn das requestCacheable TRUE ist.
     -->
     <bean id="webResourceRequestSaveFilter"
-          class="de.iew.framework.spring.web.savedrequest.WebResourceRequestSaveFilter"></bean>
+          class="de.iew.web.utils.WebResourceRequestSaveFilter"></bean>
 
     <!--
     Ein RequestCache um einen HTTP-Request zwischen zu speichern. Wir verwenden dieses Feature um nach dem Login auf

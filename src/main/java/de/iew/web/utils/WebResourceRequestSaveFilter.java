@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package de.iew.framework.spring.web.savedrequest;
+package de.iew.web.utils;
 
 import de.iew.framework.domain.security.WebResource;
 import de.iew.services.WebResourceSecurityService;
