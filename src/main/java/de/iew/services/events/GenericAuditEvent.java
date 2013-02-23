@@ -16,6 +16,7 @@
 
 package de.iew.services.events;
 
+import de.iew.framework.domain.audit.Severity;
 import org.springframework.context.ApplicationEvent;
 import org.springframework.security.core.Authentication;
 

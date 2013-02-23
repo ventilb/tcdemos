@@ -16,7 +16,8 @@
 
 package de.iew.services.events;
 
-import de.iew.domain.sketchpad.Polygon;
+import de.iew.framework.domain.audit.Severity;
+import de.iew.sketchpad.domain.Polygon;
 import org.springframework.context.ApplicationEvent;
 import org.springframework.security.core.Authentication;
 import org.springframework.util.Assert;

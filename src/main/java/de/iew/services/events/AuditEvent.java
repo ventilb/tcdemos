@@ -16,6 +16,7 @@
 
 package de.iew.services.events;
 
+import de.iew.framework.domain.audit.Severity;
 import org.springframework.security.core.Authentication;
 
 /**
@@ -58,34 +59,4 @@ public interface AuditEvent {
      */
     public Throwable getThrowable();
 
-    /**
-     * Enum of the audit events severity's.
-     */
-    public enum Severity {
-        /**
-         * Used to track calls through the system.
-         */
-        TRACE,
-        /**
-         * Used to print out developer informations.
-         */
-        DEBUG,
-        /**
-         * Default. Used for informational purposes.
-         */
-        INFO,
-        /**
-         * Something went wrong. You should investigate the cause.
-         */
-        WARN,
-        /**
-         * Something definitively went wrong. Administrators should be notified
-         * about these issues.
-         */
-        CRITICAL;
-
-        public boolean isHigherOrEqualAs(Severity other) {
-            return this.ordinal() >= other.ordinal();
-        }
-    }
 }

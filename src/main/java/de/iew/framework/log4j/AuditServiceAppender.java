@@ -16,7 +16,7 @@
 
 package de.iew.framework.log4j;
 
-import de.iew.services.events.AuditEvent;
+import de.iew.framework.domain.audit.Severity;
 import de.iew.services.events.GenericAuditEvent;
 import org.apache.log4j.AppenderSkeleton;
 import org.apache.log4j.Level;
@@ -56,14 +56,14 @@ public class AuditServiceAppender extends AppenderSkeleton {
     @Override
     protected void append(LoggingEvent loggingEvent) {
         if (loggingEvent.getLevel().isGreaterOrEqual(this.auditServiceAppenderLog4jPriority)) {
-            AuditEvent.Severity severity = log4jLevelToSeverity(loggingEvent.getLevel());
+            Severity severity = log4jLevelToSeverity(loggingEvent.getLevel());
             if (severity != null) {
                 log(loggingEvent.getLocationInformation(), loggingEvent.getTimeStamp(), getAuthentication(), severity, loggingEvent.getRenderedMessage(), loggingEvent.getThrowableInformation());
             }
         }
     }
 
-    protected void log(LocationInfo locationInfo, long ts, Authentication auth, AuditEvent.Severity severity, String msg, ThrowableInformation ti) {
+    protected void log(LocationInfo locationInfo, long ts, Authentication auth, Severity severity, String msg, ThrowableInformation ti) {
         MessageChannel messageChannel;
 
         synchronized (this) {
@@ -89,19 +89,19 @@ public class AuditServiceAppender extends AppenderSkeleton {
         return securityContextHolder.getAuthentication();
     }
 
-    protected AuditEvent.Severity log4jLevelToSeverity(Level level) {
+    protected Severity log4jLevelToSeverity(Level level) {
         if (Level.TRACE.equals(level)) {
-            return AuditEvent.Severity.TRACE;
+            return Severity.TRACE;
         } else if (Level.DEBUG.equals(level)) {
-            return AuditEvent.Severity.DEBUG;
+            return Severity.DEBUG;
         } else if (Level.INFO.equals(level)) {
-            return AuditEvent.Severity.INFO;
+            return Severity.INFO;
         } else if (Level.WARN.equals(level)) {
-            return AuditEvent.Severity.WARN;
+            return Severity.WARN;
         } else if (Level.ERROR.equals(level)) {
-            return AuditEvent.Severity.CRITICAL;
+            return Severity.CRITICAL;
         } else if (Level.FATAL.equals(level)) {
-            return AuditEvent.Severity.CRITICAL;
+            return Severity.CRITICAL;
         } else {
             return null;
         }

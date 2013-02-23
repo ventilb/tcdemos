@@ -16,10 +16,11 @@
 
 package de.iew.services.impl;
 
-import de.iew.domain.audit.AuditEventMessage;
-import de.iew.domain.utils.CollectionHolder;
+import de.iew.framework.domain.audit.AuditEventMessage;
+import de.iew.framework.domain.audit.Severity;
+import de.iew.framework.domain.utils.CollectionHolder;
 import de.iew.framework.log4j.AuditServiceAppender;
-import de.iew.persistence.AuditEventMessageDao;
+import de.iew.framework.persistence.AuditEventMessageDao;
 import de.iew.services.AuditService;
 import de.iew.services.MessagePassingService;
 import de.iew.services.events.AuditEvent;
@@ -42,7 +43,6 @@ import org.springframework.jmx.export.annotation.ManagedAttribute;
 import org.springframework.jmx.export.annotation.ManagedResource;
 import org.springframework.jmx.export.notification.NotificationPublisher;
 import org.springframework.jmx.export.notification.NotificationPublisherAware;
-import org.springframework.security.access.prepost.PostFilter;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
@@ -67,7 +67,7 @@ public class AuditServiceImpl implements AuditService, ApplicationListener<Appli
     /**
      * The default audit message severity from which audit events are passed to the message passing service.
      */
-    public static final AuditEvent.Severity DEFAULT_MPS_PASS_SEVERITY = AuditEvent.Severity.WARN;
+    public static final Severity DEFAULT_MPS_PASS_SEVERITY = Severity.WARN;
 
     /**
      * The name of the log4j appender.
@@ -82,7 +82,7 @@ public class AuditServiceImpl implements AuditService, ApplicationListener<Appli
     /**
      * The audit message severity from which audit events are passed to the message passing service.
      */
-    private AuditEvent.Severity mpsPassSeverity = DEFAULT_MPS_PASS_SEVERITY;
+    private Severity mpsPassSeverity = DEFAULT_MPS_PASS_SEVERITY;
 
     public void afterPropertiesSet() throws Exception {
         Assert.hasLength(this.auditServiceAppenderName);
@@ -106,7 +106,7 @@ public class AuditServiceImpl implements AuditService, ApplicationListener<Appli
         return new CollectionHolder<AuditEventMessage>(auditMessages, firstItem, totalCount);
     }
 
-    protected void persistMessage(Object source, Date date, Authentication authentication, AuditEvent.Severity severity, String message, Throwable throwable) {
+    protected void persistMessage(Object source, Date date, Authentication authentication, Severity severity, String message, Throwable throwable) {
         String principal = null;
 
         if (authentication != null) {
@@ -157,19 +157,19 @@ public class AuditServiceImpl implements AuditService, ApplicationListener<Appli
         return sb.toString();
     }
 
-    protected void passMessage(AuditEvent.Severity severity, String message) {
+    protected void passMessage(Severity severity, String message) {
         if (severity.isHigherOrEqualAs(this.mpsPassSeverity)) {
             this.messagePassingService.passSystemMessage(message);
         }
     }
 
-    protected void passThrowable(AuditEvent.Severity severity, Throwable throwable) {
+    protected void passThrowable(Severity severity, Throwable throwable) {
         if (severity.isHigherOrEqualAs(this.mpsPassSeverity)) {
             this.messagePassingService.passThrowableSystemMessage(throwable);
         }
     }
 
-    protected void sendMBeanNotification(Object source, Date timestamp, AuditEvent.Severity severity, String message, Throwable throwable) {
+    protected void sendMBeanNotification(Object source, Date timestamp, Severity severity, String message, Throwable throwable) {
         Notification notification = new Notification(AuditEvent.class.getName(), source.toString(), notificationSequence++, timestamp.getTime(), message);
         if (throwable != null) {
             String throwableMessage = throwable.getLocalizedMessage();
@@ -299,7 +299,7 @@ public class AuditServiceImpl implements AuditService, ApplicationListener<Appli
             defaultValue = "WARN")
     @Value(value = "#{config['audit.mps_pass_severity']}")
     public void setMpsPassSeverity(String mpsPassSeverity) {
-        this.mpsPassSeverity = AuditEvent.Severity.valueOf(mpsPassSeverity);
+        this.mpsPassSeverity = Severity.valueOf(mpsPassSeverity);
     }
 
     @ManagedAttribute
