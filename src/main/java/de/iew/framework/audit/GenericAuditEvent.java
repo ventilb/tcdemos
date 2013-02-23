@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package de.iew.services.events;
+package de.iew.framework.audit;
 
 import de.iew.framework.domain.audit.Severity;
 import org.springframework.context.ApplicationEvent;

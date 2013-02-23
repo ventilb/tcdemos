@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-package de.iew.framework.log4j;
+package de.iew.framework.audit;
 
 import de.iew.framework.domain.audit.Severity;
-import de.iew.services.events.GenericAuditEvent;
+import de.iew.framework.audit.GenericAuditEvent;
 import org.apache.log4j.AppenderSkeleton;
 import org.apache.log4j.Level;
 import org.apache.log4j.spi.LocationInfo;
@@ -37,7 +37,7 @@ import org.springframework.util.Assert;
  * @author Manuel Schulze <manuel_schulze@i-entwicklung.de>
  * @since 02.02.13 - 21:51
  */
-public class AuditServiceAppender extends AppenderSkeleton {
+public class Log4jAuditAppender extends AppenderSkeleton {
 
     /**
      * The constant DEFAULT_AUDIT_SERVICE_APPENDER_LOG4J_PRIORITY.
@@ -48,7 +48,7 @@ public class AuditServiceAppender extends AppenderSkeleton {
 
     private Level auditServiceAppenderLog4jPriority = DEFAULT_AUDIT_SERVICE_APPENDER_LOG4J_PRIORITY;
 
-    public AuditServiceAppender(MessageChannel auditEventChannel) {
+    public Log4jAuditAppender(MessageChannel auditEventChannel) {
         Assert.notNull(auditEventChannel);
         this.auditEventChannel = auditEventChannel;
     }

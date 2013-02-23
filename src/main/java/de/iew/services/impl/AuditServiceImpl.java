@@ -16,15 +16,15 @@
 
 package de.iew.services.impl;
 
+import de.iew.framework.audit.Log4jAuditAppender;
 import de.iew.framework.domain.audit.AuditEventMessage;
 import de.iew.framework.domain.audit.Severity;
 import de.iew.framework.domain.utils.CollectionHolder;
-import de.iew.framework.log4j.AuditServiceAppender;
 import de.iew.framework.persistence.AuditEventMessageDao;
 import de.iew.services.AuditService;
 import de.iew.services.MessagePassingService;
-import de.iew.services.events.AuditEvent;
-import de.iew.services.events.GenericAuditEvent;
+import de.iew.framework.audit.AuditEvent;
+import de.iew.framework.audit.GenericAuditEvent;
 import org.apache.commons.lang.SystemUtils;
 import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.commons.logging.Log;
@@ -77,7 +77,7 @@ public class AuditServiceImpl implements AuditService, ApplicationListener<Appli
     /**
      * The name of the log4j appender logging level.
      */
-    private Level auditServiceAppenderLog4jPriority = AuditServiceAppender.DEFAULT_AUDIT_SERVICE_APPENDER_LOG4J_PRIORITY;
+    private Level auditServiceAppenderLog4jPriority = Log4jAuditAppender.DEFAULT_AUDIT_SERVICE_APPENDER_LOG4J_PRIORITY;
 
     /**
      * The audit message severity from which audit events are passed to the message passing service.
@@ -232,7 +232,7 @@ public class AuditServiceImpl implements AuditService, ApplicationListener<Appli
     }
 
     /**
-     * Adds an {@link AuditServiceAppender} instance to the Log4j root appender
+     * Adds an {@link de.iew.framework.audit.Log4jAuditAppender} instance to the Log4j root appender
      * for logging messages through this audit service.
      */
     protected synchronized void configureLog4jForAuditLogging() {
@@ -241,10 +241,10 @@ public class AuditServiceImpl implements AuditService, ApplicationListener<Appli
 
             if (auditEventChannel != null) {
                 Logger logger = Logger.getRootLogger();
-                AuditServiceAppender auditServiceAppender = new AuditServiceAppender(auditEventChannel);
-                auditServiceAppender.setName(this.auditServiceAppenderName);
+                Log4jAuditAppender log4jAuditAppender = new Log4jAuditAppender(auditEventChannel);
+                log4jAuditAppender.setName(this.auditServiceAppenderName);
 
-                logger.addAppender(auditServiceAppender);
+                logger.addAppender(log4jAuditAppender);
 
                 changeAuditServiceAppenderLog4jPriority();
             } else {
@@ -270,7 +270,7 @@ public class AuditServiceImpl implements AuditService, ApplicationListener<Appli
      */
     protected synchronized void changeAuditServiceAppenderLog4jPriority() {
         Logger logger = Logger.getRootLogger();
-        AuditServiceAppender appender = (AuditServiceAppender) logger.getAppender(this.auditServiceAppenderName);
+        Log4jAuditAppender appender = (Log4jAuditAppender) logger.getAppender(this.auditServiceAppenderName);
         if (appender != null) {
             appender.setAuditServiceAppenderLog4jPriority(this.auditServiceAppenderLog4jPriority);
         }
@@ -285,7 +285,7 @@ public class AuditServiceImpl implements AuditService, ApplicationListener<Appli
             defaultValue = "WARN")
     @Value(value = "#{config['audit.audit_service_appender_log4j_priority']}")
     public void setAuditServiceAppenderLog4jPriority(String auditServiceAppenderLog4jPriority) {
-        this.auditServiceAppenderLog4jPriority = Level.toLevel(auditServiceAppenderLog4jPriority, AuditServiceAppender.DEFAULT_AUDIT_SERVICE_APPENDER_LOG4J_PRIORITY);
+        this.auditServiceAppenderLog4jPriority = Level.toLevel(auditServiceAppenderLog4jPriority, Log4jAuditAppender.DEFAULT_AUDIT_SERVICE_APPENDER_LOG4J_PRIORITY);
 
         changeAuditServiceAppenderLog4jPriority();
     }
