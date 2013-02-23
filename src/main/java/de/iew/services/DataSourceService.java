@@ -16,7 +16,7 @@
 
 package de.iew.services;
 
-import de.iew.domain.DataSource;
+import de.iew.framework.domain.DataSource;
 import de.iew.services.datasource.DataSourceProperties;
 import de.iew.framework.utils.NoSuchPropertyException;
 

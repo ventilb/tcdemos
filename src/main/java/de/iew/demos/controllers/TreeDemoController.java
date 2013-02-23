@@ -16,7 +16,7 @@
 
 package de.iew.demos.controllers;
 
-import de.iew.domain.Node;
+import de.iew.framework.domain.Node;
 import de.iew.services.TreeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;

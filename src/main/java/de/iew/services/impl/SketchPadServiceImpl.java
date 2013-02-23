@@ -16,12 +16,12 @@
 
 package de.iew.services.impl;
 
-import de.iew.domain.ModelNotFoundException;
-import de.iew.domain.sketchpad.*;
-import de.iew.persistence.*;
+import de.iew.framework.domain.ModelNotFoundException;
 import de.iew.services.AclEditorService;
 import de.iew.services.SketchPadService;
 import de.iew.services.events.SketchPadEvent;
+import de.iew.sketchpad.domain.*;
+import de.iew.sketchpad.persistence.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.integration.Message;
 import org.springframework.integration.MessageChannel;
@@ -51,7 +51,7 @@ public class SketchPadServiceImpl implements SketchPadService {
      * @see <a href="http://stackoverflow.com/questions/9595781/how-do-i-reference-a-nested-type-in-spel">http://stackoverflow.com/questions/9595781/how-do-i-reference-a-nested-type-in-spel</a>
      */
     @PostAuthorize(value = "hasPermission(returnObject, 'READ') and " +
-            "returnObject.state == T(de.iew.domain.sketchpad.SketchPad$State).ACTIVE")
+            "returnObject.state == T(de.iew.sketchpad.domain.SketchPad$State).ACTIVE")
     public SketchPad getActiveSketchPad() throws ModelNotFoundException {
         SketchPad activeSketchPad = this.sketchPadDao.findActive();
 
@@ -62,21 +62,21 @@ public class SketchPadServiceImpl implements SketchPadService {
         return activeSketchPad;
     }
 
-    @PreAuthorize(value = "hasPermission(#sketchPadId, 'de.iew.domain.sketchpad.SketchPad', 'READ')")
+    @PreAuthorize(value = "hasPermission(#sketchPadId, 'de.iew.sketchpad.domain.SketchPad', 'READ')")
     @PostFilter(value = "hasPermission(filterObject, 'READ')")
     public List<Polygon> listAllPolygons(long sketchPadId) {
         return this.polygonDao.listPolygons(sketchPadId);
     }
 
-    @PreAuthorize(value = "hasPermission(#sketchPadId, 'de.iew.domain.sketchpad.SketchPad', 'READ')")
+    @PreAuthorize(value = "hasPermission(#sketchPadId, 'de.iew.sketchpad.domain.SketchPad', 'READ')")
     @PostFilter(value = "hasPermission(filterObject, 'READ')")
     public List<Polygon> listAllPolygons(long sketchPadId, long fromPolygonId) {
         return this.polygonDao.listPolygonsFrom(sketchPadId, fromPolygonId);
     }
 
-    @PreAuthorize(value = "hasPermission(#sketchPadId, 'de.iew.domain.sketchpad.SketchPad', 'WRITE') and " +
-            "hasPermission(#lineColorId, 'de.iew.domain.sketchpad.RgbColor', 'READ') and " +
-            "hasPermission(#strokeId, 'de.iew.domain.sketchpad.Stroke', 'READ')"
+    @PreAuthorize(value = "hasPermission(#sketchPadId, 'de.iew.sketchpad.domain.SketchPad', 'WRITE') and " +
+            "hasPermission(#lineColorId, 'de.iew.sketchpad.domain.RgbColor', 'READ') and " +
+            "hasPermission(#strokeId, 'de.iew.sketchpad.domain.Stroke', 'READ')"
     )
     public Polygon createPolygon(Authentication sketchPadUser, long sketchPadId, double[] x, double[] y, long lineColorId, long strokeId) throws ModelNotFoundException {
         Assert.isTrue(x.length == y.length);
@@ -116,26 +116,26 @@ public class SketchPadServiceImpl implements SketchPadService {
         return polygon;
     }
 
-    @PreAuthorize(value = "hasPermission(#sketchPadId, 'de.iew.domain.sketchpad.SketchPad', 'READ')")
+    @PreAuthorize(value = "hasPermission(#sketchPadId, 'de.iew.sketchpad.domain.SketchPad', 'READ')")
     @PostFilter(value = "hasPermission(filterObject, 'READ')")
     public List<RgbColor> listAllColors(long sketchPadId) {
         return this.sketchPadColorDao.listColorsBySketchPadId(sketchPadId);
     }
 
-    @PreAuthorize(value = "hasPermission(#sketchPadId, 'de.iew.domain.sketchpad.SketchPad', 'READ') and " +
-            "hasPermission(#colorId, 'de.iew.domain.sketchpad.RgbColor', 'READ')")
+    @PreAuthorize(value = "hasPermission(#sketchPadId, 'de.iew.sketchpad.domain.SketchPad', 'READ') and " +
+            "hasPermission(#colorId, 'de.iew.sketchpad.domain.RgbColor', 'READ')")
     public RgbColor chooseColor(Authentication sketchPadUser, long sketchPadId, long colorId) throws ModelNotFoundException {
         return getColorBySketchPadIdAndId(sketchPadId, colorId);
     }
 
-    @PreAuthorize(value = "hasPermission(#sketchPadId, 'de.iew.domain.sketchpad.SketchPad', 'READ')")
+    @PreAuthorize(value = "hasPermission(#sketchPadId, 'de.iew.sketchpad.domain.SketchPad', 'READ')")
     @PostFilter("hasPermission(filterObject, 'READ')")
     public List<Stroke> listAllStrokes(long sketchPadId) {
         return this.sketchPadStrokeDao.listStrokesBySketchPadId(sketchPadId);
     }
 
-    @PreAuthorize(value = "hasPermission(#sketchPadId, 'de.iew.domain.sketchpad.SketchPad', 'READ') and " +
-            "hasPermission(#strokeId, 'de.iew.domain.sketchpad.Stroke', 'READ')")
+    @PreAuthorize(value = "hasPermission(#sketchPadId, 'de.iew.sketchpad.domain.SketchPad', 'READ') and " +
+            "hasPermission(#strokeId, 'de.iew.sketchpad.domain.Stroke', 'READ')")
     public Stroke chooseStroke(Authentication sketchPadUser, long sketchPadId, long strokeId) throws ModelNotFoundException {
         return getStrokeBySketchPadAndId(sketchPadId, strokeId);
     }

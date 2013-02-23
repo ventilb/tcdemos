@@ -16,9 +16,9 @@
 
 package de.iew.services;
 
-import de.iew.domain.ModelNotFoundException;
-import de.iew.domain.principals.Account;
-import de.iew.domain.principals.Authority;
+import de.iew.framework.domain.ModelNotFoundException;
+import de.iew.framework.domain.principals.Account;
+import de.iew.framework.domain.principals.Authority;
 
 /**
  * Beschreibt die Schnittstelle für einen Dienst zur Nutzerverwaltung.

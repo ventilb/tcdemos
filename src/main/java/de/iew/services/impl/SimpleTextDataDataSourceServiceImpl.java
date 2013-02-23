@@ -16,11 +16,11 @@
 
 package de.iew.services.impl;
 
-import de.iew.domain.DataSource;
-import de.iew.domain.SimpleTextData;
-import de.iew.domain.TextItem;
-import de.iew.domain.TextItemCollection;
-import de.iew.persistence.SimpleTextDataDao;
+import de.iew.framework.domain.DataSource;
+import de.iew.framework.domain.SimpleTextData;
+import de.iew.framework.domain.TextItem;
+import de.iew.framework.domain.TextItemCollection;
+import de.iew.framework.persistence.SimpleTextDataDao;
 import de.iew.services.DataSourceService;
 import de.iew.services.datasource.DataSourceProperties;
 import de.iew.framework.utils.NoSuchPropertyException;

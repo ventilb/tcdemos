@@ -16,8 +16,8 @@
 
 package de.iew.framework.security.access;
 
-import de.iew.domain.security.WebResource;
-import de.iew.persistence.models.RequestMapEntry;
+import de.iew.framework.domain.security.WebResource;
+import de.iew.framework.persistence.models.RequestMapEntry;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.security.access.ConfigAttribute;

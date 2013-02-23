@@ -16,10 +16,10 @@
 
 package de.iew.services.impl;
 
-import de.iew.domain.security.WebResource;
+import de.iew.framework.domain.security.WebResource;
 import de.iew.framework.security.access.RequestMapbuilder;
-import de.iew.persistence.WebResourceDao;
-import de.iew.persistence.models.RequestMapEntry;
+import de.iew.framework.persistence.WebResourceDao;
+import de.iew.framework.persistence.models.RequestMapEntry;
 import de.iew.services.WebResourceSecurityService;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;

@@ -16,11 +16,11 @@
 
 package de.iew.services.impl;
 
-import de.iew.domain.*;
-import de.iew.persistence.DataSourceDao;
-import de.iew.persistence.NodeDao;
-import de.iew.persistence.TreeDao;
-import de.iew.persistence.TreeOperationDao;
+import de.iew.framework.domain.*;
+import de.iew.framework.persistence.DataSourceDao;
+import de.iew.framework.persistence.NodeDao;
+import de.iew.framework.persistence.TreeDao;
+import de.iew.framework.persistence.TreeOperationDao;
 import de.iew.services.TreeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

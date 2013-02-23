@@ -16,11 +16,12 @@
 
 package de.iew.services;
 
-import de.iew.domain.ModelNotFoundException;
-import de.iew.domain.sketchpad.Polygon;
-import de.iew.domain.sketchpad.RgbColor;
-import de.iew.domain.sketchpad.SketchPad;
-import de.iew.domain.sketchpad.Stroke;
+import de.iew.framework.domain.ModelNotFoundException;
+import de.iew.sketchpad.domain.*;
+import de.iew.sketchpad.domain.RgbColor;
+import de.iew.sketchpad.domain.SketchPad;
+import de.iew.sketchpad.domain.Polygon;
+import de.iew.sketchpad.domain.Stroke;
 import org.springframework.security.core.Authentication;
 
 import java.util.List;

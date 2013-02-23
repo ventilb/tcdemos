@@ -16,10 +16,7 @@
 
 package de.iew.demos.model;
 
-import de.iew.domain.Node;
-
 import java.util.ArrayList;
-import java.util.Collection;
 
 /**
  * Klassenkommentar.

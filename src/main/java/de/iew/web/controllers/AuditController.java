@@ -1,7 +1,7 @@
 package de.iew.web.controllers;
 
-import de.iew.domain.audit.AuditEventMessage;
-import de.iew.domain.utils.CollectionHolder;
+import de.iew.framework.domain.audit.AuditEventMessage;
+import de.iew.framework.domain.utils.CollectionHolder;
 import de.iew.services.AuditService;
 import de.iew.web.isc.DSRequest;
 import de.iew.web.isc.DSResponseCollection;

@@ -20,10 +20,10 @@ import de.iew.framework.utils.NoSuchPropertyException;
 
 /**
  * Beschreibt eine Schnittstelle für die abstrakte Verwaltung von Eigenschaften
- * einer {@link de.iew.domain.DataSource}.
+ * einer {@link de.iew.framework.domain.DataSource}.
  * <p>
  * Es wird eine Schnittstelle benötigt um beispielsweise beim Anlegen neuer
- * Knoten die initialen Daten der zugeordneten {@link de.iew.domain.DataSource}
+ * Knoten die initialen Daten der zugeordneten {@link de.iew.framework.domain.DataSource}
  * angeben zu können.
  * </p>
  * <p>

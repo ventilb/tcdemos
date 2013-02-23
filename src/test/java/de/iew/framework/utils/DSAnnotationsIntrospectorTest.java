@@ -16,9 +16,9 @@
 
 package de.iew.framework.utils;
 
-import de.iew.domain.SimpleTextData;
-import de.iew.domain.TextItem;
-import de.iew.domain.TextItemCollection;
+import de.iew.framework.domain.SimpleTextData;
+import de.iew.framework.domain.TextItem;
+import de.iew.framework.domain.TextItemCollection;
 import org.junit.Test;
 
 import java.lang.reflect.Method;

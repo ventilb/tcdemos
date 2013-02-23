@@ -16,7 +16,7 @@
 
 package de.iew.web.isc;
 
-import de.iew.domain.utils.CollectionHolder;
+import de.iew.framework.domain.utils.CollectionHolder;
 import org.springframework.ui.ExtendedModelMap;
 
 import java.util.ArrayList;

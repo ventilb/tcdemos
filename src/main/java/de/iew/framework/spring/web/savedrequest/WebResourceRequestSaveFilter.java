@@ -16,7 +16,7 @@
 
 package de.iew.framework.spring.web.savedrequest;
 
-import de.iew.domain.security.WebResource;
+import de.iew.framework.domain.security.WebResource;
 import de.iew.services.WebResourceSecurityService;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;

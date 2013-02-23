@@ -16,15 +16,15 @@
 
 package de.iew.services.impl;
 
-import de.iew.domain.principals.Account;
-import de.iew.domain.sketchpad.Polygon;
-import de.iew.domain.sketchpad.RgbColor;
-import de.iew.domain.sketchpad.Stroke;
-import de.iew.persistence.PolygonDao;
-import de.iew.persistence.RgbColorDao;
-import de.iew.persistence.SketchPadDao;
-import de.iew.persistence.StrokeDao;
+import de.iew.framework.domain.principals.Account;
+import de.iew.sketchpad.domain.RgbColor;
+import de.iew.sketchpad.persistence.PolygonDao;
+import de.iew.sketchpad.persistence.RgbColorDao;
+import de.iew.sketchpad.persistence.SketchPadDao;
+import de.iew.sketchpad.persistence.StrokeDao;
 import de.iew.services.SketchPadService;
+import de.iew.sketchpad.domain.Polygon;
+import de.iew.sketchpad.domain.Stroke;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;

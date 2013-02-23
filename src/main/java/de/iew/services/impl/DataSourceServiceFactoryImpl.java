@@ -16,7 +16,7 @@
 
 package de.iew.services.impl;
 
-import de.iew.domain.SimpleTextData;
+import de.iew.framework.domain.SimpleTextData;
 import de.iew.services.DataSourceService;
 import de.iew.services.DataSourceServiceFactory;
 import org.springframework.beans.BeansException;

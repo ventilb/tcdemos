@@ -16,8 +16,8 @@
 
 package de.iew.services;
 
-import de.iew.domain.ModelNotFoundException;
-import de.iew.domain.Node;
+import de.iew.framework.domain.ModelNotFoundException;
+import de.iew.framework.domain.Node;
 
 import java.util.Collection;
 
@@ -47,7 +47,7 @@ public interface TreeService {
      *
      * @param treeId       Die Id des Baums.
      * @param parentId     Die Id des Vater-Knotens.
-     * @param dataSourceId Die Id der {@link de.iew.domain.DataSource},
+     * @param dataSourceId Die Id der {@link de.iew.framework.domain.DataSource},
      *                     die mit dem Knoten verknüpft werden soll.
      * @return Der erstellte Knoten.
      * @throws ModelNotFoundException Wenn der Knoten nicht im Baum existiert.
@@ -60,7 +60,7 @@ public interface TreeService {
      *
      * @param treeId             Die Id des Baums.
      * @param nodeToInsertBefore Die Id des Knotens vor dem eingefügt werden soll.
-     * @param dataSourceId       Die Id der {@link de.iew.domain.DataSource},
+     * @param dataSourceId       Die Id der {@link de.iew.framework.domain.DataSource},
      *                           die mit dem Knoten verknüpft werden soll.
      * @return Der erstellte Knoten.
      * @throws ModelNotFoundException Wenn der Knoten nicht im Baum existiert.
@@ -73,7 +73,7 @@ public interface TreeService {
      *
      * @param treeId            Die Id des Baums.
      * @param nodeToInsertAfter Die Id des Knotens dem dem eingefügt werden soll.
-     * @param dataSourceId      Die Id der {@link de.iew.domain.DataSource},
+     * @param dataSourceId      Die Id der {@link de.iew.framework.domain.DataSource},
      *                          die mit dem Knoten verknüpft werden soll.
      * @return Der erstellte Knoten.
      * @throws ModelNotFoundException Wenn der Knoten nicht im Baum existiert.

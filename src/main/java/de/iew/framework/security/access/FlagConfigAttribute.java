@@ -16,7 +16,7 @@
 
 package de.iew.framework.security.access;
 
-import de.iew.domain.security.WebResourceAccessRule;
+import de.iew.framework.domain.security.WebResourceAccessRule;
 
 /**
  * Implements a config attribute to manage a set of flags which will be used to

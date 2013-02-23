@@ -16,14 +16,14 @@
 
 package de.iew.framework.utils;
 
-import de.iew.domain.DomainModel;
-import de.iew.domain.annotations.DSTitleProperty;
+import de.iew.framework.domain.DomainModel;
+import de.iew.framework.domain.annotations.DSTitleProperty;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 
 /**
- * Stellt Hilfsmethoden für den Umgang mit den {@link de.iew.domain.DataSource}
+ * Stellt Hilfsmethoden für den Umgang mit den {@link de.iew.framework.domain.DataSource}
  * Annotationen bereit.
  *
  * @author Manuel Schulze <manuel_schulze@i-entwicklung.de>

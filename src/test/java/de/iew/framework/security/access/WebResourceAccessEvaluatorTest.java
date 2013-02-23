@@ -16,8 +16,8 @@
 
 package de.iew.framework.security.access;
 
-import de.iew.domain.principals.Authority;
-import de.iew.domain.security.WebResourceAccessRule;
+import de.iew.framework.domain.principals.Authority;
+import de.iew.framework.domain.security.WebResourceAccessRule;
 import org.junit.Test;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.authentication.RememberMeAuthenticationToken;

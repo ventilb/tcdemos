@@ -16,8 +16,8 @@
 
 package de.iew.services;
 
-import de.iew.domain.audit.AuditEventMessage;
-import de.iew.domain.utils.CollectionHolder;
+import de.iew.framework.domain.audit.AuditEventMessage;
+import de.iew.framework.domain.utils.CollectionHolder;
 
 /**
  * Describes an interface to implement audit services to track whats happening

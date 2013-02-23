@@ -28,9 +28,9 @@ define(['i18n!nls/messages'], function (msg) {
 
     isc.TreeDemoContextMenu.addProperties({
         data: [
-            {title: msg['tree.context_menu.item.title.new_child'], click: 'target.appendNewChildNode(target.getSelectedRecord(), "de.iew.domain.SimpleTextData")'},
-            {title: msg['tree.context_menu.item.title.sibling_before'], click: 'target.insertNewNodeBefore(target.getSelectedRecord(), "de.iew.domain.SimpleTextData")', enableIf: '!target.isRootNode(target.getSelectedRecord())'},
-            {title: msg['tree.context_menu.item.title.sibling_after'], click: 'target.insertNewNodeAfter(target.getSelectedRecord(), "de.iew.domain.SimpleTextData")', enableIf: '!target.isRootNode(target.getSelectedRecord())'},
+            {title: msg['tree.context_menu.item.title.new_child'], click: 'target.appendNewChildNode(target.getSelectedRecord(), "de.iew.framework.domain.SimpleTextData")'},
+            {title: msg['tree.context_menu.item.title.sibling_before'], click: 'target.insertNewNodeBefore(target.getSelectedRecord(), "de.iew.framework.domain.SimpleTextData")', enableIf: '!target.isRootNode(target.getSelectedRecord())'},
+            {title: msg['tree.context_menu.item.title.sibling_after'], click: 'target.insertNewNodeAfter(target.getSelectedRecord(), "de.iew.framework.domain.SimpleTextData")', enableIf: '!target.isRootNode(target.getSelectedRecord())'},
             {title: msg['tree.context_menu.submenu.title.delete'], submenu: [
                 {title: msg['tree.context_menu.item.title.delete_node'], click: 'target.deleteMigrate(target.getSelectedRecord())', enableIf: '!target.isRootNode(target.getSelectedRecord())'},
                 {title: msg['tree.context_menu.item.title.delete_subtree'], click: 'target.deleteSubtree(target.getSelectedRecord())', enableIf: '!target.isRootNode(target.getSelectedRecord())'}

@@ -16,10 +16,10 @@
 
 package de.iew.framework.security.access;
 
-import de.iew.domain.security.WebResourceAccessRule;
+import de.iew.framework.domain.security.WebResourceAccessRule;
 
 /**
- * Implements a config attribute to manage an {@link de.iew.domain.principals.Authority}
+ * Implements a config attribute to manage an {@link de.iew.framework.domain.principals.Authority}
  * system name for web resource access rule evaluation.
  *
  * @author Manuel Schulze <manuel_schulze@i-entwicklung.de>

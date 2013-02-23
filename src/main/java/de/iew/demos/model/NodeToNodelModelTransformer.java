@@ -16,22 +16,19 @@
 
 package de.iew.demos.model;
 
-import de.iew.domain.DataSource;
-import de.iew.domain.Node;
-import de.iew.domain.utils.AbstractDomainModelVisitor;
-import de.iew.domain.utils.DomainModelVisitor;
+import de.iew.framework.domain.DataSource;
+import de.iew.framework.domain.Node;
+import de.iew.framework.domain.utils.AbstractDomainModelVisitor;
 import de.iew.framework.utils.DSAnnotationsIntrospector;
 import de.iew.framework.utils.StringResolver;
-import de.iew.persistence.hibernate.HbmUtils;
+import de.iew.framework.persistence.hibernate.HbmUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.Collection;
 
 /**
- * Implementiert die {@link de.iew.domain.utils.DomainModelVisitor}-Schnittstelle zum Umwandeln der
+ * Implementiert die {@link de.iew.framework.domain.utils.DomainModelVisitor}-Schnittstelle zum Umwandeln der
  * {@link Node}-Domainmodelle in {@link NodeModel}-DTOs.
  * <p>
  * Ziel dieses Umwandlers ist, bereits während des Ladens von Knoten, die

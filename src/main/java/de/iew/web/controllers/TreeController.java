@@ -18,13 +18,13 @@ package de.iew.web.controllers;
 
 import de.iew.demos.model.NodeModel;
 import de.iew.demos.model.NodeToNodelModelTransformer;
-import de.iew.domain.DataSource;
-import de.iew.domain.Node;
-import de.iew.domain.principals.Authority;
-import de.iew.domain.utils.DomainModelVisitor;
+import de.iew.framework.domain.DataSource;
+import de.iew.framework.domain.Node;
+import de.iew.framework.domain.principals.Authority;
+import de.iew.framework.domain.utils.DomainModelVisitor;
 import de.iew.framework.utils.LocaleStringResolver;
 import de.iew.services.*;
-import de.iew.domain.ModelNotFoundException;
+import de.iew.framework.domain.ModelNotFoundException;
 import de.iew.web.isc.DSResponseCollection;
 import de.iew.web.isc.DSResponseObject;
 import org.apache.commons.logging.Log;

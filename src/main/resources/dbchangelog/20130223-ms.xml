@@ -1,0 +1,62 @@
+<!--
+  ~ Copyright 2012-2013 Manuel Schulze <manuel_schulze@i-entwicklung.de>
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~     http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+    http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-2.0.xsd">
+
+    <changeSet id="69-ms" author="Manuel Schulze">
+        <update tableName="acl_class">
+            <column name="class" value="de.iew.sketchpad.domain.SketchPad"/>
+            <where>class="de.iew.domain.sketchpad.SketchPad"</where>
+        </update>
+        <update tableName="acl_class">
+            <column name="class" value="de.iew.sketchpad.domain.Stroke"/>
+            <where>class="de.iew.domain.sketchpad.Stroke"</where>
+        </update>
+        <update tableName="acl_class">
+            <column name="class" value="de.iew.sketchpad.domain.RgbColor"/>
+            <where>class="de.iew.domain.sketchpad.RgbColor"</where>
+        </update>
+        <update tableName="acl_class">
+            <column name="class" value="de.iew.sketchpad.domain.RgbaColor"/>
+            <where>class="de.iew.domain.sketchpad.RgbaColor"</where>
+        </update>
+
+        <update tableName="sketch_color">
+            <column name="colorType" value="de.iew.sketchpad.domain.RgbColor"/>
+            <where>colorType="de.iew.domain.sketchpad.RgbColor"</where>
+        </update>
+    </changeSet>
+
+    <changeSet id="70-ms" author="Manuel Schulze">
+        <update tableName="acl_class">
+            <column name="class" value="de.iew.sketchpad.domain.Polygon"/>
+            <where>class="de.iew.domain.sketchpad.Polygon"</where>
+        </update>
+        <update tableName="acl_class">
+            <column name="class" value="de.iew.framework.domain.Node"/>
+            <where>class="de.iew.domain.Node"</where>
+        </update>
+        <update tableName="acl_class">
+            <column name="class" value="de.iew.framework.domain.SimpleTextData"/>
+            <where>class="de.iew.domain.SimpleTextData"</where>
+        </update>
+    </changeSet>
+
+</databaseChangeLog>

@@ -16,11 +16,11 @@
 
 package de.iew.services.impl;
 
-import de.iew.domain.DomainModel;
-import de.iew.domain.principals.Account;
-import de.iew.domain.sketchpad.Polygon;
+import de.iew.framework.domain.DomainModel;
+import de.iew.framework.domain.principals.Account;
 import de.iew.services.AclEditorService;
 import de.iew.services.UserDetailsService;
+import de.iew.sketchpad.domain.Polygon;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.acls.domain.BasePermission;
 import org.springframework.security.acls.domain.GrantedAuthoritySid;

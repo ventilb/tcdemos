@@ -29,7 +29,7 @@
   http://www.springframework.org/schema/aop
   http://www.springframework.org/schema/aop/spring-aop-2.0.xsd http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd">
 
-    <context:component-scan base-package="de.iew.persistence, de.iew.domain"></context:component-scan>
+    <context:component-scan base-package="de.iew.framework, de.iew.sketchpad"></context:component-scan>
 
     <!-- MySQL DataSource -->
     <bean id="dataSource" class="com.mchange.v2.c3p0.ComboPooledDataSource" destroy-method="close">
@@ -51,7 +51,8 @@
     <bean id="sessionFactory"
           class="org.springframework.orm.hibernate4.LocalSessionFactoryBean" depends-on="liquibase">
         <property name="dataSource" ref="dataSource"/>
-        <property name="packagesToScan" value="de.iew.domain"></property>
+        <property name="packagesToScan" value="de.iew.framework, de.iew.sketchpad">
+        </property>
         <property name="hibernateProperties">
             <util:properties location="classpath:hibernate.properties"/>
         </property>
@@ -84,7 +85,7 @@
 
     <aop:config proxy-target-class="true">
         <aop:advisor advice-ref="serviceAdvice" pointcut="execution(* de.iew.services..*.*(..))"/>
-        <aop:advisor advice-ref="hbmDaoAdvice" pointcut="execution(* de.iew.persistence.hibernate.*.*(..))"/>
+        <aop:advisor advice-ref="hbmDaoAdvice" pointcut="execution(* de.iew.*.persistence.hibernate.*.*(..))"/>
     </aop:config>
 
     <!-- Liquibase Integration -->

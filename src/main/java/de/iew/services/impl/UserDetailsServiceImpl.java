@@ -16,11 +16,11 @@
 
 package de.iew.services.impl;
 
-import de.iew.domain.ModelNotFoundException;
-import de.iew.domain.principals.Account;
-import de.iew.domain.principals.Authority;
-import de.iew.persistence.AccountDao;
-import de.iew.persistence.AuthorityDao;
+import de.iew.framework.domain.ModelNotFoundException;
+import de.iew.framework.domain.principals.Account;
+import de.iew.framework.domain.principals.Authority;
+import de.iew.framework.persistence.AccountDao;
+import de.iew.framework.persistence.AuthorityDao;
 import de.iew.services.UserDetailsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;

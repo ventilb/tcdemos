@@ -16,8 +16,8 @@
 
 package de.iew.framework.utils;
 
-import de.iew.domain.TextItem;
-import de.iew.domain.TextItemCollection;
+import de.iew.framework.domain.TextItem;
+import de.iew.framework.domain.TextItemCollection;
 
 import java.util.Locale;
 

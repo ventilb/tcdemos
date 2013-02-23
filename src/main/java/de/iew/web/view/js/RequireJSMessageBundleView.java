@@ -16,7 +16,7 @@
 
 package de.iew.web.view.js;
 
-import de.iew.domain.MessageBundleStore;
+import de.iew.framework.domain.MessageBundleStore;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.view.AbstractView;

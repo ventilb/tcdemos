@@ -24,13 +24,15 @@
 <%@ include file="meta/content_top.jsp" %>
 <%@ include file="meta/content_head.jsp" %>
 <div id="content">
-    <script type="text/javascript">
-        require(['jquery', 'sketchpad/sketch-pad'], function($, SketchPad) {
-            $(document).ready(function() {
-                var sketchPad = new SketchPad('#sketch_pad', ${sketchPad.id});
+    <c:if test="${sketchPad != null}">
+        <script type="text/javascript">
+            require(['jquery', 'sketchpad/sketch-pad'], function ($, SketchPad) {
+                $(document).ready(function () {
+                    var sketchPad = new SketchPad('#sketch_pad', ${sketchPad.id});
+                });
             });
-        });
-    </script>
+        </script>
+    </c:if>
 
     <div id="sketch_pad" class="sketch_pad">
         <div class="sketch_pad_canvas_container">

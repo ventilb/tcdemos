@@ -16,7 +16,7 @@
 
 package de.iew.web.controllers;
 
-import de.iew.domain.MessageBundleStore;
+import de.iew.framework.domain.MessageBundleStore;
 import de.iew.services.MessageBundleService;
 import de.iew.web.view.js.RequireJSMessageBundleView;
 import org.apache.commons.logging.Log;

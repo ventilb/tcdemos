@@ -16,7 +16,7 @@
 
 package de.iew.services;
 
-import de.iew.domain.DomainModel;
+import de.iew.framework.domain.DomainModel;
 import org.springframework.security.acls.model.AlreadyExistsException;
 import org.springframework.security.acls.model.MutableAcl;
 import org.springframework.security.acls.model.NotFoundException;

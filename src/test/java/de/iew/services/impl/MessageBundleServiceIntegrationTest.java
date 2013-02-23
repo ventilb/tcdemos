@@ -16,8 +16,8 @@
 
 package de.iew.services.impl;
 
-import de.iew.domain.MessageBundle;
-import de.iew.persistence.MessageBundleDao;
+import de.iew.framework.domain.MessageBundle;
+import de.iew.framework.persistence.MessageBundleDao;
 import de.iew.services.MessageBundleService;
 import org.junit.Test;
 import org.junit.runner.RunWith;

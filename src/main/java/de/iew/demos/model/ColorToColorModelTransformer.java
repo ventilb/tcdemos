@@ -16,8 +16,8 @@
 
 package de.iew.demos.model;
 
-import de.iew.domain.sketchpad.RgbColor;
-import de.iew.domain.utils.AbstractDomainModelVisitor;
+import de.iew.sketchpad.domain.RgbColor;
+import de.iew.framework.domain.utils.AbstractDomainModelVisitor;
 
 /**
  * Wandelt {@link RgbColor}-Domainmodelle in {@link RgbColorModel}-DTOs um.

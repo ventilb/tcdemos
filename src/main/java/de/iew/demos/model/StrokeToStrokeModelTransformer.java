@@ -16,11 +16,11 @@
 
 package de.iew.demos.model;
 
-import de.iew.domain.sketchpad.Stroke;
-import de.iew.domain.utils.AbstractDomainModelVisitor;
+import de.iew.sketchpad.domain.Stroke;
+import de.iew.framework.domain.utils.AbstractDomainModelVisitor;
 
 /**
- * Wandelt {@link Stroke}-Domainmodelle in {@link StrokeModel}-DTOs um.
+ * Wandelt {@link de.iew.sketchpad.domain.Stroke}-Domainmodelle in {@link StrokeModel}-DTOs um.
  *
  * @author Manuel Schulze <manuel_schulze@i-entwicklung.de>
  * @since 03.01.13 - 02:29

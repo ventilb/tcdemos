@@ -16,7 +16,7 @@
 
 package de.iew.services;
 
-import de.iew.domain.security.WebResource;
+import de.iew.framework.domain.security.WebResource;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -31,7 +31,7 @@ public interface WebResourceSecurityService {
     /**
      * Returns the {@link WebResource} instance which matches the given HTTP request.
      * <p>
-     * The web resources are checked in their {@link de.iew.domain.Order}. This method returns NULL if none of the web
+     * The web resources are checked in their {@link de.iew.framework.domain.Order}. This method returns NULL if none of the web
      * resources matches the given request.
      * </p>
      *

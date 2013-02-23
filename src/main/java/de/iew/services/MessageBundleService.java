@@ -16,7 +16,7 @@
 
 package de.iew.services;
 
-import de.iew.domain.MessageBundleStore;
+import de.iew.framework.domain.MessageBundleStore;
 
 import java.io.IOException;
 import java.util.List;

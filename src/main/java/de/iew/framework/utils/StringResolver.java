@@ -21,7 +21,7 @@ package de.iew.framework.utils;
  * von Objekten zu Strings.
  * <p>
  * Wird beispielsweise verwendet um den Knotentitel für Bäume aus der
- * {@link de.iew.domain.DataSource} des Knotens zu ermitteln.
+ * {@link de.iew.framework.domain.DataSource} des Knotens zu ermitteln.
  * </p>
  *
  * @author Manuel Schulze <manuel_schulze@i-entwicklung.de>

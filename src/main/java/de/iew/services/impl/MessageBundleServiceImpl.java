@@ -16,11 +16,11 @@
 
 package de.iew.services.impl;
 
-import de.iew.domain.MessageBundle;
-import de.iew.domain.MessageBundleStore;
-import de.iew.domain.TextItem;
+import de.iew.framework.domain.MessageBundle;
+import de.iew.framework.domain.MessageBundleStore;
+import de.iew.framework.domain.TextItem;
 import de.iew.framework.i18n.LocaleUtils;
-import de.iew.persistence.MessageBundleDao;
+import de.iew.framework.persistence.MessageBundleDao;
 import de.iew.services.MessageBundleService;
 import de.iew.services.UnsupportedBasenameException;
 import org.apache.commons.logging.Log;

@@ -35,7 +35,7 @@ http://www.springframework.org/schema/cache/spring-cache.xsd http://www.springfr
 
     <context:component-scan
             base-package="de.iew.services, de.iew.demos, de.iew.web.controllers, de.iew.web, de.iew.framework">
-        <context:exclude-filter type="aspectj" expression="de.iew.persistence..*"/>
+        <context:exclude-filter type="aspectj" expression="de.iew.*.persistence..*"/>
     </context:component-scan>
 
     <!--

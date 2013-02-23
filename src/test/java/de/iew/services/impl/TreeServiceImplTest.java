@@ -16,20 +16,20 @@
 
 package de.iew.services.impl;
 
-import de.iew.domain.ModelNotFoundException;
-import de.iew.domain.Node;
-import de.iew.domain.Tree;
-import de.iew.persistence.DataSourceDao;
-import de.iew.persistence.NodeDao;
-import de.iew.persistence.TreeDao;
-import de.iew.persistence.TreeOperationDao;
-import de.iew.persistence.mock.MockDataSourceDaoImpl;
-import de.iew.persistence.mock.MockNodeDaoImpl;
-import de.iew.persistence.mock.MockTreeDaoImpl;
-import de.iew.persistence.mock.MockTreeOperationDaoImpl;
-import de.iew.persistence.mock.fixtures.TreeFixture1;
-import de.iew.persistence.mock.fixtures.TreeFixture2;
-import de.iew.persistence.mock.fixtures.TreeFixture3;
+import de.iew.framework.domain.ModelNotFoundException;
+import de.iew.framework.domain.Node;
+import de.iew.framework.domain.Tree;
+import de.iew.framework.persistence.DataSourceDao;
+import de.iew.framework.persistence.NodeDao;
+import de.iew.framework.persistence.TreeDao;
+import de.iew.framework.persistence.TreeOperationDao;
+import de.iew.framework.persistence.mock.MockDataSourceDaoImpl;
+import de.iew.framework.persistence.mock.MockNodeDaoImpl;
+import de.iew.framework.persistence.mock.MockTreeDaoImpl;
+import de.iew.framework.persistence.mock.MockTreeOperationDaoImpl;
+import de.iew.framework.persistence.mock.fixtures.TreeFixture1;
+import de.iew.framework.persistence.mock.fixtures.TreeFixture2;
+import de.iew.framework.persistence.mock.fixtures.TreeFixture3;
 import junit.framework.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -987,7 +987,7 @@ public class TreeServiceImplTest {
     /**
      * Konfiguriert einen Testaufbau.
      *
-     * @see de.iew.persistence.mock.fixtures.TreeFixture1
+     * @see de.iew.framework.persistence.mock.fixtures.TreeFixture1
      */
     private void setupTestfixture1() {
         TreeFixture1 fixture = new TreeFixture1();
@@ -999,7 +999,7 @@ public class TreeServiceImplTest {
     /**
      * Konfiguriert einen Testaufbau.
      *
-     * @see de.iew.persistence.mock.fixtures.TreeFixture2
+     * @see de.iew.framework.persistence.mock.fixtures.TreeFixture2
      */
     private void setupTestfixture2() {
         TreeFixture2 fixture = new TreeFixture2();
@@ -1011,7 +1011,7 @@ public class TreeServiceImplTest {
     /**
      * Konfiguriert einen Testaufbau.
      *
-     * @see de.iew.persistence.mock.fixtures.TreeFixture3
+     * @see de.iew.framework.persistence.mock.fixtures.TreeFixture3
      */
     private void setupTestfixture3() {
         TreeFixture3 fixture = new TreeFixture3();

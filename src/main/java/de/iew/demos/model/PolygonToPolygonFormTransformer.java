@@ -16,17 +16,17 @@
 
 package de.iew.demos.model;
 
-import de.iew.domain.sketchpad.Polygon;
-import de.iew.domain.sketchpad.RgbColor;
-import de.iew.domain.sketchpad.Segment;
-import de.iew.domain.sketchpad.Stroke;
-import de.iew.domain.utils.AbstractDomainModelVisitor;
-import de.iew.persistence.hibernate.HbmUtils;
+import de.iew.sketchpad.domain.Polygon;
+import de.iew.sketchpad.domain.Segment;
+import de.iew.sketchpad.domain.Stroke;
+import de.iew.framework.domain.utils.AbstractDomainModelVisitor;
+import de.iew.framework.persistence.hibernate.HbmUtils;
+import de.iew.sketchpad.domain.RgbColor;
 
 import java.util.List;
 
 /**
- * Wandelt {@link Polygon}-Domainmodelle in {@link PolygonForm}-DTOs um.
+ * Wandelt {@link de.iew.sketchpad.domain.Polygon}-Domainmodelle in {@link PolygonForm}-DTOs um.
  *
  * @author Manuel Schulze <manuel_schulze@i-entwicklung.de>
  * @since 03.01.13 - 00:22
