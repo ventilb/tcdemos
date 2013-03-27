@@ -17,86 +17,89 @@
 
 <beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-       xmlns:int-xmpp="http://www.springframework.org/schema/integration/xmpp"
        xmlns:int-event="http://www.springframework.org/schema/integration/event"
        xmlns:task="http://www.springframework.org/schema/task"
        xmlns:int="http://www.springframework.org/schema/integration"
+       xmlns:util="http://www.springframework.org/schema/util"
        xsi:schemaLocation="http://www.springframework.org/schema/beans
  http://www.springframework.org/schema/beans/spring-beans-3.1.xsd
- http://www.springframework.org/schema/integration/xmpp
- http://www.springframework.org/schema/integration/xmpp/spring-integration-xmpp.xsd
  http://www.springframework.org/schema/integration/event
  http://www.springframework.org/schema/integration/event/spring-integration-event.xsd
  http://www.springframework.org/schema/task
  http://www.springframework.org/schema/task/spring-task.xsd
  http://www.springframework.org/schema/integration
- http://www.springframework.org/schema/integration/spring-integration.xsd">
-
-    <bean id="throwableToStringTransformer"
-          class="de.iew.framework.spring.integration.transformer.SimpleThrowableTransformer"/>
-
-    <task:executor id="executor" pool-size="5"/>
-
-    <int:poller id="defaultPoller" max-messages-per-poll="1" task-executor="executor" fixed-rate="100"/>
+ http://www.springframework.org/schema/integration/spring-integration.xsd
+ http://www.springframework.org/schema/util
+ http://www.springframework.org/schema/util/spring-util.xsd">
 
     <!--
-    Kanal zum Absenden von Spring AplicationEvents
+    | Spring integration based application event handling
+    |
+    | We define an outgoing channel for the application. The application events are routed into the
+    | synchronousApplicationEventChannel channel if the event is marked as synchronous. The application events are
+    | routed into the asynchronousApplicationEventChannel channel if the event is marked as asynchronous.
     -->
-    <int:channel id="applicationEventChannel">
-        <int:queue/>
+    <int:channel id="applicationEventChannel"/>
+    <int-event:outbound-channel-adapter channel="applicationEventChannel"/>
+
+    <int-event:inbound-channel-adapter channel="applicationEventDispatcherChannel"
+                                       event-types="de.iew.framework.utils.IewApplicationEvent"/>
+    <int:channel id="applicationEventDispatcherChannel"/>
+
+    <int:router input-channel="applicationEventDispatcherChannel" expression="payload.synchronous">
+        <int:mapping value="true" channel="synchronousApplicationEventChannel"/>
+        <int:mapping value="false" channel="jdbcApplicationEventOutgoingChannel"/>
+    </int:router>
+
+    <!--
+    | Setup jdbc based polling message channel
+    -->
+    <bean id="messageStoreQueryProvider"
+          class="org.springframework.integration.jdbc.store.channel.MySqlChannelMessageStoreQueryProvider"/>
+
+    <int:transaction-synchronization-factory id="messageStoreSyncFactory">
+        <int:after-commit expression="@messageStore.removeFromIdCache(headers.id.toString())"/>
+        <int:after-rollback expression="@messageStore.removeFromIdCache(headers.id.toString())"/>
+    </int:transaction-synchronization-factory>
+
+    <task:executor id="messageStoreThreadPool" pool-size="10"
+                   queue-capacity="10" rejection-policy="CALLER_RUNS"/>
+
+    <bean id="messageStore" class="org.springframework.integration.jdbc.store.JdbcChannelMessageStore">
+        <property name="dataSource" ref="dataSource"/>
+        <property name="channelMessageStoreQueryProvider" ref="messageStoreQueryProvider"/>
+        <property name="region" value="TX_TIMEOUT"/>
+        <property name="usingIdCache" value="true"/>
+        <property name="tablePrefix" value="msg_"/>
+    </bean>
+
+    <int:channel id="jdbcApplicationEventOutgoingChannel">
+        <int:queue message-store="messageStore"/>
     </int:channel>
 
-    <int-event:outbound-channel-adapter id="auditEventOutboundAdapter" channel="applicationEventChannel">
-        <int:poller ref="defaultPoller"/>
-    </int-event:outbound-channel-adapter>
+    <int:bridge input-channel="jdbcApplicationEventOutgoingChannel"
+                output-channel="asynchronousApplicationEventChannel">
+        <int:poller fixed-delay="500" receive-timeout="500"
+                    max-messages-per-poll="1" task-executor="messageStoreThreadPool">
+            <int:transactional propagation="REQUIRED" synchronization-factory="messageStoreSyncFactory"
+                               isolation="READ_COMMITTED" transaction-manager="txManager"/>
+        </int:poller>
+    </int:bridge>
 
     <!--
-    Der eingetragene Wert für id entspricht dem Default und könnte auch weggelassen
-    werden.
-
-    resource entspricht der Nutzergruppe, der man beitreten möchte. In Openfire
-    sind das die konfigurierten Gruppen.
-
-    see http://static.springsource.org/spring-integration/reference/htmlsingle/#xmpp
+    | Channel to receive (a)synchronous application event messages
+    |
+    | Use these channels if you want to listen for application events.
     -->
-    <int-xmpp:xmpp-connection id="xmppConnection" user="@xmpp.user@" password="@xmpp.password@" host="@xmpp.host@"
-                              port="@xmpp.port@"
-                              resource="@xmpp.resource@" subscription-mode="@xmpp.subscription_mode@"
-                              service-name="@xmpp.service_name@"/>
+    <int:publish-subscribe-channel id="synchronousApplicationEventChannel"/>
+    <int:publish-subscribe-channel id="asynchronousApplicationEventChannel"/>
 
-    <!--
-    Kanal zum Absenden von XMPP-Nachrichten.
-
-    Die Chain sieht wie folgt aus:
-
-    \o/
-      |     -> xmppOutboundEventChannel -> Transformer -> transformedXmppOutboundEventChannel -> outboundEventAdapter -> XMPP-Server
-     /\
-    -->
-    <int:channel id="xmppOutboundEventChannel"/>
-
-    <int:transformer ref="throwableToStringTransformer" input-channel="xmppOutboundEventChannel"
-                     method="transform" output-channel="transformedXmppOutboundEventChannel">
-    </int:transformer>
-
-    <int:channel id="transformedXmppOutboundEventChannel">
-        <int:queue/>
-    </int:channel>
-
-    <int-xmpp:outbound-channel-adapter id="outboundEventAdapter"
-                                       channel="transformedXmppOutboundEventChannel"
-                                       xmpp-connection="xmppConnection">
-        <int:poller ref="defaultPoller"/>
-    </int-xmpp:outbound-channel-adapter>
-
-    <!--
-    Spring Integration Konfiguration zum Empfangen von XMPP-Nachrichten.
-    -->
-    <int:channel id="xmppInboundEventChannel"/>
-
-    <int-xmpp:inbound-channel-adapter id="xmppInboundAdapter"
-                                      channel="xmppInboundEventChannel"
-                                      xmpp-connection="xmppConnection"
-                                      extract-payload="false"
-                                      auto-startup="true"/>
+    <bean id="nullMessageSubscriber" class="de.iew.framework.spring.integration.NullMessageSubscriber">
+        <property name="messageChannels">
+            <util:list>
+                <ref bean="synchronousApplicationEventChannel"/>
+                <ref bean="asynchronousApplicationEventChannel"/>
+            </util:list>
+        </property>
+    </bean>
 </beans>

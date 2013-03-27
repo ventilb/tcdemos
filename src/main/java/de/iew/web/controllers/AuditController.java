@@ -1,8 +1,10 @@
 package de.iew.web.controllers;
 
 import de.iew.framework.domain.audit.AuditEventMessage;
+import de.iew.framework.domain.utils.AbstractDomainModelVisitor;
 import de.iew.framework.domain.utils.CollectionHolder;
 import de.iew.services.AuditService;
+import de.iew.web.forms.AuditEventForm;
 import de.iew.web.isc.DSRequest;
 import de.iew.web.isc.DSResponseCollection;
 import de.iew.web.isc.annotations.IscRequest;
@@ -15,6 +17,10 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
+
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 
 /**
  * Implements a controller to manage the audit event messages.
@@ -40,7 +46,11 @@ public class AuditController {
     ) throws Exception {
         CollectionHolder<AuditEventMessage> auditEventMessages = this.auditService.getAuditEventMessages(dsRequest.getStartRow(), dsRequest.getRowCount());
 
-        return new DSResponseCollection(auditEventMessages);
+        AuditEventMessageTransformer auditEventMessageTransformer = new AuditEventMessageTransformer();
+
+        CollectionHolder<AuditEventForm> auditEventForms = new CollectionHolder<AuditEventForm>(auditEventMessageTransformer.visitCollection(auditEventMessages), auditEventMessages.getFirstItem(), auditEventMessages.getTotalCount());
+
+        return new DSResponseCollection(auditEventForms);
     }
 
     @ExceptionHandler
@@ -58,5 +68,24 @@ public class AuditController {
     @Autowired
     public void setAuditService(AuditService auditService) {
         this.auditService = auditService;
+    }
+
+    protected static class AuditEventMessageTransformer extends AbstractDomainModelVisitor<AuditEventMessage, AuditEventForm> {
+
+        public AuditEventForm visit(AuditEventMessage domainModel) {
+            AuditEventForm auditEventForm = new AuditEventForm();
+            auditEventForm.setId(domainModel.getId());
+
+            Calendar calendar = Calendar.getInstance();
+            calendar.setTime(domainModel.getTimestamp());
+
+            DateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
+
+            auditEventForm.setTimestamp(sdf.format(domainModel.getTimestamp()));
+            auditEventForm.setPrincipal(domainModel.getPrincipal());
+            auditEventForm.setSeverity(domainModel.getSeverity().name());
+            auditEventForm.setMessage(domainModel.getMessage());
+            return auditEventForm;
+        }
     }
 }

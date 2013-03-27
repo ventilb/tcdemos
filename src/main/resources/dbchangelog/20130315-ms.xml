@@ -1,0 +1,72 @@
+<!--
+  ~ Copyright 2012-2013 Manuel Schulze <manuel_schulze@i-entwicklung.de>
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~     http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+    http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-2.0.xsd">
+
+    <!--
+    | Create two database tables with infix normal and error. Depending on a severity field, the message is routed to
+    | either one or the other table.
+    -->
+    <property context="testing" name="iew_spring_integration_router_normal_test.tableName"
+              value="testing_spring_integration_router_normal_test"/>
+    <property context="testing" name="iew_spring_integration_router_error_test.tableName"
+              value="testing_spring_integration_router_error_test"/>
+
+    <changeSet id="73-ms" author="Manuel Schulze" context="testing">
+        <createTable tableName="${iew_spring_integration_router_normal_test.tableName}">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="message" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="messageId" type="binary(255)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <modifySql dbms="mysql">
+            <!--
+            http://www.liquibase.org/manual/modify_sql
+            -->
+            <append value=" engine innodb"/>
+        </modifySql>
+    </changeSet>
+
+    <changeSet id="74-ms" author="Manuel Schulze" context="testing">
+        <createTable tableName="${iew_spring_integration_router_error_test.tableName}">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="message" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="messageId" type="binary(255)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <modifySql dbms="mysql">
+            <!--
+            http://www.liquibase.org/manual/modify_sql
+            -->
+            <append value=" engine innodb"/>
+        </modifySql>
+    </changeSet>
+
+</databaseChangeLog>

@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright 2012-2013 Manuel Schulze <manuel_schulze@i-entwicklung.de>
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~     http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xmlns:util="http://www.springframework.org/schema/util"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+  http://www.springframework.org/schema/beans/spring-beans-3.1.xsd
+  http://www.springframework.org/schema/tx
+  http://www.springframework.org/schema/tx/spring-tx-3.1.xsd
+  http://www.springframework.org/schema/util
+  http://www.springframework.org/schema/util/spring-util.xsd">
+
+    <!-- MySQL DataSource -->
+    <bean id="dataSource" class="com.mchange.v2.c3p0.ComboPooledDataSource" destroy-method="close">
+        <property name="driverClass" value="@db.driverClass@"/>
+        <property name="jdbcUrl" value="@db.jdbcUrl@"/>
+        <property name="user" value="@db.user@"/>
+        <property name="password" value="@db.password@"/>
+    </bean>
+
+    <!-- Hibernate SessionFactory -->
+    <!--
+    Für die Liquibase Integration:
+
+    see http://www.insaneprogramming.be/?p=56
+
+    Für die hibernate.properties Konfiguration:
+    see http://tersesystems.com/2007/03/16/configuring-hibernate-properties-in-spring
+    -->
+    <bean id="sessionFactory"
+          class="org.springframework.orm.hibernate4.LocalSessionFactoryBean" depends-on="liquibase">
+        <property name="dataSource" ref="dataSource"/>
+        <property name="packagesToScan" value="de.iew.framework.domain"/>
+        <property name="hibernateProperties">
+            <util:properties location="classpath:hibernate.properties"/>
+        </property>
+    </bean>
+
+    <!-- Transaction Management -->
+    <tx:annotation-driven transaction-manager="txManager" proxy-target-class="true"/>
+
+    <bean id="txManager"
+          class="org.springframework.orm.hibernate4.HibernateTransactionManager">
+        <property name="sessionFactory" ref="sessionFactory"/>
+    </bean>
+
+    <!-- Liquibase Integration -->
+    <bean id="liquibase" class="liquibase.integration.spring.SpringLiquibase">
+        <property name="dataSource" ref="dataSource"/>
+        <property name="changeLog" value="classpath:db-changelog.xml"/>
+
+        <!--
+        Könnte für Unit Tests nützlich sein. Mal sehen wie das mit Maven spielt.
+        -->
+        <property name="contexts" value="testing"/>
+    </bean>
+</beans>

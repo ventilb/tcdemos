@@ -1,0 +1,56 @@
+<!--
+  ~ Copyright 2012-2013 Manuel Schulze <manuel_schulze@i-entwicklung.de>
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~     http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+    http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-2.0.xsd">
+
+    <changeSet id="75-ms" author="Manuel Schulze" context="testing">
+        <sql>
+            CREATE TABLE testing_spring_integration_message_store_CHANNEL_MESSAGE (
+            MESSAGE_ID CHAR(36) NOT NULL,
+            GROUP_KEY CHAR(36) NOT NULL,
+            CREATED_DATE BIGINT NOT NULL,
+            MESSAGE_BYTES BLOB,
+            REGION VARCHAR(100) NOT NULL,
+            constraint testing_spring_integration_message_store_CHANNEL_MESSAGE_PK primary key (GROUP_KEY, MESSAGE_ID, REGION)
+            ) ENGINE=InnoDB;
+
+            ALTER TABLE testing_spring_integration_message_store_CHANNEL_MESSAGE
+            ADD INDEX MSG_INDEX_DATE_IDX USING BTREE (CREATED_DATE ASC) ;
+        </sql>
+    </changeSet>
+
+    <changeSet id="76-ms" author="Manuel Schulze" context="development,production">
+        <sql>
+            CREATE TABLE msg_CHANNEL_MESSAGE (
+            MESSAGE_ID CHAR(36) NOT NULL,
+            GROUP_KEY CHAR(36) NOT NULL,
+            CREATED_DATE BIGINT NOT NULL,
+            MESSAGE_BYTES BLOB,
+            REGION VARCHAR(100) NOT NULL,
+            constraint msg_CHANNEL_MESSAGE_PK primary key (GROUP_KEY, MESSAGE_ID, REGION)
+            ) ENGINE=InnoDB;
+
+            ALTER TABLE msg_CHANNEL_MESSAGE
+            ADD INDEX msg_MSG_INDEX_DATE_IDX USING BTREE (CREATED_DATE ASC) ;
+        </sql>
+    </changeSet>
+
+
+</databaseChangeLog>

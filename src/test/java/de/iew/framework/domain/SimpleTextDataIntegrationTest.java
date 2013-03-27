@@ -16,10 +16,8 @@
 
 package de.iew.framework.domain;
 
-import de.iew.framework.persistence.NodeDao;
 import de.iew.framework.persistence.SimpleTextDataDao;
 import de.iew.framework.persistence.TreeDao;
-import de.iew.framework.persistence.TreeOperationDao;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,7 +26,8 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.transaction.TransactionConfiguration;
 import org.springframework.transaction.annotation.Transactional;
 
-import static junit.framework.Assert.*;
+import static junit.framework.Assert.assertEquals;
+import static junit.framework.Assert.assertNotNull;
 
 /**
  * Integrationstests für das {@link SimpleTextData}-Domainmodell.
@@ -37,19 +36,13 @@ import static junit.framework.Assert.*;
  * @since 30.11.12 - 11:11
  */
 @RunWith(value = SpringJUnit4ClassRunner.class)
-@ContextConfiguration(locations = {"classpath:application.xml", "classpath:spring-db-config.xml", "classpath:spring-security-config.xml"})
+@ContextConfiguration(locations = {"classpath:spring-datasource-config.xml", "classpath:spring-hibernate-daos.xml"})
 @TransactionConfiguration(transactionManager = "txManager", defaultRollback = true)
 @Transactional // Wichtig, sonst haben wir hier keine Transaktion und die Testdaten werden nicht zurück gerollt.
 public class SimpleTextDataIntegrationTest {
 
     @Autowired
-    private NodeDao nodeDao;
-
-    @Autowired
     private TreeDao treeDao;
-
-    @Autowired
-    private TreeOperationDao treeOperationDao;
 
     @Autowired
     private SimpleTextDataDao simpleTextDataDao;

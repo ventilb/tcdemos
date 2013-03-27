@@ -25,4 +25,6 @@ http://www.springframework.org/schema/context/spring-context.xsd">
 
     <context:mbean-export/>
 
+    <context:mbean-server/>
+
 </beans>

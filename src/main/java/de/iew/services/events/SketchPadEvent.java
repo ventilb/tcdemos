@@ -18,8 +18,8 @@ package de.iew.services.events;
 
 import de.iew.framework.audit.AuditEvent;
 import de.iew.framework.domain.audit.Severity;
+import de.iew.framework.utils.IewApplicationEvent;
 import de.iew.sketchpad.domain.Polygon;
-import org.springframework.context.ApplicationEvent;
 import org.springframework.security.core.Authentication;
 import org.springframework.util.Assert;
 
@@ -31,7 +31,7 @@ import org.springframework.util.Assert;
  * @see <a href="http://learningviacode.blogspot.de/2012/07/spring-and-events-and-listeners.html">http://learningviacode.blogspot.de/2012/07/spring-and-events-and-listeners.html</a>
  * @since 24.01.13 - 21:02
  */
-public class SketchPadEvent extends ApplicationEvent implements AuditEvent {
+public class SketchPadEvent extends IewApplicationEvent implements AuditEvent {
 
     /**
      * The authentication which caused this event.
@@ -57,7 +57,7 @@ public class SketchPadEvent extends ApplicationEvent implements AuditEvent {
      * @param authentication the authentication causing this sketch pad event
      */
     public SketchPadEvent(Object source, Action eventAction, Polygon polygon, Authentication authentication) {
-        super(source);
+        super(source, false);
         Assert.notNull(eventAction);
         Assert.notNull(polygon);
 

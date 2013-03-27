@@ -21,18 +21,68 @@
     <groupId>de.iew</groupId>
     <artifactId>tcdemos</artifactId>
     <packaging>war</packaging>
-    <version>0.1</version>
+    <version>0.1.0-SNAPSHOT</version>
+
     <name>i-entwicklung Tomcat Demos</name>
-    <url>https://www.i-entwicklung.de/tcdemos</url>
+    <url>https://github.com/ventilb/tcdemos</url>
+
+    <licenses>
+        <license>
+            <name>The Apache Software License, Version 2.0</name>
+            <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+            <distribution>repo</distribution>
+            <comments>Refer to NOTICE for third party library license information.</comments>
+        </license>
+    </licenses>
+
+    <developers>
+        <developer>
+            <id>ms</id>
+            <name>Manuel Schulze</name>
+            <email>manuel_schulze@i-entwicklung.de</email>
+            <url>https://www.i-entwicklung.de</url>
+            <roles>
+                <role>architect</role>
+                <role>developer</role>
+            </roles>
+            <timezone>+1</timezone>
+        </developer>
+    </developers>
+
+    <distributionManagement>
+        <snapshotRepository>
+            <id>iew.snapshots</id>
+            <url>http://repo.i-entwicklung.de/repository/snapshots/</url>
+        </snapshotRepository>
+    </distributionManagement>
+
+    <repositories>
+        <repository>
+            <id>iew.snapshots</id>
+            <name>iew Snapshot Repository</name>
+            <url>http://repo.i-entwicklung.de/repository/snapshots/</url>
+            <releases>
+                <enabled>false</enabled>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+        </repository>
+    </repositories>
+
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <spring.version>3.1.3.RELEASE</spring.version>
+        <spring.security.version>3.1.3.RELEASE</spring.security.version>
+        <spring.integration.version>2.2.2.RELEASE</spring.integration.version>
+        <hibernate.version>4.1.7.Final</hibernate.version>
+    </properties>
+
     <dependencies>
-        <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <version>4.10</version>
-            <scope>test</scope>
-        </dependency>
         <!--
-        Abhängigkeiten für Logging
+        | Logging
+        |
+        | Lists the dependencies to write log messages.
         -->
         <dependency>
             <groupId>commons-logging</groupId>
@@ -54,72 +104,217 @@
             <artifactId>slf4j-log4j12</artifactId>
             <version>1.6.2</version>
         </dependency>
-        <!--
-        Abhängigkeiten für Spring
 
-        Lizenz: Apache 2.0 laut Maven Repository
+        <!--
+        | Jakarta Commons
+        |
+        | Libraries from the jakarta commons repository
+        |
+        | license: Apache 2.0 (http://commons.apache.org/beanutils/license.html)
+        -->
+        <dependency>
+            <groupId>commons-beanutils</groupId>
+            <artifactId>commons-beanutils</artifactId>
+            <version>1.8.3</version>
+        </dependency>
+        <dependency>
+            <groupId>commons-lang</groupId>
+            <artifactId>commons-lang</artifactId>
+            <version>2.6</version>
+        </dependency>
+        <dependency>
+            <groupId>commons-collections</groupId>
+            <artifactId>commons-collections</artifactId>
+            <version>3.2.1</version>
+        </dependency>
+
+        <!--
+        | Database dependencies
+        |
+        | Für Caching Unterstützung. Wir haben explizit auf ehcache 2.6 aktualisiert. hibernate-ehcache bindet die 2.4er
+        | Version ein. Damit ist die doppelte Konfiguration (Spring, Hibernate) umständlich. Ab 2.5 können wir den
+        |CacheManager teilen.
+        |
+        | Lizenz: Apache 2.0 http://ehcache.org/about/license
+        | see http://ehcache.org/
+        -->
+        <dependency>
+            <groupId>net.sf.ehcache</groupId>
+            <artifactId>ehcache-core</artifactId>
+            <version>2.6.3</version>
+        </dependency>
+        <!--
+        Hibernate Datenbankzugriff.
+
+        Lizenz: LGPL v2.1 http://www.hibernate.org/license
+        -->
+        <dependency>
+            <groupId>org.hibernate</groupId>
+            <artifactId>hibernate-core</artifactId>
+            <version>${hibernate.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.hibernate</groupId>
+            <artifactId>hibernate-ehcache</artifactId>
+            <version>${hibernate.version}</version>
+        </dependency>
+        <!--
+        MySQL Treiber für Datenbank.
+
+        Lizenz: GPL v2.0 with FOSS Exception granted by Oracle
+
+        see http://dev.mysql.com/downloads/connector/j/
+        see http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
+        see http://www.mysql.com/about/legal/licensing/foss-exception/
+        see http://www.mysql.com/about/legal/licensing/oem/#5
+        -->
+        <dependency>
+            <groupId>mysql</groupId>
+            <artifactId>mysql-connector-java</artifactId>
+            <version>5.1.21</version>
+        </dependency>
+        <!--
+        Für Connection Pooling. Wir verwenden c3p0 explizit und nicht hibernate-c3p0 weil wir den Connection Pool auf
+        DataSource Ebene anlegen wollen und nicht in Hibernate.
+
+        Lizenz: LGPL
+
+        see http://www.mchange.com/projects/c3p0/
+        -->
+        <dependency>
+            <groupId>c3p0</groupId>
+            <artifactId>c3p0</artifactId>
+            <version>0.9.1.2</version>
+        </dependency>
+        <!--
+        Liquibase für einfache Datenbank-Überarbeitungen.
+
+        Lizenz: Apache 2.0 laut Webseite http://www.liquibase.org/
+        -->
+        <dependency>
+            <groupId>org.liquibase</groupId>
+            <artifactId>liquibase-core</artifactId>
+            <version>2.0.5</version>
+        </dependency>
+
+        <!--
+        | Testing
+        |
+        | Lists the dependencies to write automated tests.
+        -->
+        <dependency>
+            <groupId>dbunit</groupId>
+            <artifactId>dbunit</artifactId>
+            <version>2.2</version>
+        </dependency>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.10</version>
+            <scope>test</scope>
+        </dependency>
+
+        <!--
+        | Spring dependencies
+        |
+        | Lizenz: Apache 2.0
         -->
         <dependency>
             <groupId>org.springframework</groupId>
-            <artifactId>spring-webmvc</artifactId>
-            <version>3.1.2.RELEASE</version>
+            <artifactId>spring-core</artifactId>
+            <version>${spring.version}</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-expression</artifactId>
+            <version>${spring.version}</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-beans</artifactId>
+            <version>${spring.version}</version>
         </dependency>
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-aop</artifactId>
-            <version>3.1.2.RELEASE</version>
+            <version>${spring.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-context</artifactId>
+            <version>${spring.version}</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-tx</artifactId>
+            <version>${spring.version}</version>
+            <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-orm</artifactId>
-            <version>3.1.2.RELEASE</version>
+            <version>${spring.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-web</artifactId>
+            <version>${spring.version}</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-webmvc</artifactId>
+            <version>${spring.version}</version>
         </dependency>
         <dependency>
             <!-- Damit wir Spring Beans in JUnit Tests verwenden können -->
             <groupId>org.springframework</groupId>
             <artifactId>spring-test</artifactId>
-            <version>3.1.2.RELEASE</version>
+            <version>${spring.version}</version>
         </dependency>
+        <!--
+        | Spring security dependencies
+        -->
         <dependency>
             <groupId>org.springframework.security</groupId>
             <artifactId>spring-security-core</artifactId>
-            <version>3.1.2.RELEASE</version>
+            <version>${spring.security.version}</version>
         </dependency>
         <dependency>
-            <!-- Damit wir den security: namespace in den XML-Dateien haben -->
             <groupId>org.springframework.security</groupId>
             <artifactId>spring-security-config</artifactId>
-            <version>3.1.2.RELEASE</version>
+            <version>${spring.security.version}</version>
         </dependency>
         <dependency>
-            <!-- Für unsere DomainModel ACLs -->
             <groupId>org.springframework.security</groupId>
             <artifactId>spring-security-acl</artifactId>
-            <version>3.1.2.RELEASE</version>
+            <version>${spring.security.version}</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.security</groupId>
             <artifactId>spring-security-taglibs</artifactId>
-            <version>3.1.2.RELEASE</version>
+            <version>${spring.security.version}</version>
         </dependency>
         <dependency>
-            <!-- Zum Schützen der Webseiten und Webservices -->
             <groupId>org.springframework.security</groupId>
             <artifactId>spring-security-web</artifactId>
-            <version>3.1.2.RELEASE</version>
+            <version>${spring.security.version}</version>
         </dependency>
         <!--
-        Spring Integration Unterstützung
+        | Spring integration dependencies
         -->
         <dependency>
             <groupId>org.springframework.integration</groupId>
             <artifactId>spring-integration-core</artifactId>
-            <version>2.2.1.RELEASE</version>
+            <version>${spring.integration.version}</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.integration</groupId>
             <artifactId>spring-integration-event</artifactId>
-            <version>2.2.1.RELEASE</version>
+            <version>${spring.integration.version}</version>
         </dependency>
         <!--
         Für die Jabber Unterstützung.
@@ -131,12 +326,27 @@
         <dependency>
             <groupId>org.springframework.integration</groupId>
             <artifactId>spring-integration-xmpp</artifactId>
-            <version>2.2.1.RELEASE</version>
+            <version>${spring.integration.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.integration</groupId>
+            <artifactId>spring-integration-jpa</artifactId>
+            <version>${spring.integration.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.integration</groupId>
+            <artifactId>spring-integration-jdbc</artifactId>
+            <version>${spring.integration.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.integration</groupId>
+            <artifactId>spring-integration-jmx</artifactId>
+            <version>${spring.integration.version}</version>
         </dependency>
         <!--
-        Benötigen wir für AOP Funktionen
-
-        Lizenz: Eclipse Public License - v 1.0 (http://www.eclipse.org/legal/epl-v10.html)
+        | AOP support
+        |
+        | Lizenz: Eclipse Public License - v 1.0 (http://www.eclipse.org/legal/epl-v10.html)
         -->
         <dependency>
             <groupId>org.aspectj</groupId>
@@ -209,92 +419,6 @@
         </dependency>
 
         <!--
-        Hibernate Datenbankzugriff.
-
-        Lizenz: LGPL v2.1 http://www.hibernate.org/license
-        -->
-        <dependency>
-            <groupId>org.hibernate</groupId>
-            <artifactId>hibernate-core</artifactId>
-            <version>4.1.7.Final</version>
-        </dependency>
-        <dependency>
-            <groupId>org.hibernate</groupId>
-            <artifactId>hibernate-ehcache</artifactId>
-            <version>4.1.7.Final</version>
-        </dependency>
-        <!--
-        Für Caching Unterstützung. Wir haben explizit auf ehcache 2.6 aktualisiert. hibernate-ehcache bindet die 2.4er
-        Version ein. Damit ist die doppelte Konfiguration (Spring, Hibernate) umständlich. Ab 2.5 können wir den
-        CacheManager teilen.
-
-        Lizenz: Apache 2.0 http://ehcache.org/about/license
-        see http://ehcache.org/
-        -->
-        <dependency>
-            <groupId>net.sf.ehcache</groupId>
-            <artifactId>ehcache-core</artifactId>
-            <version>2.6.3</version>
-        </dependency>
-        <!--
-        MySQL Treiber für Datenbank.
-
-        Lizenz: GPL v2.0 with FOSS Exception granted by Oracle
-
-        see http://dev.mysql.com/downloads/connector/j/
-        see http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
-        see http://www.mysql.com/about/legal/licensing/foss-exception/
-        see http://www.mysql.com/about/legal/licensing/oem/#5
-        -->
-        <dependency>
-            <groupId>mysql</groupId>
-            <artifactId>mysql-connector-java</artifactId>
-            <version>5.1.21</version>
-        </dependency>
-        <!--
-        Für Connection Pooling. Wir verwenden c3p0 explizit und nicht hibernate-c3p0 weil wir den Connection Pool auf
-        DataSource Ebene anlegen wollen und nicht in Hibernate.
-
-        Lizenz: LGPL
-
-        see http://www.mchange.com/projects/c3p0/
-        -->
-        <dependency>
-            <groupId>c3p0</groupId>
-            <artifactId>c3p0</artifactId>
-            <version>0.9.1.2</version>
-        </dependency>
-        <!--
-        Liquibase für einfache Datenbank-Überarbeitungen.
-
-        Lizenz: Apache 2.0 laut Webseite http://www.liquibase.org/
-        -->
-        <dependency>
-            <groupId>org.liquibase</groupId>
-            <artifactId>liquibase-core</artifactId>
-            <version>2.0.5</version>
-        </dependency>
-        <!--
-        Bibliotheken aus dem Jakarta-Commons Repository.
-
-        Lizenz: Apache 2.0 (http://commons.apache.org/beanutils/license.html)
-        -->
-        <dependency>
-            <groupId>commons-beanutils</groupId>
-            <artifactId>commons-beanutils</artifactId>
-            <version>1.8.3</version>
-        </dependency>
-        <dependency>
-            <groupId>commons-lang</groupId>
-            <artifactId>commons-lang</artifactId>
-            <version>2.6</version>
-        </dependency>
-        <dependency>
-            <groupId>commons-collections</groupId>
-            <artifactId>commons-collections</artifactId>
-            <version>3.2.1</version>
-        </dependency>
-        <!--
         Für Formular Validierung. API und Implementierung von JSR-303
 
         Lizenz: Open Source laut JSR-303 Webseite
@@ -311,6 +435,12 @@
             <groupId>org.hibernate</groupId>
             <artifactId>hibernate-validator</artifactId>
             <version>4.3.0.Final</version>
+        </dependency>
+
+        <dependency>
+            <groupId>de.iew.framework</groupId>
+            <artifactId>iew-framework</artifactId>
+            <version>0.1.0-SNAPSHOT</version>
         </dependency>
     </dependencies>
     <build>
@@ -347,6 +477,9 @@
             Hiermit sagen wir Maven, dass es das angegebene Verzeichnis filtern
             und die Properties aus dem Build-Profil ersetzen soll. Zum Beispiel
             wird dadurch die Datenbank konfiguriert.
+
+            Achtung: Funktioniert nicht für src/test/resources. dafür ist ein spezieller Block testResources zu nutzen.
+            Siehe weiter hin.
             -->
             <resource>
                 <directory>src/main/resources</directory>
@@ -368,6 +501,17 @@
                 </includes>
             </resource>
         </resources>
+        <!--
+        Ersetze auch die Properties in unseren Testressource.
+
+        see http://bachman.pl/devel/what-to-do-when-maven-is-not-filtering-test-resources/
+        -->
+        <testResources>
+            <testResource>
+                <directory>src/test/resources</directory>
+                <filtering>true</filtering>
+            </testResource>
+        </testResources>
         <filters>
             <filter>profiles/${build.profile.id}/config.properties</filter>
         </filters>

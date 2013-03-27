@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright 2012-2013 Manuel Schulze <manuel_schulze@i-entwicklung.de>
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~     http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:int="http://www.springframework.org/schema/integration"
+       xmlns:int-jdbc="http://www.springframework.org/schema/integration/jdbc"
+       xmlns:task="http://www.springframework.org/schema/task"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+ http://www.springframework.org/schema/beans/spring-beans-3.1.xsd
+ http://www.springframework.org/schema/integration
+ http://www.springframework.org/schema/integration/spring-integration.xsd
+ http://www.springframework.org/schema/integration/jdbc
+ http://www.springframework.org/schema/integration/jdbc/spring-integration-jdbc.xsd
+ http://www.springframework.org/schema/task
+ http://www.springframework.org/schema/task/spring-task.xsd">
+
+    <!--
+    | Testfix for the SpringIntegrationMessageStoreTest
+    |
+    | Creates and tests a jdbc backed message store and configures it as a queue in a message channel.
+    -->
+    <bean id="messageStoreQueryProvider"
+          class="org.springframework.integration.jdbc.store.channel.MySqlChannelMessageStoreQueryProvider"/>
+
+    <int:transaction-synchronization-factory id="messageStoreSyncFactory">
+        <int:after-commit expression="@store.removeFromIdCache(headers.id.toString())"/>
+        <int:after-rollback expression="@store.removeFromIdCache(headers.id.toString())"/>
+    </int:transaction-synchronization-factory>
+
+    <task:executor id="messageStoreThreadPool" pool-size="10"
+                   queue-capacity="10" rejection-policy="CALLER_RUNS"/>
+
+    <bean id="store" class="org.springframework.integration.jdbc.store.JdbcChannelMessageStore">
+        <property name="dataSource" ref="dataSource"/>
+        <property name="channelMessageStoreQueryProvider" ref="messageStoreQueryProvider"/>
+        <property name="region" value="TX_TIMEOUT"/>
+        <property name="usingIdCache" value="true"/>
+        <property name="tablePrefix" value="testing_spring_integration_message_store_"/>
+    </bean>
+
+    <int:channel id="messageStoreInputChannel">
+        <int:queue message-store="store"/>
+    </int:channel>
+
+    <int:bridge input-channel="messageStoreInputChannel" output-channel="messageStoreOutputChannel">
+        <int:poller fixed-delay="500" receive-timeout="500"
+                    max-messages-per-poll="1" task-executor="messageStoreThreadPool">
+            <int:transactional propagation="REQUIRED" synchronization-factory="messageStoreSyncFactory"
+                               isolation="READ_COMMITTED" transaction-manager="txManager"/>
+        </int:poller>
+    </int:bridge>
+
+    <int:publish-subscribe-channel id="messageStoreOutputChannel"/>
+
+    <!--
+    | Testfix for the SpringIntegrationRouterTest
+    |
+    | Creates an outbound channel for sending application messages. Depending on a severity field in each message, the
+    | message is send to normalOutboundChannel or errorOutboundChannel.
+    -->
+    <int:channel id="routerTestOutChannel"/>
+
+    <int:router input-channel="routerTestOutChannel" expression="payload.severity">
+        <int:mapping value="NORMAL" channel="normalOutboundChannel"/>
+        <int:mapping value="ERROR" channel="errorOutboundChannel"/>
+    </int:router>
+
+    <int:channel id="normalOutboundChannel"/>
+
+    <int:channel id="errorOutboundChannel"/>
+
+    <int-jdbc:outbound-gateway
+            update="insert into testing_spring_integration_router_normal_test (id, message, messageId) values (NULL, :payload, :messageId)"
+            request-channel="normalOutboundChannel" reply-channel="jdbcInboundchannel" data-source="dataSource"
+            request-sql-parameter-source-factory="spelSource"/>
+
+    <int-jdbc:outbound-gateway
+            update="insert into testing_spring_integration_router_error_test (id, message, messageId) values (NULL, :payload, :messageId)"
+            request-channel="errorOutboundChannel" reply-channel="jdbcInboundchannel" data-source="dataSource"
+            request-sql-parameter-source-factory="spelSource"/>
+
+    <!--
+    | Testfix for the SpringIntegrationJdbcTest
+    |
+    | Creates two outbound channels for sending messages from the application. One channel to test sending simple string
+    | messages. The other channel to test sending complex object messages and to test SPEL capabilities.
+    -->
+    <int-jdbc:outbound-gateway
+            update="insert into testing_spring_integration_jdbc_test (id, message, messageId) values (NULL, :payload, :headers[id])"
+            request-channel="simpleJdbcOutboundChannel" reply-channel="jdbcInboundchannel" data-source="dataSource"/>
+
+    <int-jdbc:outbound-gateway
+            update="insert into testing_spring_integration_jdbc_test (id, message, messageId) values (NULL, :payload, :messageId)"
+            request-channel="complexJdbcOutboundChannel" reply-channel="jdbcInboundchannel" data-source="dataSource"
+            request-sql-parameter-source-factory="spelSource"/>
+
+    <bean id="spelSource"
+          class="org.springframework.integration.jdbc.ExpressionEvaluatingSqlParameterSourceFactory">
+        <property name="parameterExpressions">
+            <map>
+                <entry key="messageId" value="headers['id']"/>
+                <entry key="payload" value="payload.message"/>
+            </map>
+        </property>
+    </bean>
+
+    <int:channel id="simpleJdbcOutboundChannel"/>
+
+    <int:channel id="complexJdbcOutboundChannel"/>
+
+    <int:channel id="jdbcInboundchannel">
+        <int:queue capacity="10"/>
+    </int:channel>
+
+</beans>

@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright 2012-2013 Manuel Schulze <manuel_schulze@i-entwicklung.de>
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~     http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:int="http://www.springframework.org/schema/integration"
+       xmlns:int-jmx="http://www.springframework.org/schema/integration/jmx"
+       xmlns:util="http://www.springframework.org/schema/util"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+  http://www.springframework.org/schema/beans/spring-beans-3.1.xsd
+  http://www.springframework.org/schema/context
+  http://www.springframework.org/schema/context/spring-context.xsd
+  http://www.springframework.org/schema/integration
+  http://www.springframework.org/schema/integration/spring-integration.xsd
+  http://www.springframework.org/schema/integration/jmx
+  http://www.springframework.org/schema/integration/jmx/spring-integration-jmx.xsd http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd">
+
+    <util:properties id="configuration">
+        <prop key="serviceUrl">service:jmx:rmi://localhost/jndi/rmi://localhost:10099/myconnector</prop>
+        <prop key="jmxTestServiceObjectName">modelmbean:name=JmxTestService</prop>
+        <prop key="springIntegrationTestObjectName">modelmbean:name=SpringIntegrationTestObject</prop>
+    </util:properties>
+
+    <!--
+    | JMX Deployment/Server Konfiguration
+    |
+    | Nachfolgend die notwendigen Schritte um eigene ManagedBeans zu deployen.
+    -->
+    <context:mbean-export/>
+
+    <context:mbean-server/>
+
+    <!--
+        <bean class="org.springframework.jmx.export.MBeanExporter" lazy-init="false">
+            <property name="beans">
+                <map>
+                    <entry key="#{configuration.jmxTestServiceObjectName}" value-ref="jmxTestService"/>
+                </map>
+            </property>
+        </bean>
+    -->
+    <bean class="org.springframework.jmx.support.ConnectorServerFactoryBean" depends-on="rmiRegistry">
+        <property name="objectName" value="connector:name=rmi"/>
+        <property name="serviceUrl"
+                  value="#{configuration.serviceUrl}"/>
+    </bean>
+
+    <bean id="rmiRegistry"
+          class="org.springframework.remoting.rmi.RmiRegistryFactoryBean">
+        <property name="port" value="10099"/>
+    </bean>
+
+    <!--
+    | JMX Client Konfiguration
+    |
+    | Nachfolgend die Konfiguration um einen JMX Client zu starten.
+    -->
+    <bean id="clientConnector" class="org.springframework.jmx.support.MBeanServerConnectionFactoryBean" destroy-method="destroy">
+        <property name="serviceUrl" value="#{configuration.serviceUrl}"/>
+    </bean>
+
+    <bean id="jmxTestService" class="de.iew.spring.integration.JmxTestServiceImpl"/>
+
+    <bean id="jmxTestServiceNotificationListener" class="de.iew.spring.integration.JmxTestServiceNotificationListener"
+          scope="prototype"/>
+
+    <bean id="jmxTestServiceProxy" class="org.springframework.jmx.access.MBeanProxyFactoryBean">
+        <property name="objectName" value="#{configuration.jmxTestServiceObjectName}"/>
+        <property name="proxyInterface" value="de.iew.spring.integration.JmxTestService"/>
+        <property name="server" ref="clientConnector"/>
+    </bean>
+
+    <!--
+    | JMX und Spring Integration
+    |
+    | Konfiguration für einen Spring Integration MessageChannel um Messages als Notifications zu senden.
+    -->
+    <int:channel id="auditEventMessageJmxChannel"/>
+
+    <int:channel id="enrichedAuditEventMessageJmxChannel"/>
+
+    <int:header-enricher input-channel="auditEventMessageJmxChannel"
+                         output-channel="enrichedAuditEventMessageJmxChannel">
+        <int:header name="jmx_notificationType" method="notificationType" ref="jmxAuditEventMessageEnricher"/>
+    </int:header-enricher>
+
+    <bean id="jmxAuditEventMessageEnricher" class="de.iew.spring.integration.JmxAuditEventMessageHeaderEnricher"/>
+
+    <int-jmx:notification-publishing-channel-adapter channel="enrichedAuditEventMessageJmxChannel"
+                                                     object-name="#{configuration.springIntegrationTestObjectName}"/>
+
+</beans>

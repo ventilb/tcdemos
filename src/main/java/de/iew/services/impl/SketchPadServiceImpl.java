@@ -23,6 +23,7 @@ import de.iew.services.events.SketchPadEvent;
 import de.iew.sketchpad.domain.*;
 import de.iew.sketchpad.persistence.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.integration.Message;
 import org.springframework.integration.MessageChannel;
 import org.springframework.integration.message.GenericMessage;
@@ -36,8 +37,7 @@ import org.springframework.util.Assert;
 import java.util.List;
 
 /**
- * Demo-Implementierung der {@link SketchPadService}-Schnittstelle und
- * Spring-ACL Integration.
+ * Demo-Implementierung der {@link SketchPadService}-Schnittstelle und Spring-ACL Integration.
  *
  * @author Manuel Schulze <manuel_schulze@i-entwicklung.de>
  * @since 02.01.2013 - 14:41
@@ -189,6 +189,7 @@ public class SketchPadServiceImpl implements SketchPadService {
     private StrokeDao sketchPadStrokeDao;
 
     @Autowired(required = false)
+    @Qualifier("applicationEventChannel")
     public void setApplicationEventChannel(MessageChannel applicationEventChannel) {
         this.applicationEventChannel = applicationEventChannel;
     }

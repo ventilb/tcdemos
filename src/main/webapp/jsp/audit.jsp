@@ -35,7 +35,7 @@
                 fetchDataURL: core.baseUrl('/audit/fetch.json'),
                 fields: [
                     {name: 'id', type: 'integer', primaryKey: true},
-                    {name: 'timestamp', type: 'string'},
+                    {name: 'timestamp', type: 'datetime'},
                     {name: 'principal', type: 'string'},
                     {name: 'severity', type: 'string'},
                     {name: 'message', type: 'string'}
