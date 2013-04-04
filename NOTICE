@@ -9,6 +9,11 @@
 
 * The Simple Logging Facade for Java - SLF4J (http://www.slf4j.org/) is
   licensed under the terms of the MIT license.
+  Please refer to: http://slf4j.org/license.html
+
+* The Apache log4j™ 1.2 library (http://logging.apache.org/log4j/1.2/) is
+  licensed under the terms of the Apache 2.0 license.
+  Please refer to: http://logging.apache.org/log4j/1.2/license.html
 
 * The Jackson JSON Processor (http://jackson.codehaus.org/) is
   licensed under the terms of the Apache 2.0 license.
@@ -50,4 +55,7 @@
 
 * The libraries released from the Apache Commons repository (http://commons.apache.org/)
   are licensed under the terms of the Apache 2.0 license.
+  * commons-logging
   * commons-beanutils
+  * commons-lang
+  * commons-collections
